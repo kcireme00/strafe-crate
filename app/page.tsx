@@ -7,12 +7,12 @@ import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
 
 const tiers = [
-  { name: "Recruit", price: 25, color: "slate", letter: "R" },
-  { name: "Operative", price: 50, color: "blue", letter: "O" },
-  { name: "Vanguard", price: 75, color: "green", letter: "V" },
-  { name: "Elite", price: 100, color: "purple", letter: "E" },
-  { name: "Master", price: 150, color: "gold", letter: "M" },
-  { name: "Prestige", price: 200, color: "crimson", letter: "P" },
+  { name: "Recruit", price: 25, minimum: 21, color: "slate", letter: "R", subtitle: "Start your collection." },
+  { name: "Operative", price: 50, minimum: 43, color: "blue", letter: "O", subtitle: "Build consistent momentum." },
+  { name: "Vanguard", price: 75, minimum: 66, color: "green", letter: "V", subtitle: "Expand into premium territory." },
+  { name: "Elite", price: 100, minimum: 90, color: "purple", letter: "E", subtitle: "Where serious collections begin." },
+  { name: "Master", price: 150, minimum: 138, color: "gold", letter: "M", subtitle: "Built for dedicated collectors." },
+  { name: "Prestige", price: 200, minimum: 188, color: "crimson", letter: "P", subtitle: "The flagship membership." },
 ];
 
 export default function Home() {
@@ -118,24 +118,24 @@ export default function Home() {
             </div>
             <div className="showcase-card-center">
               <small>PREMIUM MONTHLY COLLECTION</small>
-              <strong>CURATED DROP</strong>
-              <p>One clean card. Six membership levels.</p>
+              <strong>DEFINED COLLECTION</strong>
+              <p>Six tiers. Published minimum values. Monthly delivery.</p>
             </div>
             <div className="showcase-card-bottom">
-              <div><small>PLANS</small><strong>SIX LEVELS</strong></div>
+              <div><small>COLLECTION</small><strong>SIX LEVELS</strong></div>
               <div><small>DELIVERY</small><strong>BY THE 14TH</strong></div>
-              <div><small>UPGRADES</small><strong className="green">$100+ TIERS</strong></div>
+              <div><small>UPGRADES</small><strong className="green">ELITE+</strong></div>
             </div>
           </div>
           <p className="showcase-card-hint">Move or gently drag the card to view the finish.</p>
         </div>
       </section>
 
-      <section className="value-section shell"><div><p className="eyebrow">TRANSPARENT VALUE</p><h2>You purchase a defined membership value, not odds.</h2><p>Strafe Crate retains a disclosed 5% service and fulfillment fee. The remaining 95% establishes the minimum Steam Community Market reference-value floor for the item assigned to that billing cycle.</p><Link className="text-link" href="/membership-policy">Read how valuation and selection work →</Link></div><div className="value-grid"><article><strong>95%</strong><span>Minimum item reference-value floor</span></article><article><strong>5%</strong><span>Service and fulfillment fee</span></article><article><strong>0</strong><span>Published odds, jackpots, or prize multipliers</span></article></div></section>
+      <section className="value-section shell"><div><p className="eyebrow">TRANSPARENT VALUE</p><h2>Published minimum values at every level.</h2><p>Each membership has a disclosed Steam Community Market reference-value floor. Higher tiers retain a larger share of the monthly price while supporting sourcing, fulfillment, rotation management, and customer service.</p><Link className="text-link" href="/membership-policy">Read how valuation and selection work →</Link></div><div className="value-grid"><article><strong>$21+</strong><span>Recruit minimum</span></article><article><strong>$90+</strong><span>Elite minimum</span></article><article><strong>$188+</strong><span>Prestige minimum</span></article></div></section>
 
       <section className="section band" id="plans">
         <div className="shell">
-          <div className="center"><p className="eyebrow">MEMBERSHIPS</p><h2>Six collection levels.</h2><p>Each tier uses the same disclosed 95% reference-value formula.</p></div>
+          <div className="center"><p className="eyebrow">MEMBERSHIPS</p><h2>Six collection levels.</h2><p>Higher tiers receive stronger published minimum-value retention.</p></div>
           <div className="pricing">
             {tiers.map((tier) => (
               <article className={`plan tier-${tier.color}`} key={tier.name}>
@@ -145,8 +145,10 @@ export default function Home() {
                 </div>
                 <p className="tier-name">{tier.name.toUpperCase()}</p>
                 <p className="price">${tier.price}<small>/month</small></p>
+                <p className="tier-subtitle">{tier.subtitle}</p>
+                <p className="tier-minimum">${tier.minimum}+ minimum reference value</p>
                 <ul><li>One curated CS2 skin per active cycle</li><li>Trade sent by the 14th</li><li>Private collection history</li><li>{tier.price >= 100 ? "Upgrade eligible" : "Standard fulfillment"}</li></ul>
-                <Link className="button tier-button" href={signedIn ? "/dashboard" : "/signup"}>{signedIn ? `Choose ${tier.name}` : "Create account"}</Link>
+                <Link className="button tier-button" href={signedIn ? "/dashboard" : "/signup"}>{signedIn ? `Join ${tier.name} →` : `Join ${tier.name} →`}</Link>
               </article>
             ))}
           </div>

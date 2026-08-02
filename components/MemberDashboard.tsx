@@ -177,6 +177,8 @@ export default function MemberDashboard({ user }: { user: User }) {
   };
   const memberName = profile.display_name || profile.full_name || "Strafe Crate Member";
   const tierPrice = tier ? `$${tier.monthly_price_cents / 100}` : "—";
+  const minimumByTier: Record<string, number> = { Recruit: 21, Operative: 43, Vanguard: 66, Elite: 90, Master: 138, Prestige: 188 };
+  const referenceMinimum = tier?.name ? minimumByTier[tier.name] : null;
 
   const cardStyle = {
     "--tier-color": theme.color,
@@ -248,13 +250,13 @@ export default function MemberDashboard({ user }: { user: User }) {
             <div className="member-card-main">
               <small>MEMBER</small>
               <h2>{memberName}</h2>
-              <p>{tier ? `${tierPrice} monthly membership` : "Choose a membership to activate your collection."}</p>
+              <p>{tier ? `${tierPrice} monthly membership · $${referenceMinimum}+ reference-value floor` : "Choose a membership to activate your collection."}</p>
             </div>
 
             <div className="member-card-footer">
-              <div><small>MEMBER SINCE</small><strong>{formatMonth(profile.created_at)}</strong></div>
+              <div><small>REFERENCE VALUE</small><strong>{referenceMinimum ? `$${referenceMinimum}+` : "PENDING"}</strong></div>
               <div><small>UPGRADES</small><strong>{tier?.upgrade_eligible ? "ELIGIBLE" : "STANDARD"}</strong></div>
-              <div><small>STATUS</small><strong>{subscription?.status || "PENDING"}</strong></div>
+              <div><small>MEMBER SINCE</small><strong>{formatMonth(profile.created_at)}</strong></div>
             </div>
           </div>
           <p className="member-card-hint">Move or gently drag the card to view the finish.</p>
@@ -320,13 +322,26 @@ export default function MemberDashboard({ user }: { user: User }) {
 
       <section className="panel">
         <h2>Weapon rotation</h2>
-        <p>Completed categories are read from your Supabase history.</p>
-        <div className="weapon-grid">
-          {weapons.map((weapon: any) => (
-            <span className={received.has(weapon.name) ? "received" : ""} key={weapon.id}>
-              {received.has(weapon.name) ? "✓" : "○"} {weapon.name}
-            </span>
-          ))}
+        <p>Track progress by weapon class. Open a group to see each category.</p>
+        <div className="weapon-groups">
+          {["Pistols","SMGs","Rifles","Snipers","Heavy"].map((group) => {
+            const groupWeapons = weapons.filter((weapon: any) => {
+              const category = String(weapon.category || "").toLowerCase();
+              if (group === "Pistols") return category.includes("pistol");
+              if (group === "SMGs") return category.includes("smg");
+              if (group === "Rifles") return category.includes("rifle");
+              if (group === "Snipers") return category.includes("sniper");
+              return !category.includes("pistol") && !category.includes("smg") && !category.includes("rifle") && !category.includes("sniper");
+            });
+            if (!groupWeapons.length) return null;
+            const complete = groupWeapons.filter((weapon: any) => received.has(weapon.name)).length;
+            const percent = Math.round((complete / groupWeapons.length) * 100);
+            return <details className="weapon-group" key={group}>
+              <summary><span><strong>{group}</strong><small>{complete} of {groupWeapons.length} complete</small></span><b>{percent}%</b></summary>
+              <div className="group-progress"><span style={{width:`${percent}%`}} /></div>
+              <div className="weapon-grid">{groupWeapons.map((weapon:any)=><span className={received.has(weapon.name)?"received":""} key={weapon.id}>{received.has(weapon.name)?"✓":"○"} {weapon.name}</span>)}</div>
+            </details>;
+          })}
         </div>
       </section>
 
