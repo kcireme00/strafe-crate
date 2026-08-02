@@ -5,3 +5,34 @@
 @media(max-width:900px){.member-identity-layout{grid-template-columns:1fr}.member-side-metrics{grid-template-columns:repeat(3,1fr);grid-template-rows:auto}.member-tier-card{min-height:340px}}
 @media(max-width:720px){.member-side-metrics{grid-template-columns:1fr}.member-tier-card{min-height:390px;padding:22px}.member-card-main{margin-top:48px}.member-card-main h2{font-size:2.35rem}.member-card-footer{left:22px;right:22px;bottom:22px;grid-template-columns:1fr 1fr}.member-card-footer>div:last-child{display:none}.member-card-hint{display:none}}
 @media(prefers-reduced-motion:reduce){.member-tier-card{transform:none!important;transition:none!important}.member-card-shine{display:none}}
+
+.nav-member{
+  max-width:180px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  padding:8px 11px;
+  border:1px solid rgba(255,106,32,.28);
+  border-radius:8px;
+  color:#fff;
+  background:rgba(255,106,32,.06);
+  font-weight:700;
+}
+.nav-logout{
+  appearance:none;
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  font:inherit;
+  cursor:pointer;
+  padding:8px 0;
+}
+.nav-logout:hover,
+.site-header nav a:hover{
+  color:#fff;
+}
+.nav-session-placeholder{
+  display:block;
+  width:180px;
+  height:38px;
+}
