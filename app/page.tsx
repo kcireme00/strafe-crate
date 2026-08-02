@@ -118,8 +118,8 @@ export default function Home() {
             </div>
             <div className="showcase-card-center">
               <small>PREMIUM MONTHLY COLLECTION</small>
-              <strong>DEFINED COLLECTION</strong>
-              <p>Six tiers. Published minimum values. Monthly delivery.</p>
+              <strong>CURATED DROP</strong>
+              <p>One clean card. Six membership levels.</p>
             </div>
             <div className="showcase-card-bottom">
               <div><small>COLLECTION</small><strong>SIX LEVELS</strong></div>
@@ -139,14 +139,10 @@ export default function Home() {
           <div className="pricing">
             {tiers.map((tier) => (
               <article className={`plan tier-${tier.color}`} key={tier.name}>
-                <div className="plan-topline">
-                  <div className="emblem">{tier.letter}</div>
-                  <TierEmblem tier={tier.name} className="plan-tier-rank" />
-                </div>
+                <TierEmblem tier={tier.name} className="plan-tier-rank" />
                 <p className="tier-name">{tier.name.toUpperCase()}</p>
                 <p className="price">${tier.price}<small>/month</small></p>
                 <p className="tier-subtitle">{tier.subtitle}</p>
-                <p className="tier-minimum">${tier.minimum}+ minimum reference value</p>
                 <ul><li>One curated CS2 skin per active cycle</li><li>Trade sent by the 14th</li><li>Private collection history</li><li>{tier.price >= 100 ? "Upgrade eligible" : "Standard fulfillment"}</li></ul>
                 <Link className="button tier-button" href={signedIn ? "/dashboard" : "/signup"}>{signedIn ? `Join ${tier.name} →` : `Join ${tier.name} →`}</Link>
               </article>
