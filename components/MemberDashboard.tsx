@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 
@@ -229,7 +230,7 @@ export default function MemberDashboard({ user }: { user: User }) {
 
             <div className="member-card-header">
               <div className="member-card-brand">
-                <span className="member-tier-emblem">{theme.letter}</span>
+                <span className="member-tier-emblem member-tier-logo"><Image src="/strafe-crate-mark.png" width={42} height={42} alt="Strafe Crate logo" /><i>{theme.letter}</i></span>
                 <div>
                   <small>STRAFE CRATE</small>
                   <strong>{tierName.toUpperCase()}</strong>
@@ -273,6 +274,21 @@ export default function MemberDashboard({ user }: { user: User }) {
               <span style={{ width: `${Math.min(100, (received.size / (weapons.length || 34)) * 100)}%` }} />
             </div>
           </article>
+          {tier?.upgrade_eligible && (
+            <article className="trade-up-metric">
+              <small>TRADE UP ACCESS</small>
+              <strong>Eligible</strong>
+              <span>Send a previously delivered item before the monthly cutoff.</span>
+              <a
+                className="button trade-up-button"
+                href="https://steamcommunity.com/tradeoffer/new/?partner=249207205&token=N1oHNTyP"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                Open official trade link
+              </a>
+            </article>
+          )}
         </div>
       </section>
 

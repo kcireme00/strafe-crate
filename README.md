@@ -1,18 +1,16 @@
-# Strafe Crate policy and consent update
+# Brand and card cleanup update
 
-Copy all folders in this update into your local GitHub repository and choose Replace.
+Replace these files in Documents\GitHub\strafe-crate:
 
-Adds:
-- Auth-aware header
-- Premium legal footer
-- Membership and Value Policy
-- Billing and Cancellation Policy
-- Refunds and Fulfillment Policy
-- Upgrade Program Policy
-- Terms of Service with jurisdiction clause
-- Privacy Policy
-- FAQ and Contact pages
-- Required signup consent checkbox
-- Homepage transparent-value section
+- app/page.tsx
+- app/globals.css
+- components/MemberDashboard.tsx
 
-Commit message: Add policy suite and terms consent
+Then commit and push through GitHub Desktop.
+
+Changes:
+- Signed-in homepage buttons now show Open dashboard and View memberships.
+- Main homepage card uses the SC logo, removes the single-tier price, matches the dashboard card, and tilts interactively.
+- Every membership plan has a small branded tier emblem in the top-right.
+- Dashboard membership card uses the actual SC logo.
+- Elite, Master, and Prestige members receive an official Trade Up link in the dashboard.
