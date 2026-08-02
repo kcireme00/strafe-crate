@@ -1,52 +1,18 @@
-# Strafe Crate working authentication build
+# Strafe Crate policy and consent update
 
-This build uses Supabase's browser session persistence and your existing Row Level Security policies. It avoids the cookie handoff problem from the previous attempt.
+Copy all folders in this update into your local GitHub repository and choose Replace.
 
-## Deploy correctly
+Adds:
+- Auth-aware header
+- Premium legal footer
+- Membership and Value Policy
+- Billing and Cancellation Policy
+- Refunds and Fulfillment Policy
+- Upgrade Program Policy
+- Terms of Service with jurisdiction clause
+- Privacy Policy
+- FAQ and Contact pages
+- Required signup consent checkbox
+- Homepage transparent-value section
 
-Upload the folder whose top level contains:
-
-- package.json
-- app
-- components
-- lib
-- public
-
-In Vercel, the Root Directory must be blank.
-
-## Environment variables
-
-Add these to this project, not only Shared variables:
-
-NEXT_PUBLIC_SUPABASE_URL=https://owsdxucrpwpvhwprehgx.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your full sb_publishable key
-NEXT_PUBLIC_SITE_URL=https://your-current-vercel-domain.vercel.app
-
-## Supabase URLs
-
-Authentication, URL Configuration:
-
-Site URL:
-https://your-current-vercel-domain.vercel.app
-
-Redirect URLs:
-https://your-current-vercel-domain.vercel.app/auth/callback
-https://your-current-vercel-domain.vercel.app/reset-password
-
-## Admin account
-
-Run in Supabase SQL Editor:
-
-update public.profiles
-set role = 'admin', account_approved = true
-where email = 'nightscreamer10@gmail.com';
-
-## Test order
-
-1. Open /login.
-2. Log in with the already-confirmed account.
-3. Confirm /dashboard stays open.
-4. Save the Steam trade URL.
-5. Open /admin after promoting the account.
-
-Stripe is intentionally not connected in this build. Authentication and real database reads/writes should be proven first.
+Commit message: Add policy suite and terms consent

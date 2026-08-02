@@ -6,11 +6,7 @@ import { useRouter } from "next/navigation";
 import Brand from "@/components/Brand";
 import { getSupabase } from "@/lib/supabase";
 
-type HeaderProfile = {
-  full_name: string | null;
-  display_name: string | null;
-  role: string;
-};
+type HeaderProfile = { full_name: string | null; display_name: string | null; role: string };
 
 export default function SiteHeader() {
   const router = useRouter();
@@ -21,117 +17,39 @@ export default function SiteHeader() {
   useEffect(() => {
     const supabase = getSupabase();
     let active = true;
-
     async function loadHeader() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
+      const { data: { session } } = await supabase.auth.getSession();
       if (!active) return;
-
-      if (!session?.user) {
-        setSignedIn(false);
-        setProfile(null);
-        setReady(true);
-        return;
-      }
-
+      if (!session?.user) { setSignedIn(false); setProfile(null); setReady(true); return; }
       setSignedIn(true);
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("full_name, display_name, role")
-        .eq("id", session.user.id)
-        .single();
-
+      const { data } = await supabase.from("profiles").select("full_name, display_name, role").eq("id", session.user.id).single();
       if (!active) return;
-
-      const loadedProfile = data as HeaderProfile | null;
-
-      setProfile(
-        loadedProfile ?? {
-          full_name:
-            (session.user.user_metadata?.full_name as string | undefined) ??
-            session.user.email ??
-            "Member",
-          display_name: null,
-          role: "member",
-        }
-      );
-
+      setProfile((data as HeaderProfile | null) ?? { full_name: (session.user.user_metadata?.full_name as string | undefined) ?? session.user.email ?? "Member", display_name: null, role: "member" });
       setReady(true);
     }
-
     void loadHeader();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) return;
-
-      if (!session?.user) {
-        setSignedIn(false);
-        setProfile(null);
-        setReady(true);
-        return;
-      }
-
+      if (!session?.user) { setSignedIn(false); setProfile(null); setReady(true); return; }
       void loadHeader();
     });
-
-    return () => {
-      active = false;
-      subscription.unsubscribe();
-    };
+    return () => { active = false; subscription.unsubscribe(); };
   }, []);
 
   async function logOut() {
     await getSupabase().auth.signOut();
-    setSignedIn(false);
-    setProfile(null);
-    router.push("/");
-    router.refresh();
+    setSignedIn(false); setProfile(null); router.push("/"); router.refresh();
   }
 
-  const memberName =
-    profile?.display_name ||
-    profile?.full_name ||
-    "Member";
-
-  return (
-    <header className="site-header shell">
-      <Brand />
-
-      <nav aria-label="Main navigation">
-        <Link href="/#plans">Memberships</Link>
-
-        {!ready ? (
-          <span className="nav-session-placeholder" aria-hidden="true" />
-        ) : signedIn ? (
-          <>
-            <Link href="/dashboard">Dashboard</Link>
-
-            {profile?.role === "admin" && (
-              <Link href="/admin">Admin</Link>
-            )}
-
-            <Link className="nav-member" href="/dashboard">
-              {memberName}
-            </Link>
-
-            <button className="nav-logout" type="button" onClick={logOut}>
-              Log out
-            </button>
-          </>
-        ) : (
-          <>
-            <Link href="/login">Login</Link>
-            <Link className="nav-cta" href="/signup">
-              Create account
-            </Link>
-          </>
-        )}
-      </nav>
-    </header>
-  );
+  const memberName = profile?.display_name || profile?.full_name || "Member";
+  return <header className="site-header shell"><Brand/><nav aria-label="Main navigation">
+    <Link href="/#plans">Memberships</Link>
+    <Link href="/membership-policy">How value works</Link>
+    {!ready ? <span className="nav-session-placeholder" aria-hidden="true"/> : signedIn ? <>
+      <Link href="/dashboard">Dashboard</Link>
+      {profile?.role === "admin" && <Link href="/admin">Admin</Link>}
+      <Link className="nav-member" href="/dashboard">{memberName}</Link>
+      <button className="nav-logout" type="button" onClick={logOut}>Log out</button>
+    </> : <><Link href="/login">Login</Link><Link className="nav-cta" href="/signup">Create account</Link></>}
+  </nav></header>;
 }
