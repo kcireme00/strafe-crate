@@ -1,11 +1,25 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSupabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
+import { getSupabase } from "@/lib/supabase";
 
-export default function AuthGuard({ children, admin = false }: { children: (user: User) => React.ReactNode; admin?: boolean }) {
+type AuthGuardProps = {
+  children: (user: User) => React.ReactNode;
+  admin?: boolean;
+};
+
+type ProfileRole = {
+  role: string;
+};
+
+export default function AuthGuard({
+  children,
+  admin = false,
+}: AuthGuardProps) {
   const router = useRouter();
+
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
   const [denied, setDenied] = useState(false);
@@ -13,34 +27,82 @@ export default function AuthGuard({ children, admin = false }: { children: (user
   useEffect(() => {
     const supabase = getSupabase();
     let active = true;
-    async function load() {
-      const { data } = await supabase.auth.getSession();
-      const sessionUser = data.session?.user ?? null;
+
+    async function loadSession() {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
       if (!active) return;
-      if (!sessionUser) {
+
+      if (sessionError || !session?.user) {
         router.replace("/login");
         return;
       }
+
+      const sessionUser = session.user;
+
       if (admin) {
-        const { data: profile } = await supabase.from("profiles").select("role").eq("id", sessionUser.id).single();
-        if (profile?.role !== "admin") {
+        const { data, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", sessionUser.id)
+          .single();
+
+        if (!active) return;
+
+        const profile = data as ProfileRole | null;
+
+        if (profileError || profile?.role !== "admin") {
           setDenied(true);
           setReady(true);
           return;
         }
       }
+
       setUser(sessionUser);
       setReady(true);
     }
-    load();
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) router.replace("/login");
+
+    void loadSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        router.replace("/login");
+      }
     });
-    return () => { active = false; listener.subscription.unsubscribe(); };
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, [admin, router]);
 
-  if (!ready) return <main className="loading shell">Loading secure account...</main>;
-  if (denied) return <main className="loading shell"><h1>Admin access required.</h1><a className="button secondary" href="/dashboard">Return to dashboard</a></main>;
-  if (!user) return null;
+  if (!ready) {
+    return (
+      <main className="loading shell">
+        Loading secure account...
+      </main>
+    );
+  }
+
+  if (denied) {
+    return (
+      <main className="loading shell">
+        <h1>Admin access required.</h1>
+        <a className="button secondary" href="/dashboard">
+          Return to dashboard
+        </a>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return <>{children(user)}</>;
 }
