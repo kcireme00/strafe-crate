@@ -1,16 +1,23 @@
-# Brand and card cleanup update
+# Unique tier rank emblem update
 
 Replace these files in Documents\GitHub\strafe-crate:
 
+- components/TierEmblem.tsx (new file)
 - app/page.tsx
-- app/globals.css
 - components/MemberDashboard.tsx
+- app/globals.css
 
-Then commit and push through GitHub Desktop.
+Then commit and push in GitHub Desktop.
 
-Changes:
-- Signed-in homepage buttons now show Open dashboard and View memberships.
-- Main homepage card uses the SC logo, removes the single-tier price, matches the dashboard card, and tilts interactively.
-- Every membership plan has a small branded tier emblem in the top-right.
-- Dashboard membership card uses the actual SC logo.
-- Elite, Master, and Prestige members receive an official Trade Up link in the dashboard.
+Commit message:
+Add unique membership rank emblems
+
+The six emblems are:
+- Recruit: shield and cross
+- Operative: crossed pistols
+- Vanguard: crossed rifle silhouettes
+- Elite: winged star rank
+- Master: crown and laurels
+- Prestige: diamond skull crest
+
+The dashboard card automatically shows the active member tier emblem on the right.

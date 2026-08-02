@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import TierEmblem from "@/components/TierEmblem";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 
@@ -230,15 +231,18 @@ export default function MemberDashboard({ user }: { user: User }) {
 
             <div className="member-card-header">
               <div className="member-card-brand">
-                <span className="member-tier-emblem member-tier-logo"><Image src="/strafe-crate-mark.png" width={42} height={42} alt="Strafe Crate logo" /><i>{theme.letter}</i></span>
+                <span className="member-brand-mark"><Image src="/strafe-crate-mark.png" width={46} height={46} alt="Strafe Crate logo" /></span>
                 <div>
                   <small>STRAFE CRATE</small>
                   <strong>{tierName.toUpperCase()}</strong>
                 </div>
               </div>
-              <span className={profile.account_approved ? "card-status approved" : "card-status"}>
-                {profile.account_approved ? "APPROVED" : "REVIEW PENDING"}
-              </span>
+              <div className="member-card-rank-area">
+                {tier?.name && <TierEmblem tier={tier.name} className="member-card-rank" />}
+                <span className={profile.account_approved ? "card-status approved" : "card-status"}>
+                  {profile.account_approved ? "APPROVED" : "REVIEW PENDING"}
+                </span>
+              </div>
             </div>
 
             <div className="member-card-main">

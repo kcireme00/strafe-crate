@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import TierEmblem from "@/components/TierEmblem";
 import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
 
@@ -140,10 +141,7 @@ export default function Home() {
               <article className={`plan tier-${tier.color}`} key={tier.name}>
                 <div className="plan-topline">
                   <div className="emblem">{tier.letter}</div>
-                  <div className="plan-mini-logo" aria-label={`${tier.name} tier emblem`}>
-                    <Image src="/strafe-crate-mark.png" width={42} height={42} alt="" />
-                    <span>{tier.letter}</span>
-                  </div>
+                  <TierEmblem tier={tier.name} className="plan-tier-rank" />
                 </div>
                 <p className="tier-name">{tier.name.toUpperCase()}</p>
                 <p className="price">${tier.price}<small>/month</small></p>
