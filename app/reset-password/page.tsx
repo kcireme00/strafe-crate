@@ -1,0 +1,1 @@
+import AuthForm from "@/components/AuthForm";export default function Page(){return <main className="auth-shell shell"><section><p className="eyebrow">NEW PASSWORD</p><h1>Choose a new password.</h1></section><section className="form-card"><AuthForm mode="reset"/></section></main>}

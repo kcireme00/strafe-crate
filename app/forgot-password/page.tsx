@@ -1,0 +1,1 @@
+import AuthForm from "@/components/AuthForm";export default function Page(){return <main className="auth-shell shell"><section><p className="eyebrow">PASSWORD RESET</p><h1>Recover your account.</h1></section><section className="form-card"><AuthForm mode="forgot"/></section></main>}

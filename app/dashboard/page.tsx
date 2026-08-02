@@ -1,0 +1,1 @@
+"use client";import AuthGuard from "@/components/AuthGuard";import MemberDashboard from "@/components/MemberDashboard";export default function Page(){return <AuthGuard>{user=><MemberDashboard user={user}/>}</AuthGuard>}

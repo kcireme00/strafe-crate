@@ -1,0 +1,1 @@
+"use client";import AuthGuard from "@/components/AuthGuard";import AdminDashboard from "@/components/AdminDashboard";export default function Page(){return <AuthGuard admin>{user=><AdminDashboard user={user}/>}</AuthGuard>}

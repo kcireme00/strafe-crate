@@ -1,0 +1,1 @@
+"use client";import {useEffect} from "react";import {useRouter} from "next/navigation";import {getSupabase} from "@/lib/supabase";export default function Page(){const r=useRouter();useEffect(()=>{const s=getSupabase();s.auth.getSession().then(()=>r.replace("/dashboard"))},[r]);return <main className="loading shell">Confirming your account...</main>}
