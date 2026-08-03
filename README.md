@@ -1,4 +1,4 @@
-# Subtle Chat Profile Popover
+# Wide Chat Popover + Clean Composer
 
 Replace:
 - components/LiveChat.tsx
@@ -6,11 +6,12 @@ Replace:
 - app/globals.css
 
 Commit:
-Make chat player cards subtle popovers
+Widen chat profile popover and restore clean composer
 
-Behavior:
-- Click username or avatar
-- Small player card opens beside the clicked name
-- No full-screen blur or centered modal
-- Click anywhere outside or press Escape to close
-- On mobile it becomes a compact bottom card
+This update:
+- restores the dark premium chat input
+- keeps the auto-growing composer
+- makes the profile card wider and shorter
+- adds a subtle pointer toward the clicked username
+- keeps the card anchored beside the user
+- uses only a thin tier-colored top accent

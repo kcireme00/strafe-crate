@@ -40,40 +40,41 @@ export default function PublicPlayerCard({
   const ref = useRef<HTMLElement | null>(null);
 
   const position = useMemo(() => {
-    const width = 330;
-    const gap = 10;
-    const viewportPadding = 12;
+    const width = 455;
+    const estimatedHeight = 205;
+    const gap = 12;
+    const edge = 12;
 
     let left = anchor.right + gap;
-    if (left + width > window.innerWidth - viewportPadding) {
-      left = Math.max(viewportPadding, anchor.left - width - gap);
+    let side: "right" | "left" = "right";
+
+    if (left + width > window.innerWidth - edge) {
+      left = Math.max(edge, anchor.left - width - gap);
+      side = "left";
     }
 
-    let top = anchor.top - 8;
-    const estimatedHeight = 255;
-    if (top + estimatedHeight > window.innerHeight - viewportPadding) {
-      top = Math.max(viewportPadding, window.innerHeight - estimatedHeight - viewportPadding);
+    let top = anchor.top - 18;
+    if (top + estimatedHeight > window.innerHeight - edge) {
+      top = Math.max(edge, window.innerHeight - estimatedHeight - edge);
     }
 
-    return { left, top };
+    return { left, top, side };
   }, [anchor]);
 
   useEffect(() => {
-    function handlePointerDown(event: MouseEvent) {
-      if (!ref.current?.contains(event.target as Node)) {
-        onClose();
-      }
+    function handleOutside(event: MouseEvent) {
+      if (!ref.current?.contains(event.target as Node)) onClose();
     }
 
     function handleEscape(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
     }
 
-    window.addEventListener("mousedown", handlePointerDown);
+    window.addEventListener("mousedown", handleOutside);
     window.addEventListener("keydown", handleEscape);
 
     return () => {
-      window.removeEventListener("mousedown", handlePointerDown);
+      window.removeEventListener("mousedown", handleOutside);
       window.removeEventListener("keydown", handleEscape);
     };
   }, [onClose]);
@@ -86,57 +87,49 @@ export default function PublicPlayerCard({
   return (
     <section
       ref={ref}
-      className={`chat-profile-popover ${tierClass(card.tier_name)}`}
+      className={`chat-profile-popover wide ${tierClass(card.tier_name)} pointer-${position.side}`}
       style={{ left: position.left, top: position.top }}
       role="dialog"
       aria-label={`${card.display_name} player card`}
     >
-      <div className="chat-profile-popover-top">
-        <div>
+      <div className="chat-profile-main">
+        <div className="chat-profile-copy">
           <small>STRAFE CRATE PLAYER</small>
           <h3>{card.display_name}</h3>
           <p>
-            Level {card.level} · {card.tier_name ?? "Membership pending"}
+            Level {card.level}
+            <span aria-hidden="true"> · </span>
+            {card.tier_name ?? "Membership pending"}
           </p>
+
+          <div className="chat-profile-inline-stats">
+            <span><b>{card.lifetime_xp.toLocaleString()}</b><em>XP</em></span>
+            <span><b>{card.consecutive_paid_months} mo.</b><em>STREAK</em></span>
+            <span><b>{Number(card.xp_multiplier).toFixed(2)}×</b><em>MULTIPLIER</em></span>
+          </div>
         </div>
 
-        {card.tier_name ? (
-          <TierEmblem tier={card.tier_name} className="chat-profile-popover-emblem" />
-        ) : (
-          <span className="chat-profile-popover-pending">◇</span>
-        )}
-      </div>
+        <div className="chat-profile-rank">
+          {card.tier_name ? (
+            <TierEmblem tier={card.tier_name} className="chat-profile-popover-emblem" />
+          ) : (
+            <span className="chat-profile-popover-pending">◇</span>
+          )}
 
-      <div className="chat-profile-popover-stats">
-        <span>
-          <small>XP</small>
-          <strong>{card.lifetime_xp.toLocaleString()}</strong>
-        </span>
-        <span>
-          <small>STREAK</small>
-          <strong>{card.consecutive_paid_months} mo.</strong>
-        </span>
-        <span>
-          <small>MULTIPLIER</small>
-          <strong>{Number(card.xp_multiplier).toFixed(2)}×</strong>
-        </span>
-      </div>
-
-      <div className="chat-profile-popover-trophies">
-        <small>FEATURED</small>
-        <div>
-          {[0, 1, 2].map((index) => {
-            const trophy = featured[index];
-            return (
-              <span
-                key={index}
-                className={trophy ? `rarity-${trophy.rarity}` : "empty"}
-                title={trophy?.description ?? "Empty trophy slot"}
-              >
-                {trophy?.icon ?? "○"}
-              </span>
-            );
-          })}
+          <div className="chat-profile-mini-trophies">
+            {[0, 1, 2].map((index) => {
+              const trophy = featured[index];
+              return (
+                <span
+                  key={index}
+                  className={trophy ? `rarity-${trophy.rarity}` : "empty"}
+                  title={trophy?.description ?? "Empty trophy slot"}
+                >
+                  {trophy?.icon ?? "○"}
+                </span>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
