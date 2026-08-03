@@ -1,2 +1,44 @@
 import LegalPage from "@/components/LegalPage";
-export default function Page(){return <LegalPage eyebrow="UPGRADE POLICY" title="Upgrade Program Policy"><section><h2>1. Eligible memberships</h2><p>Upgrade requests are available only to active Elite, Master, and Prestige members: the $100, $150, and $200 monthly tiers.</p></section><section><h2>2. Eligible returned item</h2><p>The returned item must have been previously supplied to the member by Strafe Crate, must match the approved request, and must be successfully received through the official Strafe Crate trade destination.</p></section><section><h2>3. Monthly cutoff</h2><p>The approved returned item must be received no later than 11:59 p.m. Pacific Time on the second day of the month to be processed in that month’s billing cycle. Items received on or after the third day move to the following eligible cycle.</p></section><section><h2>4. Review</h2><p>Strafe Crate may verify item identity, wear, trade status, ownership history, and reference value before approval. Unapproved, substituted, compromised, restricted, or incorrectly transferred items may be rejected.</p></section><section><h2>5. Upgrade value</h2><p>The replacement is determined using the active tier, the accepted returned item, the published reference-value method, and the applicable program rules. No cash difference is paid to the member.</p></section><section><h2>6. Steam delays</h2><p>Trade holds, account restrictions, or other Steam limitations may move an upgrade to a later cycle. A request is not treated as received until the item is successfully transferred and available for review.</p></section></LegalPage>}
+
+export default function Page() {
+  return (
+    <LegalPage eyebrow="UPGRADE PROGRAM" title="Upgrade Policy">
+      <section>
+        <h2>1. Eligible memberships</h2>
+        <p>
+          Upgrade requests are available only for the membership tiers and
+          billing cycles identified as upgrade eligible, currently including
+          Elite, Master, and Prestige unless otherwise displayed.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Eligible returned items</h2>
+        <p>
+          The returned item must have originally been supplied by Strafe Crate,
+          match the submitted request, remain transferable, and be received
+          through the official Strafe Crate Steam trade link by the applicable
+          cutoff.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Review and timing</h2>
+        <p>
+          Requests may be reviewed for item identity, trade completion,
+          condition, restrictions, fraud, and fulfillment availability. Items
+          received after a cutoff may be processed during a later cycle.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. No cash balance</h2>
+        <p>
+          Upgrade value is applied only according to the published upgrade
+          program. It is not a cash balance, withdrawal right, or promise of a
+          cash payment for any difference.
+        </p>
+      </section>
+    </LegalPage>
+  );
+}

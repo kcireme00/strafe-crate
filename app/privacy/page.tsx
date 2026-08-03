@@ -1,2 +1,59 @@
 import LegalPage from "@/components/LegalPage";
-export default function Page(){return <LegalPage eyebrow="PRIVACY POLICY" title="Privacy Policy"><section><h2>1. Information collected</h2><p>We may collect your name, email address, account identifiers, Steam profile URL, Steam trade URL, subscription tier and status, fulfillment and upgrade history, support communications, consent records, and security or technical logs.</p></section><section><h2>2. Payments</h2><p>Payment-card information is processed by the payment processor and is not stored directly by Strafe Crate. We may store payment-provider customer, subscription, invoice, and transaction identifiers needed to operate the service.</p></section><section><h2>3. How information is used</h2><p>Information is used to create and secure accounts, process subscriptions, operate weapon rotation, fulfill trades, manage upgrades, provide support, prevent fraud, comply with law, and improve the service.</p></section><section><h2>4. Steam credentials</h2><p>Strafe Crate does not request or store Steam passwords, Steam Guard codes, session cookies, or private API keys.</p></section><section><h2>5. Sharing</h2><p>Information may be shared with service providers that support hosting, authentication, payments, communications, security, analytics, or legal compliance. We do not sell Steam credentials or payment-card information.</p></section><section><h2>6. Retention and requests</h2><p>Records are retained for as long as reasonably needed for membership operations, disputes, fraud prevention, accounting, legal obligations, and security. Privacy questions or requests may be submitted through the Contact page.</p></section></LegalPage>}
+
+export default function Page() {
+  return (
+    <LegalPage eyebrow="PRIVACY POLICY" title="Privacy Policy">
+      <section>
+        <h2>1. Information we collect</h2>
+        <p>
+          We may collect your name, display name, email address, account
+          identifiers, Steam profile URL, Steam trade URL, subscription tier,
+          billing status, fulfillment history, reward history, XP, trophies,
+          community messages, reports, moderation history, and technical
+          security logs.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Information we do not request</h2>
+        <p>
+          We do not request your Steam password, Steam Guard code, session
+          cookie, or private API key. Payment-card information is handled by
+          the applicable payment processor rather than stored directly by
+          Strafe Crate.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. How information is used</h2>
+        <p>
+          Information is used to provide accounts, process memberships,
+          fulfill trades, operate rewards and progression, display public
+          player-card information, moderate the community, prevent fraud,
+          provide support, improve the service, and comply with legal
+          obligations.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Public profile information</h2>
+        <p>
+          Your chosen display name, membership tier, level, Lifetime XP, paid
+          streak, XP multiplier, and featured trophies may be visible to signed-
+          in community users. Your email, Steam trade URL, payment information,
+          and private admin notes are not displayed on public player cards.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Retention and deletion</h2>
+        <p>
+          Records may be retained as reasonably necessary for fulfillment,
+          accounting, fraud prevention, chargeback defense, moderation,
+          security, and legal compliance. Contact support to request access,
+          correction, or deletion where applicable.
+        </p>
+      </section>
+    </LegalPage>
+  );
+}

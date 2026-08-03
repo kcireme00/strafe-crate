@@ -1,2 +1,98 @@
 import LegalPage from "@/components/LegalPage";
-export default function Page(){return <LegalPage eyebrow="MEMBERSHIP POLICY" title="Membership and Value Policy"><section><h2>1. The membership</h2><p>Strafe Crate is a recurring digital-item collection membership. During each successfully paid billing cycle, Strafe Crate assigns one eligible Counter-Strike 2 item for delivery through a Steam trade offer.</p></section><section><h2>2. Published minimum values</h2><p>Each tier has a published minimum Steam Community Market reference-value floor. The difference between the membership price and the published floor supports sourcing, fulfillment, rotation management, payment processing, customer service, and operating costs. Higher tiers retain a larger percentage of membership value.</p><div className="policy-table"><div><b>Recruit</b><span>$25</span><strong>$21 minimum</strong></div><div><b>Operative</b><span>$50</span><strong>$43 minimum</strong></div><div><b>Vanguard</b><span>$75</span><strong>$66 minimum</strong></div><div><b>Elite</b><span>$100</span><strong>$90 minimum</strong></div><div><b>Master</b><span>$150</span><strong>$138 minimum</strong></div><div><b>Prestige</b><span>$200</span><strong>$188 minimum</strong></div></div></section><section><h2>3. Steam reference value</h2><p>Steam Reference Value means the displayed U.S.-dollar buyer price for the applicable item on the Steam Community Market when Strafe Crate records and assigns the item for fulfillment. Reference value is not cash value, guaranteed resale value, investment value, or a promise that the item can immediately be sold for that amount.</p></section><section><h2>4. Selection and rotation</h2><p>Selection may be randomized only among items and weapon categories that satisfy the member’s tier value floor, account history, rotation status, and current availability. Members are not sold jackpot entries, prize multipliers, published odds, or a chance to win an additional prize.</p><p>The service aims to avoid duplicate weapon categories until the eligible rotation is completed. Availability, Steam restrictions, and operational issues may require a qualifying substitution.</p></section><section><h2>5. Member acceptance and jurisdiction</h2><p>By creating an account, purchasing, renewing, or maintaining a membership, the member agrees to the Terms of Service, Privacy Policy, Billing Policy, Refund Policy, Upgrade Policy, and this Membership Policy. The member represents that they are legally permitted to purchase the subscription and receive Steam digital items under the laws applicable where they live or access the service. If use is prohibited in the member’s location, the member must not use or purchase the service.</p></section></LegalPage>}
+
+const tiers = [
+  ["Recruit", "$25", "$21 minimum", "84%", "16%"],
+  ["Operative", "$50", "$43 minimum", "86%", "14%"],
+  ["Vanguard", "$75", "$66 minimum", "88%", "12%"],
+  ["Elite", "$100", "$90 minimum", "90%", "10%"],
+  ["Master", "$150", "$138 minimum", "92%", "8%"],
+  ["Prestige", "$200", "$188 minimum", "94%", "6%"],
+];
+
+export default function Page() {
+  return (
+    <LegalPage
+      eyebrow="MEMBERSHIP POLICY"
+      title="Membership and Value Policy"
+    >
+      <section>
+        <h2>1. The membership</h2>
+        <p>
+          Strafe Crate is a recurring digital-item collection membership.
+          During each successfully paid billing cycle, Strafe Crate assigns one
+          eligible Counter-Strike 2 item for delivery through a Steam trade
+          offer.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Transparent tier value</h2>
+        <p>
+          Each tier has a published minimum Steam Community Market reference
+          value. The remaining portion of the membership price supports item
+          sourcing, payment processing, fraud prevention, customer support,
+          platform operations, fulfillment labor, development, and other costs
+          of operating the service.
+        </p>
+
+        <div className="policy-table">
+          {tiers.map(([name, price, minimum, collectible, operations]) => (
+            <div key={name}>
+              <b>{name}</b>
+              <span>{price}</span>
+              <strong>{minimum}</strong>
+              <span>{collectible} toward published minimum value</span>
+              <span>{operations} for service and operations</span>
+            </div>
+          ))}
+        </div>
+
+        <p>
+          The published minimum is the minimum reference-value floor, not a
+          representation of Strafe Crate's exact acquisition cost or a
+          dollar-for-dollar segregation of customer funds.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Steam reference value</h2>
+        <p>
+          Steam Reference Value means the displayed U.S.-dollar buyer price for
+          the applicable item on the Steam Community Market when Strafe Crate
+          records and assigns the item for fulfillment.
+        </p>
+        <p>
+          Reference value is not cash value, guaranteed resale value,
+          investment value, or a promise that the item can immediately be sold
+          for that amount. Digital-item prices may rise or fall before or after
+          delivery.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Selection and rotation</h2>
+        <p>
+          Items are selected according to the applicable tier value floor,
+          member history, eligible weapon rotation, inventory availability, and
+          fulfillment requirements. The service may use automated selection
+          among qualifying items.
+        </p>
+        <p>
+          Strafe Crate does not publish prize odds, jackpots, cash multipliers,
+          wagering outcomes, or paid rerolls. A qualifying substitution may be
+          necessary because of inventory availability, Steam restrictions, or
+          operational issues.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. No cash redemption</h2>
+        <p>
+          Membership items cannot be redeemed from Strafe Crate for cash. Use
+          of Steam and the Steam Community Market remains subject to Valve's
+          agreements, fees, restrictions, and technical availability.
+        </p>
+      </section>
+    </LegalPage>
+  );
+}

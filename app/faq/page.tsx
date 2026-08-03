@@ -1,2 +1,67 @@
 import LegalPage from "@/components/LegalPage";
-export default function Page(){return <LegalPage eyebrow="FREQUENTLY ASKED QUESTIONS" title="Frequently Asked Questions"><section><h2>Is this a mystery-box or jackpot service?</h2><p>No jackpot, odds table, prize multiplier, or chance-to-win feature is sold. Each tier has a published minimum Steam Community Market reference-value floor, with higher tiers retaining a larger percentage of the membership price. Randomization is limited to selecting an eligible item after the value and rotation requirements are applied.</p></section><section><h2>How is Steam value measured?</h2><p>The displayed U.S.-dollar buyer price on the Steam Community Market is recorded when the item is assigned for fulfillment. The price can change afterward and is not guaranteed cash or resale value.</p></section><section><h2>When am I billed?</h2><p>Active memberships are normally billed on the first day of the month. Enrollment after the first is scheduled for the following cycle unless checkout clearly states otherwise.</p></section><section><h2>When is my item sent?</h2><p>The fulfillment target is on or before the fourteenth day of the active billing cycle.</p></section><section><h2>Can I cancel?</h2><p>Yes. Cancellation stops future renewals but does not reverse an already-paid active cycle.</p></section><section><h2>Can weapon categories repeat?</h2><p>The platform aims to avoid duplicate weapon categories until the eligible rotation is completed. Availability or operational restrictions may require a qualifying substitution.</p></section><section><h2>Who can request an upgrade?</h2><p>Active Elite, Master, and Prestige members, subject to the Upgrade Program Policy.</p></section></LegalPage>}
+
+export default function Page() {
+  return (
+    <LegalPage eyebrow="SUPPORT" title="Frequently Asked Questions">
+      <section>
+        <h2>What does my membership include?</h2>
+        <p>
+          One qualifying curated CS2 item during each successfully paid active
+          billing cycle, private collection tracking, and access to the member
+          features available for your account.
+        </p>
+      </section>
+
+      <section>
+        <h2>How is the item value determined?</h2>
+        <p>
+          Each tier has a published minimum Steam Community Market reference
+          value measured when the item is assigned for fulfillment. Market
+          prices may change afterward.
+        </p>
+      </section>
+
+      <section>
+        <h2>What is Lifetime XP?</h2>
+        <p>
+          Lifetime XP is permanent profile progression used for levels,
+          trophies, titles, and community recognition. It has no cash value.
+        </p>
+      </section>
+
+      <section>
+        <h2>What is the loyalty multiplier?</h2>
+        <p>
+          Consecutive paid cycles can increase recurring-payment XP up to the
+          current permanent cap of 1.25× after twelve paid months. Temporary
+          events may separately advertise a limited 2× XP rate.
+        </p>
+      </section>
+
+      <section>
+        <h2>Are Supply Credits the same as XP?</h2>
+        <p>
+          No. Supply Credits are a separate, slowly earned reward balance. They
+          are not affected by the XP multiplier and cannot be withdrawn as
+          cash.
+        </p>
+      </section>
+
+      <section>
+        <h2>Can I cancel?</h2>
+        <p>
+          Yes. Cancellation prevents future renewal but does not automatically
+          reverse a cycle that has already been successfully paid.
+        </p>
+      </section>
+
+      <section>
+        <h2>Will Strafe Crate ask for my Steam password?</h2>
+        <p>
+          No. Never provide a Steam password, Steam Guard code, session cookie,
+          or API key to Strafe Crate or another community member.
+        </p>
+      </section>
+    </LegalPage>
+  );
+}

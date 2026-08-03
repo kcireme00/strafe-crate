@@ -1,2 +1,34 @@
 import LegalPage from "@/components/LegalPage";
-export default function Page(){return <LegalPage eyebrow="CONTACT" title="Contact Strafe Crate"><section><h2>Support</h2><p>For membership, billing, trade, privacy, or policy questions, contact <a href="mailto:strafecrate@gmail.com">strafecrate@gmail.com</a>.</p></section><section><h2>Security reminder</h2><p>Strafe Crate will never ask you to send a Steam password, Steam Guard code, session cookie, private API key, or complete payment-card details by email.</p></section><section><h2>Include with your request</h2><p>Include your account email, the applicable billing cycle, and a clear description of the issue. Do not include passwords or security codes.</p></section></LegalPage>}
+
+export default function Page() {
+  return (
+    <LegalPage eyebrow="SUPPORT" title="Contact Strafe Crate">
+      <section>
+        <h2>Account and membership support</h2>
+        <p>
+          Add your official support email address here before accepting public
+          payments. Include the email address used for the account, but never
+          send a Steam password, Steam Guard code, session cookie, or API key.
+        </p>
+      </section>
+
+      <section>
+        <h2>Billing requests</h2>
+        <p>
+          For billing requests, include the account email, payment date, and
+          invoice or receipt identifier when available. Do not send complete
+          payment-card details.
+        </p>
+      </section>
+
+      <section>
+        <h2>Community reports</h2>
+        <p>
+          Use the in-chat report control for individual messages. Urgent
+          account-security issues should be reported through the official
+          support channel.
+        </p>
+      </section>
+    </LegalPage>
+  );
+}

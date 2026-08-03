@@ -1,2 +1,56 @@
 import LegalPage from "@/components/LegalPage";
-export default function Page(){return <LegalPage eyebrow="BILLING POLICY" title="Billing and Cancellation Policy"><section><h2>1. Automatic renewal</h2><p>Memberships are recurring subscriptions and renew automatically at the selected monthly price until cancelled. The recurring price, billing frequency, value formula, and cancellation terms will be shown before purchase.</p></section><section><h2>2. Billing cycle</h2><p>Active memberships are normally billed on the first day of each calendar month. A successful payment creates eligibility for that month’s fulfillment cycle.</p><p>Enrollment completed after the first day of a month is scheduled for the following monthly cycle unless checkout clearly states otherwise. The customer will not be charged for that scheduled cycle until its applicable billing date.</p></section><section><h2>3. Cancellation</h2><p>Members may cancel at any time through the available billing-management process. Cancellation stops future renewals. It does not reverse a successfully paid current cycle or remove eligibility for an item already being processed.</p></section><section><h2>4. Failed payments</h2><p>If a payment fails, the related fulfillment order may not be created or may be paused. Strafe Crate may retry the payment, request an updated payment method, or end the subscription.</p></section><section><h2>5. Consent</h2><p>By purchasing or maintaining a membership, you expressly consent to recurring charges at the disclosed price and frequency until cancellation.</p></section></LegalPage>}
+
+export default function Page() {
+  return (
+    <LegalPage
+      eyebrow="SUBSCRIPTION POLICY"
+      title="Billing and Cancellation"
+    >
+      <section>
+        <h2>1. Automatic renewal</h2>
+        <p>
+          Memberships renew automatically at the disclosed price and frequency
+          until cancelled. Applicable taxes and clearly disclosed charges may
+          be added.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Billing cycle</h2>
+        <p>
+          Billing normally occurs on the first day of the active cycle. A
+          membership purchased after the monthly enrollment cutoff may begin
+          with the following cycle, as displayed before checkout.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Authorization</h2>
+        <p>
+          By completing checkout, you authorize recurring billing and confirm
+          that you reviewed the membership price, renewal frequency, value
+          policy, cancellation method, refund policy, and linked Terms.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Cancellation</h2>
+        <p>
+          You may cancel future renewal through the available account or
+          billing-portal controls. Cancellation prevents future charges but
+          does not automatically cancel or refund a cycle that has already been
+          successfully paid.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Failed payments</h2>
+        <p>
+          Failed, disputed, reversed, or unpaid charges may pause membership,
+          fulfillment, XP awards, Supply Credit awards, community eligibility,
+          and other member benefits until the account is restored.
+        </p>
+      </section>
+    </LegalPage>
+  );
+}

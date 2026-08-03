@@ -1,2 +1,48 @@
 import LegalPage from "@/components/LegalPage";
-export default function Page(){return <LegalPage eyebrow="REFUND POLICY" title="Refunds and Fulfillment Policy"><section><h2>1. General rule</h2><p>Completed membership payments are final and nonrefundable except where required by applicable law or expressly stated in this policy.</p></section><section><h2>2. Cancellation is not a refund</h2><p>Cancellation prevents future renewal but does not refund or cancel an active paid cycle.</p></section><section><h2>3. Fulfillment target</h2><p>Strafe Crate’s target is to send the official Steam trade offer on or before the fourteenth day of the active billing cycle. Delivery may be affected by account review, invalid trade information, Steam restrictions, trade holds, service outages, or circumstances outside Strafe Crate’s reasonable control.</p></section><section><h2>4. Unfulfilled paid cycle</h2><p>If Strafe Crate cannot fulfill a paid cycle, Strafe Crate may provide a qualifying replacement, account credit, or refund for the unfulfilled cycle, as appropriate and subject to applicable law.</p></section><section><h2>5. Customer-caused delivery issues</h2><p>The member is responsible for providing an accurate Steam trade URL, maintaining an account capable of receiving trades, and accepting the offer. Rejected, expired, or inaccessible trades may delay fulfillment and may require support review.</p></section></LegalPage>}
+
+export default function Page() {
+  return (
+    <LegalPage
+      eyebrow="FULFILLMENT POLICY"
+      title="Refunds and Fulfillment"
+    >
+      <section>
+        <h2>1. General rule</h2>
+        <p>
+          Successfully processed membership payments are generally
+          non-refundable after the billing cycle begins, except where required
+          by applicable law or expressly stated otherwise.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Unfulfilled cycles</h2>
+        <p>
+          If Strafe Crate cannot fulfill a successfully paid cycle, Strafe
+          Crate may provide a qualifying replacement, account credit,
+          rescheduled fulfillment, or refund as appropriate to the
+          circumstances and applicable law.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Member responsibility</h2>
+        <p>
+          Members must maintain an accurate Steam trade URL, an account capable
+          of trading, and timely access to accept a valid trade offer. Delays
+          caused by trade holds, account restrictions, inaccurate information,
+          or failure to accept an offer may extend fulfillment.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Reward redemptions</h2>
+        <p>
+          Supply Credit redemptions are generally final after approval or
+          fulfillment. Credits may be restored when a redemption is rejected or
+          cannot be fulfilled, depending on the circumstances.
+        </p>
+      </section>
+    </LegalPage>
+  );
+}
