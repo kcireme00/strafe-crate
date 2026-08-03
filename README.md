@@ -1,10 +1,12 @@
-# Rewards Dashboard Type Fix
+# Client Page Fix
 
 Replace:
 
-- components/RewardsDashboard.tsx
+- app/community/page.tsx
+- app/rewards/page.tsx
 
-Then commit and push.
+Commit message:
+Fix community and rewards client pages
 
-Suggested commit:
-Fix rewards data typing
+This fixes the Next.js prerender error:
+Functions cannot be passed directly to Client Components.
