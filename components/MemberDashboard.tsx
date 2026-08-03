@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import TierEmblem from "@/components/TierEmblem";
+import LoyaltyPanel from "@/components/LoyaltyPanel";
+import TrophyCabinet from "@/components/TrophyCabinet";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 
@@ -59,12 +61,14 @@ export default function MemberDashboard({ user }: { user: User }) {
   const [orders, setOrders] = useState<any[]>([]);
   const [weapons, setWeapons] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
+  const [loyalty, setLoyalty] = useState<any>(null);
+  const [trophies, setTrophies] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const [p, s, o, w, h] = await Promise.all([
+      const [p, s, o, w, h, l, t] = await Promise.all([
         supabase
           .from("profiles")
           .select("id,full_name,display_name,email,role,steam_profile_url,steam_trade_url,account_approved,created_at")
@@ -90,6 +94,16 @@ export default function MemberDashboard({ user }: { user: User }) {
           .from("member_weapon_history")
           .select("weapon_categories(name),rotation_number,received_at")
           .eq("user_id", user.id),
+        supabase
+          .from("loyalty_accounts")
+          .select("lifetime_xp,supply_credits,consecutive_paid_months,xp_multiplier")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("member_trophies")
+          .select("id,featured_slot,awarded_at,trophy_definitions(name,description,icon,rarity)")
+          .eq("user_id", user.id)
+          .order("featured_slot", { ascending: true, nullsFirst: false }),
       ]);
 
       if (p.error) setMessage(p.error.message);
@@ -99,6 +113,8 @@ export default function MemberDashboard({ user }: { user: User }) {
       setOrders(o.data || []);
       setWeapons(w.data || []);
       setHistory(h.data || []);
+      setLoyalty(l.data || null);
+      setTrophies(t.data || []);
       setLoading(false);
     })();
   }, [supabase, user.id]);
@@ -297,6 +313,11 @@ export default function MemberDashboard({ user }: { user: User }) {
           )}
         </div>
       </section>
+
+
+      <LoyaltyPanel loyalty={loyalty} />
+
+      <TrophyCabinet trophies={trophies} />
 
       <section className="panel profile-panel">
         <div className="panel-head">

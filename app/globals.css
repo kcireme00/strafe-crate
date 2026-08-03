@@ -157,3 +157,487 @@
   .plan .plan-tier-rank{top:20px;right:20px;width:58px;height:58px}
   .plan .tier-name,.plan .tier-subtitle{margin-right:72px}
 }
+
+
+/* ==========================================================
+   LOYALTY, TROPHIES, REWARDS, AND COMMUNITY
+   ========================================================== */
+
+.loyalty-panel .panel-head,
+.trophy-panel .panel-head{
+  gap:24px;
+}
+.loyalty-panel .panel-head h2,
+.trophy-panel .panel-head h2{
+  margin:4px 0 8px;
+}
+.loyalty-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin:24px 0 20px;
+}
+.loyalty-metrics article{
+  min-height:126px;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:#0a0e14;
+  display:flex;
+  flex-direction:column;
+}
+.loyalty-metrics small,
+.credit-balance small,
+.reward-value small{
+  color:var(--muted);
+  font-size:.62rem;
+  letter-spacing:.08em;
+}
+.loyalty-metrics strong{
+  margin:5px 0;
+  font-size:1.25rem;
+}
+.loyalty-metrics span{
+  color:var(--muted);
+  font-size:.75rem;
+}
+.xp-progress-label{
+  display:flex;
+  justify-content:space-between;
+  color:var(--muted);
+  font-size:.72rem;
+  margin-bottom:7px;
+}
+.xp-progress-track,
+.group-progress{
+  height:10px;
+  border-radius:999px;
+  background:#080b10;
+  border:1px solid var(--line);
+  overflow:hidden;
+}
+.xp-progress-track span{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,var(--orange),var(--orange2));
+}
+
+.featured-trophies{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin:24px 0;
+}
+.featured-trophy{
+  min-height:190px;
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#0a0e14;
+  display:flex;
+  flex-direction:column;
+}
+.featured-trophy.empty{
+  border-style:dashed;
+  opacity:.65;
+}
+.featured-trophy small{
+  color:var(--muted);
+  font-size:.6rem;
+  margin:12px 0 4px;
+}
+.featured-trophy p,
+.trophy-item p{
+  color:var(--muted);
+  font-size:.76rem;
+  margin:6px 0 0;
+}
+.trophy-icon{
+  width:52px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  border:1px solid currentColor;
+  border-radius:14px;
+  font-size:1.45rem;
+}
+.rarity-common{color:#9aa7b7}
+.rarity-rare{color:#3f8cff}
+.rarity-epic{color:#9a52ee}
+.rarity-legendary{color:#e0ad3c}
+.trophy-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.trophy-item{
+  display:flex;
+  gap:13px;
+  align-items:center;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:#0a0e14;
+}
+.empty-trophy-cabinet{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  padding:24px;
+  border:1px dashed var(--line);
+  border-radius:14px;
+}
+.empty-trophy-cabinet>span{
+  font-size:2.2rem;
+  color:var(--orange2);
+}
+.empty-trophy-cabinet p{
+  margin:4px 0 0;
+}
+
+.rewards-shell,
+.community-shell{
+  padding:60px 0 100px;
+}
+.rewards-heading,
+.community-heading{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:32px;
+  align-items:end;
+  margin-bottom:28px;
+}
+.rewards-heading h1,
+.community-heading h1{
+  margin:8px 0 12px;
+}
+.rewards-heading p,
+.community-heading p{
+  color:var(--muted);
+}
+.credit-balance{
+  min-width:260px;
+  padding:20px;
+  border:1px solid rgba(255,106,32,.35);
+  border-radius:14px;
+  background:rgba(255,106,32,.06);
+  display:flex;
+  flex-direction:column;
+}
+.credit-balance strong{
+  font-size:2.4rem;
+  line-height:1;
+  margin:6px 0;
+}
+.credit-balance span{
+  color:var(--muted);
+  font-size:.75rem;
+}
+.reward-transparency{
+  padding:26px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--panel);
+  margin-bottom:22px;
+}
+.reward-transparency p{
+  color:var(--muted);
+}
+.credit-earning-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:18px;
+}
+.credit-earning-grid article{
+  padding:13px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#0a0e14;
+  display:flex;
+  flex-direction:column;
+}
+.credit-earning-grid span{
+  color:var(--muted);
+  font-size:.74rem;
+}
+.reward-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+.reward-card{
+  min-height:420px;
+  padding:24px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#0a0e14;
+  display:flex;
+  flex-direction:column;
+}
+.reward-card>small{
+  color:var(--orange2);
+  font-size:.62rem;
+  margin-top:20px;
+}
+.reward-card h2{
+  margin:8px 0;
+}
+.reward-card p{
+  color:var(--muted);
+  flex:1;
+}
+.reward-cache-icon{
+  width:70px;
+  height:70px;
+  border:1px solid currentColor;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  color:var(--orange2);
+  font-weight:900;
+  font-size:1.35rem;
+}
+.reward-level-2 .reward-cache-icon{color:#9a52ee}
+.reward-level-3 .reward-cache-icon{color:#e0ad3c}
+.reward-value{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:18px 0;
+}
+.reward-value div{
+  display:flex;
+  flex-direction:column;
+}
+.reward-status{
+  margin-top:18px;
+  color:var(--orange2);
+}
+
+.community-rules{
+  max-width:340px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel);
+  display:flex;
+  flex-direction:column;
+}
+.community-rules span{
+  color:var(--muted);
+  font-size:.75rem;
+}
+.chat-panel{
+  border:1px solid var(--line);
+  border-radius:17px;
+  overflow:hidden;
+  background:var(--panel);
+}
+.chat-feed{
+  min-height:480px;
+  max-height:650px;
+  overflow-y:auto;
+  padding:18px;
+}
+.chat-message{
+  display:grid;
+  grid-template-columns:42px 1fr auto;
+  gap:12px;
+  padding:12px 6px;
+  border-bottom:1px solid var(--line);
+}
+.chat-message.own{
+  background:rgba(255,106,32,.025);
+}
+.chat-avatar{
+  width:42px;
+  height:42px;
+  border:1px solid rgba(255,106,32,.4);
+  border-radius:12px;
+  background:#080b10;
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+}
+.chat-meta{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.chat-meta button{
+  border:0;
+  background:transparent;
+  color:#fff;
+  padding:0;
+  font-weight:800;
+  cursor:pointer;
+}
+.chat-meta span{
+  padding:2px 7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  color:var(--muted);
+  font-size:.65rem;
+}
+.chat-meta time{
+  color:var(--muted);
+  font-size:.66rem;
+}
+.chat-message-body p{
+  margin:3px 0 0;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.chat-report{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:.68rem;
+}
+.chat-composer{
+  padding:16px;
+  border-top:1px solid var(--line);
+  background:#090d13;
+}
+.chat-composer textarea{
+  min-height:92px;
+  resize:vertical;
+}
+.chat-composer>div{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:9px;
+}
+.chat-composer>div span{
+  color:var(--muted);
+  font-size:.7rem;
+}
+.chat-status{
+  color:var(--orange2);
+  margin:9px 0 0;
+}
+.chat-empty{
+  color:var(--muted);
+  padding:35px 0;
+  text-align:center;
+}
+
+.player-card-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  padding:24px;
+  display:grid;
+  place-items:center;
+  background:rgba(2,4,8,.76);
+  backdrop-filter:blur(12px);
+}
+.public-player-card{
+  position:relative;
+  width:min(100%,620px);
+  padding:28px;
+  border:1px solid rgba(255,106,32,.42);
+  border-radius:22px;
+  background:linear-gradient(145deg,#101722,#070a0f 72%);
+}
+.player-card-close{
+  position:absolute;
+  right:16px;
+  top:13px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  font-size:1.7rem;
+  cursor:pointer;
+}
+.public-card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  align-items:flex-start;
+}
+.public-card-top small{
+  color:var(--orange2);
+  letter-spacing:.12em;
+  font-size:.62rem;
+}
+.public-card-top h2{
+  margin:9px 0 4px;
+}
+.public-card-top p{
+  color:var(--muted);
+}
+.public-card-emblem{
+  width:92px;
+  height:92px;
+}
+.public-card-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin:25px 0;
+}
+.public-card-stats div{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+}
+.public-card-stats small,
+.public-card-trophies>small{
+  color:var(--muted);
+  font-size:.6rem;
+}
+.public-card-trophies>div{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+  margin-top:8px;
+}
+.public-card-trophies span{
+  min-height:80px;
+  padding:10px;
+  border:1px solid currentColor;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.public-card-trophies span.empty{
+  color:var(--muted);
+  border-style:dashed;
+}
+.public-card-trophies b{
+  font-size:1.3rem;
+}
+.public-card-member-since{
+  color:var(--muted);
+  font-size:.75rem;
+  margin:20px 0 0;
+}
+
+@media(max-width:1000px){
+  .loyalty-metrics{grid-template-columns:repeat(2,1fr)}
+  .reward-grid{grid-template-columns:1fr}
+  .credit-earning-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:720px){
+  .rewards-heading,
+  .community-heading{grid-template-columns:1fr}
+  .credit-balance{min-width:0}
+  .loyalty-metrics,
+  .featured-trophies,
+  .trophy-grid,
+  .credit-earning-grid,
+  .public-card-stats,
+  .public-card-trophies>div{grid-template-columns:1fr}
+  .chat-message{grid-template-columns:40px 1fr}
+  .chat-report{grid-column:2;justify-self:start}
+  .public-card-emblem{width:68px;height:68px}
+}
