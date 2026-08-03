@@ -1,59 +1,37 @@
-# Admin Hub + Fulfillment Beta
-
-## 1. Run SQL
-
-Open:
-
-supabase/admin-fulfillment-beta.sql
-
-Paste into Supabase SQL Editor and run it.
-
-The final result should say:
-
-fulfillment_orders
-
-## 2. Copy to GitHub
+# Clean Admin Orders Queue
 
 Replace/add:
 
 - app/admin/page.tsx
-- components/AdminFulfillmentBeta.tsx
+- app/admin/admin.module.css
+- components/AdminOrdersQueue.tsx
 
-This admin page expects the existing:
+This package uses a CSS module, so you do NOT need to paste anything into
+globals.css.
 
-- components/AdminChatReports.tsx
+The Orders tab is now the default admin view.
 
-from the earlier moderation package.
+Every fulfillment order appears as a single editable line with:
 
-## 3. Add styles
+- member and billing cycle
+- tier
+- weapon/category
+- skin name
+- exterior
+- Steam reference value
+- acquisition cost
+- calculated spread
+- trade ID
+- status
+- Save button
 
-Open:
+The existing SQL functions are used:
 
-admin-hub-fulfillment-styles.css
+- get_admin_fulfillment_orders()
+- get_admin_member_directory()
 
-Copy everything and paste it at the BOTTOM of:
-
-app/globals.css
-
-Do not replace globals.css.
-
-## 4. Commit
+No new SQL is required for this UI-only update.
 
 Commit message:
 
-Polish admin hub and add fulfillment beta
-
-## Beta test flow
-
-1. Create or select a test member account.
-2. Open Admin > Fulfillment Beta.
-3. Create a test order.
-4. Select the weapon/category sent.
-5. Enter the exact skin name and exterior.
-6. Enter Steam reference value and your acquisition cost.
-7. Change status:
-   draft > purchasing > ready to send > trade sent > accepted > fulfilled
-8. Confirm the order appears as fulfilled with timestamps.
-
-The member dashboard can read from `public.fulfillment_orders` later to display
-the same live fulfillment status.
+Replace admin hub with clean orders queue
