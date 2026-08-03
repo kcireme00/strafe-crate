@@ -872,272 +872,141 @@
 }
 
 
-/* Compact dashboard-style player card shown from community chat */
-.compact-player-card{
-  --player-tier:#ff7628;
-  position:relative;
-  width:min(92vw,560px);
-  min-height:350px;
-  padding:24px;
-  overflow:hidden;
-  border:1px solid color-mix(in srgb,var(--player-tier) 72%,#26303d);
-  border-radius:22px;
-  color:#f7f8fb;
+/* Small anchored player-card popover for community usernames */
+.chat-profile-popover{
+  --popover-tier:#ff7628;
+  position:fixed;
+  z-index:120;
+  width:330px;
+  padding:16px;
+  border:1px solid color-mix(in srgb,var(--popover-tier) 62%,#26303d);
+  border-radius:15px;
+  color:#f7f9fc;
   background:
-    radial-gradient(circle at 88% 78%,color-mix(in srgb,var(--player-tier) 10%,transparent),transparent 33%),
-    linear-gradient(145deg,#111823,#070a0f 72%);
+    radial-gradient(circle at 92% 8%,color-mix(in srgb,var(--popover-tier) 11%,transparent),transparent 38%),
+    linear-gradient(145deg,#111823,#080b10 72%);
   box-shadow:
-    0 28px 80px rgba(0,0,0,.52),
+    0 18px 48px rgba(0,0,0,.42),
     inset 0 1px 0 rgba(255,255,255,.035);
-  transform:translateY(0) scale(1);
-  animation:compact-player-enter .2s ease-out both;
+  animation:chat-profile-popover-in .14s ease-out both;
 }
 
-.compact-player-card.player-tier-recruit{--player-tier:#96a1af}
-.compact-player-card.player-tier-operative{--player-tier:#438cff}
-.compact-player-card.player-tier-vanguard{--player-tier:#42c97a}
-.compact-player-card.player-tier-elite{--player-tier:#9b4ff0}
-.compact-player-card.player-tier-master{--player-tier:#e4ad35}
-.compact-player-card.player-tier-prestige{--player-tier:#eb405b}
-.compact-player-card.player-tier-pending{--player-tier:#ff7628}
+.chat-profile-popover.popover-tier-recruit{--popover-tier:#96a1af}
+.chat-profile-popover.popover-tier-operative{--popover-tier:#438cff}
+.chat-profile-popover.popover-tier-vanguard{--popover-tier:#42c97a}
+.chat-profile-popover.popover-tier-elite{--popover-tier:#9b4ff0}
+.chat-profile-popover.popover-tier-master{--popover-tier:#e4ad35}
+.chat-profile-popover.popover-tier-prestige{--popover-tier:#eb405b}
+.chat-profile-popover.popover-tier-pending{--popover-tier:#ff7628}
 
-@keyframes compact-player-enter{
-  from{opacity:0;transform:translateY(12px) scale(.985)}
+@keyframes chat-profile-popover-in{
+  from{opacity:0;transform:translateY(5px) scale(.985)}
   to{opacity:1;transform:translateY(0) scale(1)}
 }
 
-.compact-player-sheen{
-  position:absolute;
-  inset:-45% -25% auto auto;
-  width:360px;
-  height:360px;
-  border:1px solid color-mix(in srgb,var(--player-tier) 16%,transparent);
-  border-radius:50%;
-  box-shadow:
-    0 0 0 34px color-mix(in srgb,var(--player-tier) 4%,transparent),
-    0 0 0 68px color-mix(in srgb,var(--player-tier) 3%,transparent);
-  pointer-events:none;
-}
-
-.compact-player-close{
-  position:absolute;
-  z-index:5;
-  top:13px;
-  right:15px;
-  width:34px;
-  height:34px;
-  display:grid;
-  place-items:center;
-  border:0;
-  border-radius:9px;
-  background:rgba(255,255,255,.035);
-  color:#d9dee7;
-  font-size:1.35rem;
-  cursor:pointer;
-  transition:background .15s ease,color .15s ease,transform .15s ease;
-}
-
-.compact-player-close:hover{
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  transform:scale(1.04);
-}
-
-.compact-player-header{
-  position:relative;
-  z-index:2;
+.chat-profile-popover-top{
   display:flex;
   justify-content:space-between;
+  gap:14px;
   align-items:flex-start;
-  gap:20px;
-  padding-right:30px;
 }
 
-.compact-player-brand{
-  display:flex;
-  align-items:center;
-  gap:11px;
+.chat-profile-popover-top small,
+.chat-profile-popover-stats small,
+.chat-profile-popover-trophies>small{
+  color:#7f8b9c;
+  font-size:.55rem;
+  font-weight:850;
+  letter-spacing:.11em;
 }
 
-.compact-player-mark{
+.chat-profile-popover-top h3{
+  margin:4px 0 2px;
+  font-size:1.45rem;
+  line-height:1;
+  letter-spacing:-.025em;
+}
+
+.chat-profile-popover-top p{
+  margin:5px 0 0;
+  color:#9aa7b8;
+  font-size:.72rem;
+}
+
+.chat-profile-popover-emblem{
+  width:50px;
+  height:50px;
+  color:var(--popover-tier);
+  opacity:.95;
+}
+
+.chat-profile-popover-pending{
   width:46px;
   height:46px;
   display:grid;
   place-items:center;
-  border:1px solid color-mix(in srgb,var(--player-tier) 72%,#253140);
-  border-radius:13px;
-  color:var(--player-tier);
-  background:#090d13;
-  font-size:.76rem;
-  font-weight:950;
-  letter-spacing:.08em;
-  box-shadow:inset 0 0 20px color-mix(in srgb,var(--player-tier) 9%,transparent);
+  border:1px solid color-mix(in srgb,var(--popover-tier) 40%,transparent);
+  border-radius:12px;
+  color:var(--popover-tier);
+  font-size:1.35rem;
 }
 
-.compact-player-brand>div{
-  display:flex;
-  flex-direction:column;
-}
-
-.compact-player-brand small,
-.compact-player-identity small,
-.compact-player-stats small,
-.compact-featured-trophies>small{
-  color:#8491a4;
-  font-size:.58rem;
-  font-weight:800;
-  letter-spacing:.12em;
-}
-
-.compact-player-brand strong{
-  margin-top:3px;
-  color:var(--player-tier);
-  font-size:.76rem;
-  letter-spacing:.08em;
-}
-
-.compact-player-emblem{
-  width:74px;
-  height:74px;
-  color:var(--player-tier);
-  opacity:.95;
-}
-
-.compact-pending-emblem{
-  width:66px;
-  height:66px;
-  display:grid;
-  place-items:center;
-  border:1px solid color-mix(in srgb,var(--player-tier) 38%,transparent);
-  border-radius:18px;
-  color:var(--player-tier);
-  font-size:2rem;
-}
-
-.compact-player-identity{
-  position:relative;
-  z-index:2;
-  margin-top:42px;
-}
-
-.compact-player-identity h2{
-  margin:5px 0 2px;
-  font-size:clamp(2.3rem,7vw,4rem);
-  line-height:.95;
-  letter-spacing:-.045em;
-}
-
-.compact-player-identity p{
-  margin:8px 0 0;
-  color:#9aa7b8;
-  font-size:.87rem;
-}
-
-.compact-player-stats{
-  position:relative;
-  z-index:2;
+.chat-profile-popover-stats{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:9px;
-  margin-top:28px;
-}
-
-.compact-player-stats>div{
-  padding:12px 13px;
-  border:1px solid #26303c;
-  border-radius:10px;
-  background:rgba(6,9,14,.66);
-  display:flex;
-  flex-direction:column;
-}
-
-.compact-player-stats strong{
-  margin-top:4px;
-  font-size:1rem;
-}
-
-.compact-player-footer{
-  position:relative;
-  z-index:2;
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:18px;
-  margin-top:22px;
-}
-
-.compact-featured-trophies>div{
-  display:flex;
   gap:7px;
-  margin-top:7px;
+  margin-top:14px;
 }
 
-.compact-trophy{
-  width:80px;
-  min-height:57px;
-  padding:7px;
-  border:1px solid currentColor;
-  border-radius:9px;
-  background:rgba(6,9,14,.68);
+.chat-profile-popover-stats span{
+  padding:9px;
+  border:1px solid #26303c;
+  border-radius:8px;
+  background:rgba(6,9,14,.64);
   display:flex;
   flex-direction:column;
-  justify-content:center;
 }
 
-.compact-trophy.empty{
-  color:#647184;
+.chat-profile-popover-stats strong{
+  margin-top:3px;
+  font-size:.78rem;
+}
+
+.chat-profile-popover-trophies{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:13px;
+}
+
+.chat-profile-popover-trophies>div{
+  display:flex;
+  gap:6px;
+}
+
+.chat-profile-popover-trophies span{
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  border:1px solid currentColor;
+  border-radius:8px;
+  background:rgba(6,9,14,.64);
+  font-size:.82rem;
+}
+
+.chat-profile-popover-trophies span.empty{
+  color:#637083;
   border-style:dashed;
 }
 
-.compact-trophy b{
-  font-size:1rem;
-  line-height:1;
-}
-
-.compact-trophy em{
-  max-width:100%;
-  margin-top:5px;
-  overflow:hidden;
-  color:currentColor;
-  font-size:.56rem;
-  font-style:normal;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-.compact-player-footer>p{
-  margin:0;
-  color:#788597;
-  font-size:.66rem;
-  white-space:nowrap;
-}
-
-@media(max-width:620px){
-  .compact-player-card{
-    width:min(94vw,460px);
-    min-height:0;
-    padding:20px;
-  }
-
-  .compact-player-emblem{
-    width:58px;
-    height:58px;
-  }
-
-  .compact-player-identity{
-    margin-top:32px;
-  }
-
-  .compact-player-stats{
-    grid-template-columns:1fr;
-  }
-
-  .compact-player-footer{
-    align-items:flex-start;
-    flex-direction:column;
-  }
-
-  .compact-trophy{
-    width:72px;
+@media(max-width:700px){
+  .chat-profile-popover{
+    left:12px!important;
+    right:12px!important;
+    top:auto!important;
+    bottom:12px;
+    width:auto;
   }
 }

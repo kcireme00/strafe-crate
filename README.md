@@ -1,17 +1,16 @@
-# Compact Chat Player Card
+# Subtle Chat Profile Popover
 
-Replace these files:
-
+Replace:
+- components/LiveChat.tsx
 - components/PublicPlayerCard.tsx
 - app/globals.css
 
-Commit message:
+Commit:
+Make chat player cards subtle popovers
 
-Match chat player card to dashboard
-
-This redesign makes the player popup:
-- smaller and tighter
-- visually consistent with the dashboard membership card
-- tier colored
-- equipped with the tier emblem
-- focused on player name, level, XP, streak, multiplier, and trophies
+Behavior:
+- Click username or avatar
+- Small player card opens beside the clicked name
+- No full-screen blur or centered modal
+- Click anywhere outside or press Escape to close
+- On mobile it becomes a compact bottom card

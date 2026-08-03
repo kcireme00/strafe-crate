@@ -22,6 +22,7 @@ export default function LiveChat({ user }: { user: User }) {
   const [body, setBody] = useState("");
   const [status, setStatus] = useState("");
   const [playerCard, setPlayerCard] = useState<any>(null);
+  const [playerCardAnchor, setPlayerCardAnchor] = useState<DOMRect | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -84,7 +85,8 @@ export default function LiveChat({ user }: { user: User }) {
     }
   }
 
-  async function openCard(userId: string) {
+  async function openCard(userId: string, anchor: HTMLElement) {
+    setPlayerCardAnchor(anchor.getBoundingClientRect());
     setStatus("Loading player card...");
     const { data, error } = await (supabase as any).rpc(
       "get_public_player_card",
@@ -132,12 +134,19 @@ export default function LiveChat({ user }: { user: User }) {
               className={`chat-message ${tierClass(message.tier_name_snapshot)} ${message.user_id === user.id ? "own" : ""}`}
               key={message.id}
             >
-              <button className="chat-avatar" type="button" onClick={() => openCard(message.user_id)}>
+              <button
+                className="chat-avatar"
+                type="button"
+                onClick={(event) => void openCard(message.user_id, event.currentTarget)}
+              >
                 {message.display_name_snapshot.slice(0, 2).toUpperCase()}
               </button>
               <div className="chat-message-body">
                 <div className="chat-meta">
-                  <button type="button" onClick={() => openCard(message.user_id)}>
+                  <button
+                    type="button"
+                    onClick={(event) => void openCard(message.user_id, event.currentTarget)}
+                  >
                     {message.display_name_snapshot}
                   </button>
                   <span>Level {message.level_snapshot}</span>
@@ -160,56 +169,40 @@ export default function LiveChat({ user }: { user: User }) {
         </div>
 
         <div className="chat-composer">
-          <label className="sr-only" htmlFor="community-message">Message</label>
-
-          <div className="chat-input-shell">
-            <span className="chat-input-mark" aria-hidden="true">SC</span>
-
-            <textarea
-              id="community-message"
-              maxLength={500}
-              rows={1}
-              value={body}
-              onChange={(event) => {
-                setBody(event.target.value);
-                event.currentTarget.style.height = "0px";
-                event.currentTarget.style.height = `${Math.min(event.currentTarget.scrollHeight, 128)}px`;
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  void send();
-                }
-              }}
-              placeholder="Message the Strafe Crate community..."
-            />
-
-            <div className="chat-input-actions">
-              <span className={body.length > 450 ? "near-limit" : ""}>
-                {body.length}/500
-              </span>
-              <button
-                className="chat-send-button"
-                type="button"
-                disabled={!body.trim()}
-                onClick={() => void send()}
-                aria-label="Send message"
-              >
-                <span>Send</span>
-                <b aria-hidden="true">→</b>
-              </button>
-            </div>
+          <label htmlFor="community-message">Message</label>
+          <textarea
+            id="community-message"
+            maxLength={500}
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                void send();
+              }
+            }}
+            placeholder="Share collection progress, discuss skins, or help another member."
+          />
+          <div>
+            <span>{body.length}/500</span>
+            <button className="button primary" type="button" onClick={() => void send()}>
+              Send message
+            </button>
           </div>
-
-          <p className="chat-composer-help">
-            Press Enter to send · Shift + Enter for a new line
-          </p>
-
           {status && <p className="chat-status">{status}</p>}
         </div>
       </section>
 
-      {playerCard && <PublicPlayerCard card={playerCard} onClose={() => setPlayerCard(null)} />}
+      {playerCard && playerCardAnchor && (
+        <PublicPlayerCard
+          card={playerCard}
+          anchor={playerCardAnchor}
+          onClose={() => {
+            setPlayerCard(null);
+            setPlayerCardAnchor(null);
+          }}
+        />
+      )}
     </main>
   );
 }
