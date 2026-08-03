@@ -1,38 +1,21 @@
-# Chat Username + Tier Color Fix
+# Clean Chat Composer Update
 
-## 1. Run the SQL first
-
-Open Supabase > SQL Editor > New Query.
-
-Paste and run:
-
-supabase/chat-identity-tier-fix.sql
-
-This:
-- installs the missing chat trigger
-- uses the member's display name, then full name, then email prefix
-- adds their active subscription tier
-- calculates their level from Lifetime XP
-- repairs existing messages that display "Pending"
-
-## 2. Copy the website files
-
-Replace:
+Replace these files:
 
 - components/LiveChat.tsx
 - app/globals.css
 
-## 3. Commit and push
+Then commit and push.
 
-Commit message:
+Suggested commit message:
 
-Fix chat usernames and tier styling
+Polish community chat composer
 
-The chat colors are:
-- Recruit: silver
-- Operative: blue
-- Vanguard: green
-- Elite: purple
-- Master: gold
-- Prestige: crimson
-- Membership pending: orange
+This update replaces the browser-default white textarea with:
+- dark glass message bar
+- orange focus ring
+- auto-growing input
+- inline character counter
+- disabled send state
+- clean Send arrow button
+- mobile layout
