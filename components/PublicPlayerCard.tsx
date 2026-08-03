@@ -21,6 +21,12 @@ type PublicCard = {
   }>;
 };
 
+function tierClass(tier: string | null) {
+  return `player-tier-${(tier ?? "pending")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")}`;
+}
+
 export default function PublicPlayerCard({
   card,
   onClose,
@@ -33,50 +39,112 @@ export default function PublicPlayerCard({
     .sort((a, b) => (a.featured_slot ?? 9) - (b.featured_slot ?? 9))
     .slice(0, 3);
 
+  const memberSince = new Date(card.member_since).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+
   return (
-    <div className="player-card-backdrop" role="presentation" onMouseDown={onClose}>
+    <div
+      className="player-card-backdrop"
+      role="presentation"
+      onMouseDown={onClose}
+    >
       <section
-        className="public-player-card"
+        className={`compact-player-card ${tierClass(card.tier_name)}`}
         role="dialog"
         aria-modal="true"
         aria-label={`${card.display_name} player card`}
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <button className="player-card-close" type="button" onClick={onClose}>×</button>
+        <button
+          className="compact-player-close"
+          type="button"
+          onClick={onClose}
+          aria-label="Close player card"
+        >
+          ×
+        </button>
 
-        <div className="public-card-top">
-          <div>
-            <small>STRAFE CRATE PLAYER</small>
-            <h2>{card.display_name}</h2>
-            <p>Level {card.level} · {card.tier_name ?? "Membership pending"}</p>
+        <div className="compact-player-sheen" aria-hidden="true" />
+
+        <div className="compact-player-header">
+          <div className="compact-player-brand">
+            <span className="compact-player-mark">SC</span>
+            <div>
+              <small>STRAFE CRATE</small>
+              <strong>
+                {card.tier_name
+                  ? `${card.tier_name.toUpperCase()} MEMBER`
+                  : "MEMBERSHIP PENDING"}
+              </strong>
+            </div>
           </div>
-          {card.tier_name && <TierEmblem tier={card.tier_name} className="public-card-emblem" />}
+
+          {card.tier_name ? (
+            <TierEmblem
+              tier={card.tier_name}
+              className="compact-player-emblem"
+            />
+          ) : (
+            <span className="compact-pending-emblem" aria-hidden="true">
+              ◇
+            </span>
+          )}
         </div>
 
-        <div className="public-card-stats">
-          <div><small>LIFETIME XP</small><strong>{card.lifetime_xp.toLocaleString()}</strong></div>
-          <div><small>PAID STREAK</small><strong>{card.consecutive_paid_months} mo.</strong></div>
-          <div><small>XP MULTIPLIER</small><strong>{Number(card.xp_multiplier).toFixed(2)}×</strong></div>
+        <div className="compact-player-identity">
+          <small>PLAYER</small>
+          <h2>{card.display_name}</h2>
+          <p>
+            Level {card.level}
+            <span aria-hidden="true"> · </span>
+            {card.tier_name ?? "Membership pending"}
+          </p>
         </div>
 
-        <div className="public-card-trophies">
-          <small>FEATURED TROPHIES</small>
+        <div className="compact-player-stats">
           <div>
-            {[0, 1, 2].map((index) => {
-              const trophy = featured[index];
-              return (
-                <span className={trophy ? `rarity-${trophy.rarity}` : "empty"} key={index} title={trophy?.description}>
-                  <b>{trophy?.icon ?? "○"}</b>
-                  {trophy?.name ?? "Empty"}
-                </span>
-              );
-            })}
+            <small>LIFETIME XP</small>
+            <strong>{card.lifetime_xp.toLocaleString()}</strong>
+          </div>
+          <div>
+            <small>PAID STREAK</small>
+            <strong>{card.consecutive_paid_months} mo.</strong>
+          </div>
+          <div>
+            <small>XP MULTIPLIER</small>
+            <strong>{Number(card.xp_multiplier).toFixed(2)}×</strong>
           </div>
         </div>
 
-        <p className="public-card-member-since">
-          Member since {new Date(card.member_since).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-        </p>
+        <div className="compact-player-footer">
+          <div className="compact-featured-trophies">
+            <small>FEATURED TROPHIES</small>
+            <div>
+              {[0, 1, 2].map((index) => {
+                const trophy = featured[index];
+
+                return (
+                  <span
+                    className={
+                      trophy
+                        ? `compact-trophy rarity-${trophy.rarity}`
+                        : "compact-trophy empty"
+                    }
+                    key={index}
+                    title={trophy?.description ?? "Empty trophy slot"}
+                  >
+                    <b>{trophy?.icon ?? "○"}</b>
+                    <em>{trophy?.name ?? "Empty"}</em>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          <p>Member since {memberSince}</p>
+        </div>
       </section>
     </div>
   );

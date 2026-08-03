@@ -1,21 +1,17 @@
-# Clean Chat Composer Update
+# Compact Chat Player Card
 
 Replace these files:
 
-- components/LiveChat.tsx
+- components/PublicPlayerCard.tsx
 - app/globals.css
 
-Then commit and push.
+Commit message:
 
-Suggested commit message:
+Match chat player card to dashboard
 
-Polish community chat composer
-
-This update replaces the browser-default white textarea with:
-- dark glass message bar
-- orange focus ring
-- auto-growing input
-- inline character counter
-- disabled send state
-- clean Send arrow button
-- mobile layout
+This redesign makes the player popup:
+- smaller and tighter
+- visually consistent with the dashboard membership card
+- tier colored
+- equipped with the tier emblem
+- focused on player name, level, XP, streak, multiplier, and trophies
