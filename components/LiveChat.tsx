@@ -63,6 +63,10 @@ export default function LiveChat({ user }: { user: User }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  function tierClass(tier: string | null) {
+    return `tier-${(tier ?? "pending").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  }
+
   async function send() {
     const cleaned = body.trim();
     if (!cleaned) return;
@@ -71,8 +75,6 @@ export default function LiveChat({ user }: { user: User }) {
     const { error } = await (supabase.from("chat_messages") as any).insert({
       user_id: user.id,
       body: cleaned,
-      display_name_snapshot: "Pending",
-      level_snapshot: 1,
     });
 
     if (error) setStatus(error.message);
@@ -126,7 +128,10 @@ export default function LiveChat({ user }: { user: User }) {
       <section className="chat-panel">
         <div className="chat-feed" aria-live="polite">
           {messages.map((message) => (
-            <article className={`chat-message ${message.user_id === user.id ? "own" : ""}`} key={message.id}>
+            <article
+              className={`chat-message ${tierClass(message.tier_name_snapshot)} ${message.user_id === user.id ? "own" : ""}`}
+              key={message.id}
+            >
               <button className="chat-avatar" type="button" onClick={() => openCard(message.user_id)}>
                 {message.display_name_snapshot.slice(0, 2).toUpperCase()}
               </button>
@@ -136,7 +141,9 @@ export default function LiveChat({ user }: { user: User }) {
                     {message.display_name_snapshot}
                   </button>
                   <span>Level {message.level_snapshot}</span>
-                  {message.tier_name_snapshot && <span>{message.tier_name_snapshot}</span>}
+                  <span className="chat-tier-badge">
+                    {message.tier_name_snapshot ?? "Membership pending"}
+                  </span>
                   <time>{new Date(message.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</time>
                 </div>
                 <p>{message.body}</p>

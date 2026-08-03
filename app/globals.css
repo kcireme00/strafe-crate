@@ -641,3 +641,43 @@
   .chat-report{grid-column:2;justify-self:start}
   .public-card-emblem{width:68px;height:68px}
 }
+
+
+/* Chat identity and subscription-tier styling */
+.chat-message{
+  --chat-tier:#ff7628;
+  position:relative;
+  border-left:3px solid var(--chat-tier);
+  padding-left:13px;
+  background:
+    linear-gradient(90deg,color-mix(in srgb,var(--chat-tier) 7%,transparent),transparent 30%);
+}
+.chat-message.tier-recruit{--chat-tier:#96a1af}
+.chat-message.tier-operative{--chat-tier:#438cff}
+.chat-message.tier-vanguard{--chat-tier:#42c97a}
+.chat-message.tier-elite{--chat-tier:#9b4ff0}
+.chat-message.tier-master{--chat-tier:#e4ad35}
+.chat-message.tier-prestige{--chat-tier:#eb405b}
+.chat-message.tier-pending{--chat-tier:#ff7628}
+
+.chat-message.own{
+  background:
+    linear-gradient(90deg,color-mix(in srgb,var(--chat-tier) 12%,transparent),transparent 38%);
+}
+.chat-avatar{
+  border-color:color-mix(in srgb,var(--chat-tier) 72%,#202938);
+  color:var(--chat-tier);
+  box-shadow:inset 0 0 18px color-mix(in srgb,var(--chat-tier) 9%,transparent);
+}
+.chat-meta button{
+  color:var(--chat-tier);
+  text-decoration:none;
+}
+.chat-meta button:hover{
+  text-decoration:underline;
+}
+.chat-tier-badge{
+  color:var(--chat-tier)!important;
+  border:1px solid color-mix(in srgb,var(--chat-tier) 30%,transparent);
+  background:color-mix(in srgb,var(--chat-tier) 8%,transparent)!important;
+}
