@@ -41,7 +41,10 @@ export default function RewardsDashboard({ user }: { user: User }) {
     if (!confirmed) return;
 
     setStatus("Submitting redemption...");
-    const { error } = await supabase.rpc("redeem_reward", { reward_slug: slug });
+    const { error } = await (supabase as any).rpc(
+      "redeem_reward",
+      { reward_slug: slug },
+    );
     if (error) setStatus(error.message);
     else {
       setStatus("Reward redemption submitted. The admin fulfillment queue will review it.");

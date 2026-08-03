@@ -84,9 +84,12 @@ export default function LiveChat({ user }: { user: User }) {
 
   async function openCard(userId: string) {
     setStatus("Loading player card...");
-    const { data, error } = await supabase.rpc("get_public_player_card", {
-      target_user_id: userId,
-    });
+    const { data, error } = await (supabase as any).rpc(
+      "get_public_player_card",
+      {
+        target_user_id: userId,
+      },
+    );
 
     if (error) {
       setStatus(error.message);
