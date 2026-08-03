@@ -25,11 +25,19 @@ export default function RewardsDashboard({ user }: { user: User }) {
       supabase.from("reward_catalog").select("id,slug,name,description,credits_required,estimated_reward_value_cents").eq("active", true).order("credits_required"),
     ]);
 
-    if (account.error) setStatus(account.error.message);
-    else setCredits(account.data?.supply_credits ?? 0);
+    if (account.error) {
+      setStatus(account.error.message);
+    } else {
+      const loyaltyAccount = account.data as { supply_credits: number } | null;
+      setCredits(loyaltyAccount?.supply_credits ?? 0);
+    }
 
-    if (catalog.error) setStatus(catalog.error.message);
-    else setRewards((catalog.data ?? []) as Reward[]);
+    if (catalog.error) {
+      setStatus(catalog.error.message);
+    } else {
+      const rewardCatalog = (catalog.data ?? []) as Reward[];
+      setRewards(rewardCatalog);
+    }
   }
 
   useEffect(() => {
