@@ -1,65 +1,59 @@
-# Admin Moderation + Founder Update
+# Admin Hub + Fulfillment Beta
 
-## 1. Run the SQL first
+## 1. Run SQL
 
 Open:
 
-supabase/admin-moderation-founder.sql
+supabase/admin-fulfillment-beta.sql
 
-Paste the entire file into:
+Paste into Supabase SQL Editor and run it.
 
-Supabase > SQL Editor > New Query
+The final result should say:
 
-Then click Run Query.
+fulfillment_orders
 
-The final results should show:
+## 2. Copy to GitHub
 
-- tyler.m.emerick@gmail.com with role `admin`
-- Founding Member in featured slot 1
+Replace/add:
 
-## 2. Copy these files into GitHub
+- app/admin/page.tsx
+- components/AdminFulfillmentBeta.tsx
 
-- app/admin/reports/page.tsx
+This admin page expects the existing:
+
 - components/AdminChatReports.tsx
-- components/SiteHeader.tsx
 
-## 3. Add the CSS
+from the earlier moderation package.
+
+## 3. Add styles
 
 Open:
 
-admin-reports-styles.css
+admin-hub-fulfillment-styles.css
 
-Copy all of it and paste it at the BOTTOM of your existing:
+Copy everything and paste it at the BOTTOM of:
 
 app/globals.css
 
-Do not replace globals.css with the small CSS file.
+Do not replace globals.css.
 
-## 4. Commit and push
+## 4. Commit
 
 Commit message:
 
-Add admin chat moderation and founder access
+Polish admin hub and add fulfillment beta
 
-## 5. Open the moderation inbox
+## Beta test flow
 
-After deployment:
+1. Create or select a test member account.
+2. Open Admin > Fulfillment Beta.
+3. Create a test order.
+4. Select the weapon/category sent.
+5. Enter the exact skin name and exterior.
+6. Enter Steam reference value and your acquisition cost.
+7. Change status:
+   draft > purchasing > ready to send > trade sent > accepted > fulfilled
+8. Confirm the order appears as fulfilled with timestamps.
 
-/admin/reports
-
-Admins can:
-
-- review all chat reports
-- delete reported messages
-- time users out for 1 hour
-- time users out for 24 hours
-- time users out for 7 days
-- permanently ban users from chat
-- remove chat restrictions
-- dismiss reports
-
-All actions are recorded in `public.moderation_log`.
-
-## Admin Hub
-
-This package also replaces `/admin` with a tabbed hub containing Overview, Reports, Moderation Log, Members, Orders, and Rewards.
+The member dashboard can read from `public.fulfillment_orders` later to display
+the same live fulfillment status.

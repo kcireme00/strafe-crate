@@ -1,17 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
 import AdminChatReports from "@/components/AdminChatReports";
+import AdminFulfillmentBeta from "@/components/AdminFulfillmentBeta";
 import { getSupabase } from "@/lib/supabase";
 
 type Tab =
   | "overview"
+  | "fulfillment"
   | "reports"
   | "moderation"
   | "members"
-  | "orders"
   | "rewards";
 
 type ModerationLog = {
@@ -20,7 +20,6 @@ type ModerationLog = {
   reason: string | null;
   expires_at: string | null;
   created_at: string;
-  target_user_id: string | null;
 };
 
 function AdminHubContent() {
@@ -32,9 +31,10 @@ function AdminHubContent() {
 
   async function loadLogs() {
     setStatus("Loading moderation log...");
+
     const { data, error } = await supabase
       .from("moderation_log")
-      .select("id,action,reason,expires_at,created_at,target_user_id")
+      .select("id,action,reason,expires_at,created_at")
       .order("created_at", { ascending: false })
       .limit(100);
 
@@ -55,33 +55,41 @@ function AdminHubContent() {
     }
   }
 
+  const tabs: Array<[Tab, string]> = [
+    ["overview", "Overview"],
+    ["fulfillment", "Fulfillment Beta"],
+    ["reports", "Reports"],
+    ["moderation", "Moderation Log"],
+    ["members", "Members"],
+    ["rewards", "Rewards"],
+  ];
+
   return (
-    <main className="admin-hub-shell shell">
-      <div className="admin-hub-heading">
+    <main className="admin-command-shell shell">
+      <header className="admin-command-hero">
         <div>
           <p className="eyebrow">PRIVATE ADMIN</p>
           <h1>Operations hub.</h1>
           <p>
-            Manage members, orders, rewards, reports, and community moderation
-            from one place.
+            Fulfillment, reports, moderation, members, and rewards in one
+            operating console.
           </p>
         </div>
-      </div>
 
-      <nav className="admin-hub-tabs" aria-label="Admin sections">
-        {[
-          ["overview", "Overview"],
-          ["reports", "Reports"],
-          ["moderation", "Moderation log"],
-          ["members", "Members"],
-          ["orders", "Orders"],
-          ["rewards", "Rewards"],
-        ].map(([value, label]) => (
+        <div className="admin-command-badge">
+          <small>ACCESS</small>
+          <strong>FOUNDER ADMIN</strong>
+          <span>Private control center</span>
+        </div>
+      </header>
+
+      <nav className="admin-command-tabs" aria-label="Admin sections">
+        {tabs.map(([value, label]) => (
           <button
-            className={tab === value ? "active" : ""}
             type="button"
             key={value}
-            onClick={() => void changeTab(value as Tab)}
+            className={tab === value ? "active" : ""}
+            onClick={() => void changeTab(value)}
           >
             {label}
           </button>
@@ -89,35 +97,43 @@ function AdminHubContent() {
       </nav>
 
       {tab === "overview" && (
-        <section className="admin-hub-overview">
+        <section className="admin-overview-grid">
+          <article className="admin-overview-feature">
+            <span>01</span>
+            <small>FULFILLMENT</small>
+            <h2>Beta-test the complete skin delivery workflow.</h2>
+            <p>
+              Select a member, choose the weapon and skin, enter Steam value,
+              send the trade, and mark the order fulfilled.
+            </p>
+            <button className="button primary" type="button" onClick={() => void changeTab("fulfillment")}>
+              Open fulfillment beta
+            </button>
+          </article>
+
           <article>
-            <small>CHAT MODERATION</small>
-            <h2>Review reports</h2>
-            <p>Delete messages, issue timeouts, ban users, or dismiss reports.</p>
-            <button className="button primary" type="button" onClick={() => void changeTab("reports")}>
+            <span>02</span>
+            <small>COMMUNITY SAFETY</small>
+            <h2>Review reported chat messages.</h2>
+            <p>Delete messages, issue timeouts, permanently ban, or dismiss.</p>
+            <button className="button secondary" type="button" onClick={() => void changeTab("reports")}>
               Open reports
             </button>
           </article>
 
           <article>
+            <span>03</span>
             <small>AUDIT TRAIL</small>
-            <h2>Moderation history</h2>
-            <p>Review every delete, timeout, ban, and reversal performed by admins.</p>
+            <h2>Moderation history.</h2>
+            <p>See every timeout, deletion, ban, and reversal made by admins.</p>
             <button className="button secondary" type="button" onClick={() => void changeTab("moderation")}>
-              View log
+              View moderation log
             </button>
-          </article>
-
-          <article>
-            <small>MEMBER OPERATIONS</small>
-            <h2>Existing admin tools</h2>
-            <p>Use the current dashboard for membership approvals and fulfillment.</p>
-            <Link className="button secondary" href="/admin/reports">
-              Open moderation route
-            </Link>
           </article>
         </section>
       )}
+
+      {tab === "fulfillment" && <AdminFulfillmentBeta />}
 
       {tab === "reports" && <AdminChatReports />}
 
@@ -126,7 +142,7 @@ function AdminHubContent() {
           <div className="panel-head">
             <div>
               <p className="eyebrow">AUDIT LOG</p>
-              <h2>Moderation actions</h2>
+              <h2>Moderation actions.</h2>
             </div>
             <button className="button secondary" type="button" onClick={() => void loadLogs()}>
               Refresh
@@ -142,46 +158,46 @@ function AdminHubContent() {
                 </div>
                 <p>{log.reason || "No internal reason recorded."}</p>
                 {log.expires_at && (
-                  <small>Restriction ends {new Date(log.expires_at).toLocaleString()}</small>
+                  <small>
+                    Restriction ends{" "}
+                    {new Date(log.expires_at).toLocaleString()}
+                  </small>
                 )}
               </article>
             ))}
-            {!logs.length && <p className="admin-log-empty">No moderation actions recorded yet.</p>}
+
+            {!logs.length && (
+              <p className="admin-log-empty">
+                No moderation actions recorded yet.
+              </p>
+            )}
           </div>
         </section>
       )}
 
       {tab === "members" && (
-        <section className="admin-hub-placeholder">
-          <h2>Members</h2>
+        <section className="admin-placeholder-panel">
+          <p className="eyebrow">MEMBERS</p>
+          <h2>Member controls.</h2>
           <p>
-            This tab is reserved for account approvals, roles, trophies, XP,
-            and member restrictions.
-          </p>
-        </section>
-      )}
-
-      {tab === "orders" && (
-        <section className="admin-hub-placeholder">
-          <h2>Orders</h2>
-          <p>
-            This tab is reserved for fulfillment queues, trades, delivery
-            status, and drop history.
+            This tab is reserved for approvals, roles, trophies, XP, membership
+            tiers, and account restrictions.
           </p>
         </section>
       )}
 
       {tab === "rewards" && (
-        <section className="admin-hub-placeholder">
-          <h2>Rewards</h2>
+        <section className="admin-placeholder-panel">
+          <p className="eyebrow">REWARDS</p>
+          <h2>Reward operations.</h2>
           <p>
-            This tab is reserved for Supply Credit redemptions, XP awards, and
-            trophy management.
+            This tab is reserved for Supply Credit redemptions, trophy awards,
+            XP adjustments, and event rewards.
           </p>
         </section>
       )}
 
-      {status && <p className="admin-hub-status">{status}</p>}
+      {status && <p className="admin-command-status">{status}</p>}
     </main>
   );
 }
