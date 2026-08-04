@@ -1,8 +1,5 @@
-"use client";
-
-import AuthGuard from "@/components/AuthGuard";
-import RewardsDashboard from "@/components/RewardsDashboard";
+import RewardsHub from "@/components/RewardsHub";
 
 export default function RewardsPage() {
-  return <AuthGuard>{(user) => <RewardsDashboard user={user} />}</AuthGuard>;
+  return <RewardsHub />;
 }

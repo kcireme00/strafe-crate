@@ -1,43 +1,49 @@
-# Random Unused Weapon Rotation
+# Dashboard UI Cleanup
 
-## 1. Run SQL
+No SQL is required.
 
-Open:
+## Add/replace
 
-supabase/random-weapon-rotation.sql
+Add:
 
-Paste it into Supabase SQL Editor as a NEW query and run it.
-
-The final result should show:
-
-34
-
-## 2. Replace Admin Orders Queue
+- components/CompactCollectorProgress.tsx
+- components/CompactCollectorProgress.module.css
+- components/RewardsHub.tsx
+- components/RewardsHub.module.css
 
 Replace:
 
-components/AdminOrdersQueue.tsx
+- app/rewards/page.tsx
 
-## 3. Add CSS
+## Update MemberDashboard.tsx
 
-Open:
+Import:
 
-admin-random-weapon-styles.css
+import CompactCollectorProgress from "@/components/CompactCollectorProgress";
 
-Paste the contents at the bottom of:
+Remove these full dashboard sections:
 
-app/admin/admin.module.css
+<LoyaltyPanel loyalty={loyalty} />
+<TrophyCabinet />
 
-## Behavior
+Replace them with:
 
-- New test orders have Auto-pick unused weapon enabled by default.
-- Each order row has a Randomize unused button.
-- The system excludes categories already assigned to another valid order in
-  that member's current rotation.
-- Failed and cancelled orders do not consume a category.
-- After all 34 categories are used, the next assignment starts a new rotation.
-- Admin may still manually override the selected weapon before saving.
+<CompactCollectorProgress />
+
+Do not render ProfileSettings in the middle of the main dashboard. Put it below
+Drop History, or later move it to a dedicated Settings page.
+
+## Recommended main dashboard order
+
+1. Player card
+2. Current monthly drop and timeline
+3. Collection snapshot
+4. CompactCollectorProgress
+5. Recent activity
+6. ProfileSettings at the bottom
+
+The full XP panel and Trophy Cabinet now live on /rewards.
 
 Commit:
 
-Add random unused weapon rotation
+Clean dashboard and move progression to rewards

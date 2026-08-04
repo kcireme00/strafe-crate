@@ -1,0 +1,141 @@
+.card {
+  display: grid;
+  grid-template-columns: 0.8fr 1.7fr 0.9fr;
+  gap: 24px;
+  align-items: center;
+  padding: 22px 24px;
+  border: 1px solid #273240;
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(255, 118, 40, 0.055), transparent 35%),
+    #111824;
+  color: #f5f7fb;
+}
+
+.identity p {
+  margin: 0;
+  color: #ff812f;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.identity h2 {
+  margin: 7px 0 4px;
+  font-size: 2rem;
+}
+
+.identity span {
+  color: #8997aa;
+  font-size: 0.7rem;
+}
+
+.progressColumn {
+  min-width: 0;
+}
+
+.progressLabels {
+  display: flex;
+  justify-content: space-between;
+  color: #8694a7;
+  font-size: 0.62rem;
+}
+
+.track {
+  height: 9px;
+  margin: 7px 0 14px;
+  overflow: hidden;
+  border: 1px solid #2c3745;
+  border-radius: 999px;
+  background: #080d13;
+}
+
+.track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff6820, #ff983e);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.metrics div {
+  padding: 10px 12px;
+  border: 1px solid #25303d;
+  border-radius: 9px;
+  background: #090e15;
+  display: flex;
+  flex-direction: column;
+}
+
+.metrics small,
+.trophyColumn > small {
+  color: #78869a;
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+}
+
+.metrics strong {
+  margin-top: 3px;
+  font-size: 0.86rem;
+}
+
+.trophyColumn {
+  padding-left: 22px;
+  border-left: 1px solid #273240;
+}
+
+.trophyRow {
+  display: flex;
+  gap: 7px;
+  margin: 10px 0 12px;
+}
+
+.trophy {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 10px;
+  background: #090e15;
+}
+
+.emblem {
+  width: 24px;
+  height: 24px;
+}
+
+.common { color: #a7b1bf; }
+.rare { color: #4b91ff; }
+.epic { color: #a354f0; }
+.legendary { color: #e5b12f; }
+
+.empty {
+  color: #637084;
+  border-style: dashed;
+}
+
+.trophyColumn a {
+  color: #ff914e;
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .card {
+    grid-template-columns: 1fr;
+  }
+
+  .trophyColumn {
+    padding-left: 0;
+    padding-top: 18px;
+    border-left: 0;
+    border-top: 1px solid #273240;
+  }
+}
