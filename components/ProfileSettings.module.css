@@ -1,0 +1,156 @@
+.panel {
+  padding: 28px;
+  border: 1px solid #26313f;
+  border-radius: 17px;
+  background: #111824;
+  color: #f5f7fb;
+}
+
+.heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.heading h2 {
+  margin: 6px 0 8px;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+
+.heading p {
+  margin: 0;
+  color: #9aa8ba;
+}
+
+.eyebrow {
+  margin: 0 !important;
+  color: #ff812f !important;
+  font-size: 0.63rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.readyBadge,
+.requiredBadge {
+  height: max-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.61rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.readyBadge {
+  border: 1px solid rgba(69, 212, 135, 0.35);
+  background: rgba(69, 212, 135, 0.1);
+  color: #56df94;
+}
+
+.requiredBadge {
+  border: 1px solid rgba(255, 118, 40, 0.4);
+  background: rgba(255, 118, 40, 0.1);
+  color: #ff914e;
+}
+
+.notice {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 22px 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 118, 40, 0.3);
+  border-radius: 11px;
+  background: rgba(255, 118, 40, 0.055);
+}
+
+.notice strong {
+  color: #ff8a40;
+  white-space: nowrap;
+}
+
+.notice span {
+  color: #9aa8ba;
+  font-size: 0.77rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.formGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.formGrid label b {
+  color: #ff8a40;
+  font-size: 0.57rem;
+  text-transform: uppercase;
+}
+
+.formGrid input {
+  min-height: 45px;
+  padding: 10px 12px;
+  border: 1px solid #293544;
+  border-radius: 9px;
+  background: #080d13;
+  color: #fff;
+  font: inherit;
+}
+
+.formGrid input:focus {
+  outline: none;
+  border-color: rgba(255, 118, 40, 0.65);
+  box-shadow: 0 0 0 3px rgba(255, 118, 40, 0.08);
+}
+
+.security {
+  margin: 16px 0;
+  color: #7f8da1;
+  font-size: 0.71rem;
+}
+
+.saveButton {
+  width: 100%;
+  min-height: 47px;
+  border: 1px solid #ff7628;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #ff681f, #ff913f);
+  color: #080b10;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.status {
+  margin: 12px 0 0;
+  color: #ff914e;
+  font-size: 0.73rem;
+}
+
+@media (max-width: 760px) {
+  .panel {
+    padding: 20px;
+  }
+
+  .heading,
+  .notice {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .notice strong {
+    white-space: normal;
+  }
+}

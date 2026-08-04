@@ -1,0 +1,352 @@
+.panel {
+  padding: 28px;
+  border: 1px solid #26313f;
+  border-radius: 17px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(255, 118, 40, 0.05), transparent 35%),
+    #111824;
+  color: #f5f7fb;
+}
+
+.heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.heading h2 {
+  margin: 6px 0 8px;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+
+.heading p {
+  margin: 0;
+  color: #9aa8ba;
+}
+
+.eyebrow {
+  margin: 0 !important;
+  color: #ff812f !important;
+  font-size: 0.63rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.unlockedCount {
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border: 1px solid #303b49;
+  border-radius: 999px;
+  color: #dfe5ec;
+  background: #0a0f16;
+  font-size: 0.62rem;
+  font-weight: 850;
+}
+
+.slotGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 25px;
+}
+
+.slot {
+  position: relative;
+  min-height: 215px;
+  padding: 20px;
+  border: 1px solid #2b3644;
+  border-radius: 14px;
+  background: #090e15;
+  color: #a6b0be;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.slot:hover {
+  transform: translateY(-2px);
+  border-color: currentColor;
+  background: #0b1119;
+}
+
+.emblemFrame {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 13px;
+  background: #080d13;
+}
+
+.emblem {
+  width: 32px;
+  height: 32px;
+}
+
+.emptyMark {
+  color: #7b8797;
+  font-size: 1.4rem;
+}
+
+.slot small {
+  margin-top: 16px;
+  color: #78869a;
+  font-size: 0.56rem;
+  letter-spacing: 0.09em;
+}
+
+.slot strong {
+  margin-top: 7px;
+  color: currentColor;
+  font-size: 1rem;
+}
+
+.slot p {
+  margin: 8px 0 0;
+  color: #8795a8;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.changeLabel {
+  position: absolute;
+  right: 16px;
+  bottom: 15px;
+  color: currentColor;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.common {
+  color: #a7b1bf;
+}
+
+.rare {
+  color: #4b91ff;
+}
+
+.epic {
+  color: #a354f0;
+}
+
+.legendary {
+  color: #e5b12f;
+}
+
+.empty {
+  color: #7d8999;
+  border-style: dashed;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.footer p {
+  margin: 0;
+  color: #7f8da1;
+  font-size: 0.72rem;
+}
+
+.saveButton {
+  min-height: 43px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 118, 40, 0.52);
+  border-radius: 9px;
+  background: rgba(255, 118, 40, 0.1);
+  color: #ff914e;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.status {
+  margin: 12px 0 0;
+  color: #ff914e;
+  font-size: 0.73rem;
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  padding: 24px;
+  background: rgba(2, 5, 9, 0.76);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+}
+
+.modal {
+  width: min(880px, 96vw);
+  max-height: min(760px, 90vh);
+  overflow-y: auto;
+  padding: 24px;
+  border: 1px solid rgba(255, 118, 40, 0.34);
+  border-radius: 17px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(255, 118, 40, 0.08), transparent 35%),
+    #0d131c;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+}
+
+.modalHeading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.modalHeading h3 {
+  margin: 7px 0 6px;
+  font-size: 2rem;
+}
+
+.modalHeading p {
+  margin: 0;
+  color: #8c9aad;
+}
+
+.closeButton {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #303b49;
+  border-radius: 9px;
+  background: #090e15;
+  color: #dce2ea;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.pickerGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.pickerCard {
+  position: relative;
+  min-height: 100px;
+  padding: 14px 82px 14px 14px;
+  border: 1px solid #293544;
+  border-radius: 11px;
+  background: #090e15;
+  color: #a6b0be;
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pickerCard:hover,
+.pickerCard.current {
+  border-color: currentColor;
+  background: color-mix(in srgb, currentColor 7%, #090e15);
+}
+
+.pickerCard > span {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 10px;
+}
+
+.pickerEmblem {
+  width: 27px;
+  height: 27px;
+}
+
+.pickerCard strong {
+  color: currentColor;
+}
+
+.pickerCard p {
+  margin: 5px 0 0;
+  color: #8391a4;
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.pickerCard em {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: currentColor;
+  font-size: 0.54rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.noTrophies {
+  grid-column: 1 / -1;
+  padding: 28px;
+  border: 1px dashed #303b49;
+  border-radius: 11px;
+  color: #8795a8;
+}
+
+.noTrophies p {
+  margin: 5px 0 0;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.clearButton {
+  min-height: 39px;
+  padding: 0 13px;
+  border: 1px solid #303b49;
+  border-radius: 8px;
+  background: #090e15;
+  color: #8e9bae;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .panel {
+    padding: 20px;
+  }
+
+  .heading,
+  .footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .slotGrid,
+  .pickerGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .saveButton {
+    width: 100%;
+  }
+}
