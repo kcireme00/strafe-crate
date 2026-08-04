@@ -1,0 +1,6 @@
+*** Begin Patch
+*** Update File: components/MemberDashboard.tsx
+@@
+-      <TrophyCabinet trophies={trophies} />
++      <TrophyCabinet />
+*** End Patch
