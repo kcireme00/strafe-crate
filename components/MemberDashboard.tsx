@@ -317,7 +317,7 @@ export default function MemberDashboard({ user }: { user: User }) {
 
       <LoyaltyPanel loyalty={loyalty} />
 
-      <TrophyCabinet trophies={trophies} />
+      <TrophyCabinet />
 
       <section className="panel profile-panel">
         <div className="panel-head">
