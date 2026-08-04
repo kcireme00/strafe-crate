@@ -1,0 +1,146 @@
+/* APPEND TO THE BOTTOM OF app/globals.css */
+
+.tier-member-tracker{
+  padding-top:70px;
+  padding-bottom:70px;
+}
+
+.tier-tracker-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:28px;
+  margin-bottom:22px;
+}
+
+.tier-tracker-heading h2{
+  margin:7px 0 8px;
+  font-size:clamp(2.3rem,5vw,4.8rem);
+  line-height:.95;
+  letter-spacing:-.045em;
+}
+
+.tier-tracker-heading>div>p:last-child{
+  margin:0;
+  color:var(--muted);
+}
+
+.tier-tracker-total{
+  min-width:190px;
+  padding:15px 17px;
+  border:1px solid rgba(255,118,40,.3);
+  border-radius:13px;
+  background:
+    radial-gradient(circle at 90% 10%,rgba(255,118,40,.1),transparent 45%),
+    var(--panel);
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.tracker-live-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#45d487;
+  box-shadow:0 0 0 5px rgba(69,212,135,.1);
+}
+
+.tier-tracker-total div{
+  display:flex;
+  flex-direction:column;
+}
+
+.tier-tracker-total strong{
+  font-size:1.6rem;
+  line-height:1;
+}
+
+.tier-tracker-total small{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:.57rem;
+  letter-spacing:.1em;
+}
+
+.tier-tracker-grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:10px;
+}
+
+.tier-count-card{
+  --tier-count-color:#ff7628;
+  min-height:150px;
+  padding:17px;
+  border:1px solid color-mix(in srgb,var(--tier-count-color) 40%,#26303c);
+  border-radius:13px;
+  background:
+    radial-gradient(circle at 88% 12%,color-mix(in srgb,var(--tier-count-color) 10%,transparent),transparent 42%),
+    #0d131c;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.tier-count-recruit{--tier-count-color:#96a1af}
+.tier-count-operative{--tier-count-color:#438cff}
+.tier-count-vanguard{--tier-count-color:#42c97a}
+.tier-count-elite{--tier-count-color:#9b4ff0}
+.tier-count-master{--tier-count-color:#e4ad35}
+.tier-count-prestige{--tier-count-color:#eb405b}
+
+.tier-count-emblem{
+  width:40px;
+  height:40px;
+  color:var(--tier-count-color);
+}
+
+.tier-count-card div{
+  display:flex;
+  flex-direction:column;
+}
+
+.tier-count-card small{
+  color:var(--tier-count-color);
+  font-size:.58rem;
+  font-weight:900;
+  letter-spacing:.1em;
+}
+
+.tier-count-card strong{
+  margin-top:5px;
+  font-size:1.8rem;
+}
+
+.tier-count-card span{
+  color:var(--muted);
+  font-size:.65rem;
+}
+
+.tier-tracker-note{
+  margin:12px 0 0;
+  color:#667386;
+  font-size:.66rem;
+}
+
+@media(max-width:1050px){
+  .tier-tracker-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+@media(max-width:650px){
+  .tier-tracker-heading{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .tier-tracker-total{
+    width:100%;
+  }
+
+  .tier-tracker-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}

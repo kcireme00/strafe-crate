@@ -1,37 +1,63 @@
-# Clean Admin Orders Queue
+# Complete Trophy + Profile + Tier Tracker Update
 
-Replace/add:
+## 1. Run SQL first
 
-- app/admin/page.tsx
-- app/admin/admin.module.css
-- components/AdminOrdersQueue.tsx
+Open:
 
-This package uses a CSS module, so you do NOT need to paste anything into
-globals.css.
+supabase/complete-trophy-profile-tracker.sql
 
-The Orders tab is now the default admin view.
+Paste into Supabase SQL Editor as a NEW query and run it.
 
-Every fulfillment order appears as a single editable line with:
+## 2. Replace/add GitHub files
 
-- member and billing cycle
-- tier
-- weapon/category
-- skin name
-- exterior
-- Steam reference value
-- acquisition cost
-- calculated spread
-- trade ID
-- status
-- Save button
+Replace:
+- components/SiteHeader.tsx
 
-The existing SQL functions are used:
+Add:
+- components/TrophyEmblem.tsx
+- components/TierMemberTracker.tsx
+- components/DashboardProfileAndTrophies.tsx
+- components/DashboardProfileAndTrophies.module.css
 
-- get_admin_fulfillment_orders()
-- get_admin_member_directory()
+## 3. Dashboard integration
 
-No new SQL is required for this UI-only update.
+In the dashboard page:
+
+import DashboardProfileAndTrophies from "@/components/DashboardProfileAndTrophies";
+
+Replace the old Profile and Trophy Cabinet sections with:
+
+<DashboardProfileAndTrophies />
+
+## 4. Homepage tier tracker
+
+In the homepage:
+
+import TierMemberTracker from "@/components/TierMemberTracker";
+
+Place this below the six membership cards:
+
+<TierMemberTracker />
+
+Then append the contents of:
+
+tier-member-tracker-styles.css
+
+to the bottom of:
+
+app/globals.css
+
+## 5. What this package does
+
+- removes Reports from the main header
+- keeps Reports inside Admin only
+- adds 18 trophy definitions
+- renders custom silhouette SVG emblems from trophy slugs
+- lets members select and save up to three featured trophies
+- validates Steam profile and trade URLs
+- blocks fulfillment progression until both valid URLs are saved
+- adds real live counts for active/trialing members by tier
 
 Commit message:
 
-Replace admin hub with clean orders queue
+Add trophy emblems profile readiness and live tier counts

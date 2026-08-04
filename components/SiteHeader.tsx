@@ -42,20 +42,14 @@ export default function SiteHeader() {
         .single();
 
       if (!active) return;
-
-      setProfile((data as HeaderProfile | null) ?? {
-        full_name: (session.user.user_metadata?.full_name as string | undefined) ?? session.user.email ?? "Member",
-        display_name: null,
-        role: "member",
-      });
+      setProfile((data as HeaderProfile | null) ?? null);
       setReady(true);
     }
 
     void loadHeader();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      if (active) void loadHeader();
-    });
+    const { data: { subscription } } =
+      supabase.auth.onAuthStateChange(() => void loadHeader());
 
     return () => {
       active = false;
@@ -65,13 +59,12 @@ export default function SiteHeader() {
 
   async function logOut() {
     await getSupabase().auth.signOut();
-    setSignedIn(false);
-    setProfile(null);
     router.push("/");
     router.refresh();
   }
 
-  const memberName = profile?.display_name || profile?.full_name || "Member";
+  const memberName =
+    profile?.display_name || profile?.full_name || "Member";
 
   return (
     <header className="site-header shell">
@@ -79,21 +72,16 @@ export default function SiteHeader() {
       <nav aria-label="Main navigation">
         <Link href="/#plans">Memberships</Link>
 
-        {!ready ? (
-          <span className="nav-session-placeholder" aria-hidden="true" />
-        ) : signedIn ? (
+        {!ready ? null : signedIn ? (
           <>
             <Link href="/dashboard">Dashboard</Link>
             <Link href="/rewards">Rewards</Link>
             <Link href="/community">Community</Link>
-            {profile?.role === "admin" && (
-              <>
-                <Link href="/admin">Admin</Link>
-                <Link href="/admin/reports">Reports</Link>
-              </>
-            )}
+            {profile?.role === "admin" && <Link href="/admin">Admin</Link>}
             <Link className="nav-member" href="/dashboard">{memberName}</Link>
-            <button className="nav-logout" type="button" onClick={logOut}>Log out</button>
+            <button className="nav-logout" type="button" onClick={logOut}>
+              Log out
+            </button>
           </>
         ) : (
           <>
