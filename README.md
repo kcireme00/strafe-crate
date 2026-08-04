@@ -1,19 +1,43 @@
-# TrophyCabinet Build Fix
+# Random Unused Weapon Rotation
+
+## 1. Run SQL
 
 Open:
 
-components/MemberDashboard.tsx
+supabase/random-weapon-rotation.sql
 
-Find:
+Paste it into Supabase SQL Editor as a NEW query and run it.
 
-<TrophyCabinet trophies={trophies} />
+The final result should show:
 
-Replace it with:
+34
 
-<TrophyCabinet />
+## 2. Replace Admin Orders Queue
 
-The new TrophyCabinet component loads its own trophies from Supabase and does not accept props.
+Replace:
 
-Commit message:
+components/AdminOrdersQueue.tsx
 
-Fix TrophyCabinet dashboard integration
+## 3. Add CSS
+
+Open:
+
+admin-random-weapon-styles.css
+
+Paste the contents at the bottom of:
+
+app/admin/admin.module.css
+
+## Behavior
+
+- New test orders have Auto-pick unused weapon enabled by default.
+- Each order row has a Randomize unused button.
+- The system excludes categories already assigned to another valid order in
+  that member's current rotation.
+- Failed and cancelled orders do not consume a category.
+- After all 34 categories are used, the next assignment starts a new rotation.
+- Admin may still manually override the selected weapon before saving.
+
+Commit:
+
+Add random unused weapon rotation

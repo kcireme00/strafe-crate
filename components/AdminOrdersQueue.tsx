@@ -30,6 +30,8 @@ type Order = {
   updated_at: string;
   trade_sent_at: string | null;
   fulfilled_at: string | null;
+  rotation_cycle?: number | null;
+  randomized_weapon?: boolean | null;
 };
 
 type EditableOrder = Order & {
@@ -93,6 +95,7 @@ export default function AdminOrdersQueue() {
     user_id: "",
     cycle_month: new Date().toISOString().slice(0, 7) + "-01",
     tier_name: "",
+    auto_randomize: true,
   });
 
   async function load() {
@@ -134,6 +137,35 @@ export default function AdminOrdersQueue() {
           : order,
       ),
     );
+  }
+
+  async function randomizeWeapon(orderId: string) {
+    setSaving(orderId);
+    setStatus("Choosing an unused weapon category...");
+
+    const { data, error } = await (supabase as any).rpc(
+      "assign_random_weapon_for_order",
+      {
+        target_order_id: orderId,
+      },
+    );
+
+    setSaving(null);
+
+    if (error) {
+      setStatus(error.message);
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+
+    setStatus(
+      result?.rotation_reset
+        ? `Rotation completed. New cycle started with ${result.weapon_category}.`
+        : `Assigned ${result?.weapon_category ?? "a weapon category"}.`,
+    );
+
+    await load();
   }
 
   async function saveOrder(order: EditableOrder) {
@@ -182,16 +214,36 @@ export default function AdminOrdersQueue() {
 
     setStatus("Creating test order...");
 
-    const { error } = await (supabase.from("fulfillment_orders") as any).insert({
-      user_id: newOrder.user_id,
-      cycle_month: newOrder.cycle_month,
-      tier_name: newOrder.tier_name || null,
-      status: "draft",
-    });
+    const { data, error } = await (supabase.from("fulfillment_orders") as any)
+      .insert({
+        user_id: newOrder.user_id,
+        cycle_month: newOrder.cycle_month,
+        tier_name: newOrder.tier_name || null,
+        status: "draft",
+      })
+      .select("id")
+      .single();
 
     if (error) {
       setStatus(error.message);
       return;
+    }
+
+    if (newOrder.auto_randomize && data?.id) {
+      const { error: randomizeError } = await (supabase as any).rpc(
+        "assign_random_weapon_for_order",
+        {
+          target_order_id: data.id,
+        },
+      );
+
+      if (randomizeError) {
+        setStatus(
+          `Order created, but weapon assignment failed: ${randomizeError.message}`,
+        );
+        await load();
+        return;
+      }
     }
 
     setShowCreate(false);
@@ -199,8 +251,13 @@ export default function AdminOrdersQueue() {
       user_id: "",
       cycle_month: new Date().toISOString().slice(0, 7) + "-01",
       tier_name: "",
+      auto_randomize: true,
     });
-    setStatus("Test order created.");
+    setStatus(
+      newOrder.auto_randomize
+        ? "Test order created with an unused weapon category."
+        : "Test order created.",
+    );
     await load();
   }
 
@@ -310,6 +367,20 @@ export default function AdminOrdersQueue() {
             }
           />
 
+          <label className={styles.randomizeToggle}>
+            <input
+              type="checkbox"
+              checked={newOrder.auto_randomize}
+              onChange={(event) =>
+                setNewOrder({
+                  ...newOrder,
+                  auto_randomize: event.target.checked,
+                })
+              }
+            />
+            Auto-pick unused weapon
+          </label>
+
           <button
             className={styles.primaryButton}
             type="button"
@@ -392,6 +463,14 @@ export default function AdminOrdersQueue() {
                         <option key={weapon}>{weapon}</option>
                       ))}
                     </select>
+                    <button
+                      className={styles.randomizeButton}
+                      type="button"
+                      disabled={saving === order.order_id}
+                      onClick={() => void randomizeWeapon(order.order_id)}
+                    >
+                      Randomize unused
+                    </button>
                   </td>
 
                   <td className={styles.skinCell}>
