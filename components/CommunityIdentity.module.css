@@ -1,0 +1,61 @@
+.identity {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.name {
+  color: var(--member-tier-color);
+  font-weight: 900;
+}
+
+.level,
+.tier {
+  padding: 3px 7px;
+  border: 1px solid #2d3745;
+  border-radius: 999px;
+  background: #202632;
+  color: #aeb8c6;
+  font-size: 0.55rem;
+  font-weight: 800;
+}
+
+.tier {
+  border-color: color-mix(
+    in srgb,
+    var(--member-tier-color) 50%,
+    #2d3745
+  );
+  color: var(--member-tier-color);
+  background: color-mix(
+    in srgb,
+    var(--member-tier-color) 8%,
+    #151b24
+  );
+}
+
+.trophy {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 7px;
+  background: #090e15;
+}
+
+.emblem {
+  width: 15px;
+  height: 15px;
+}
+
+.common { color: #a7b1bf; }
+.rare { color: #4b91ff; }
+.epic { color: #a354f0; }
+.legendary { color: #e5b12f; }

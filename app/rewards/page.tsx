@@ -1,5 +1,5 @@
-import RewardsHub from "@/components/RewardsHub";
+import RewardsProgressPage from "@/components/RewardsProgressPage";
 
-export default function RewardsPage() {
-  return <RewardsHub />;
+export default function Page() {
+  return <RewardsProgressPage />;
 }

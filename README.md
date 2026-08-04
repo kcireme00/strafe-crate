@@ -1,49 +1,98 @@
-# Dashboard UI Cleanup
+# Clean Progression Pages + Community Trophy Sync
 
-No SQL is required.
+## 1. Run SQL first
 
-## Add/replace
+Open:
+
+supabase/featured-trophy-community-sync.sql
+
+Paste it into Supabase SQL Editor as a NEW query and run it.
+
+## 2. Add files
 
 Add:
 
-- components/CompactCollectorProgress.tsx
-- components/CompactCollectorProgress.module.css
-- components/RewardsHub.tsx
-- components/RewardsHub.module.css
+- components/DashboardCollectorSummary.tsx
+- components/DashboardCollectorSummary.module.css
+- components/RewardsProgressPage.tsx
+- components/RewardsProgressPage.module.css
+- components/TrophiesPage.tsx
+- components/TrophiesPage.module.css
+- components/CommunityIdentity.tsx
+- components/CommunityIdentity.module.css
 
 Replace:
 
 - app/rewards/page.tsx
 
-## Update MemberDashboard.tsx
+Add:
+
+- app/trophies/page.tsx
+
+Keep:
+
+- components/TrophyCabinet.tsx
+- components/TrophyEmblem.tsx
+
+## 3. Clean MemberDashboard.tsx
 
 Import:
 
-import CompactCollectorProgress from "@/components/CompactCollectorProgress";
+import DashboardCollectorSummary from "@/components/DashboardCollectorSummary";
 
-Remove these full dashboard sections:
+REMOVE from the dashboard:
 
-<LoyaltyPanel loyalty={loyalty} />
-<TrophyCabinet />
+- <LoyaltyPanel loyalty={loyalty} />
+- <TrophyCabinet />
+- <ProfileSettings />
+- the old inline Profile and Steam Settings section
 
-Replace them with:
+ADD only:
 
-<CompactCollectorProgress />
+<DashboardCollectorSummary />
 
-Do not render ProfileSettings in the middle of the main dashboard. Put it below
-Drop History, or later move it to a dedicated Settings page.
+Recommended dashboard:
 
-## Recommended main dashboard order
+1. Player card and current order
+2. Monthly fulfillment timeline
+3. Collection snapshot / weapon coverage
+4. DashboardCollectorSummary
+5. Recent activity / drop history
 
-1. Player card
-2. Current monthly drop and timeline
-3. Collection snapshot
-4. CompactCollectorProgress
-5. Recent activity
-6. ProfileSettings at the bottom
+Nothing else.
 
-The full XP panel and Trophy Cabinet now live on /rewards.
+## 4. Dedicated pages
 
-Commit:
+/rewards:
+- full XP
+- multiplier
+- paid streak
+- Supply Credits
+- reward catalog
 
-Clean dashboard and move progression to rewards
+/trophies:
+- trophy cabinet
+- slot picker
+- achievement management
+
+## 5. Community chat identity
+
+Import in LiveChat.tsx:
+
+import CommunityIdentity from "@/components/CommunityIdentity";
+
+Replace the current username / level / membership badges with the component
+shown in:
+
+components/CommunityIdentityExample.tsx
+
+The exact saved featured trophy in slot 1 is returned by:
+
+get_public_community_identity(user_id)
+
+This ensures the emblem beside the chat username matches the first trophy shown
+on the public player card.
+
+## 6. Commit
+
+Clean progression pages and sync community trophy identity
