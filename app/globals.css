@@ -1190,3 +1190,83 @@
 .remember-me-check span {
   line-height: 1.2;
 }
+
+
+/* Simplified member fulfillment status */
+.order-timeline-simple{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  max-width:620px;
+}
+.order-timeline-simple .timeline-step{
+  min-height:58px;
+  padding:16px 18px;
+}
+.order-timeline-simple .timeline-step strong{
+  font-size:.78rem;
+}
+
+/* Prestige belongs with weapon progression */
+.weapon-rotation-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:28px;
+}
+.weapon-rotation-header>div{
+  min-width:0;
+}
+.weapon-rotation-header h2{
+  margin-top:0;
+}
+.weapon-prestige-summary{
+  flex:0 0 min(310px,38%);
+  padding:18px 20px;
+  border:1px solid rgba(255,118,40,.28);
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 85% 0%,rgba(255,118,40,.13),transparent 42%),
+    #0a0f16;
+}
+.weapon-prestige-summary small{
+  display:block;
+  color:#91a3b9;
+  font-size:.62rem;
+  letter-spacing:.12em;
+}
+.weapon-prestige-summary strong{
+  display:block;
+  margin:7px 0 4px;
+  color:#ff8a3d;
+  font-size:1.25rem;
+}
+.weapon-prestige-summary span{
+  color:var(--muted);
+  font-size:.76rem;
+}
+
+/* Four compact data points on the player card */
+.member-card-footer{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.member-card-footer>div:nth-child(3) strong{
+  color:var(--tier-color);
+}
+
+@media(max-width:900px){
+  .weapon-rotation-header{
+    flex-direction:column;
+  }
+  .weapon-prestige-summary{
+    width:100%;
+    flex-basis:auto;
+  }
+}
+@media(max-width:640px){
+  .order-timeline-simple{
+    grid-template-columns:1fr;
+  }
+  .member-card-footer{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}

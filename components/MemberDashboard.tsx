@@ -245,6 +245,7 @@ export default function MemberDashboard({ user }: { user: User }) {
             <div className="member-card-footer">
               <div><small>REFERENCE VALUE</small><strong>{referenceMinimum ? `$${referenceMinimum}+` : "PENDING"}</strong></div>
               <div><small>UPGRADES</small><strong>{tier?.upgrade_eligible ? "ELIGIBLE" : "STANDARD"}</strong></div>
+              <div><small>PRESTIGE</small><strong>{prestige.prestige_level > 0 ? prestige.prestige_level : "UNRANKED"}</strong></div>
               <div><small>MEMBER SINCE</small><strong>{formatMonth(profile.created_at)}</strong></div>
             </div>
           </div>
@@ -262,11 +263,6 @@ export default function MemberDashboard({ user }: { user: User }) {
             <small>CURRENT ORDER</small>
             <strong>{current?.status?.replaceAll("_", " ") || "No active order"}</strong>
             <span>{current ? `Due ${formatDate(current.delivery_due_date)}` : "Created after payment"}</span>
-          </article>
-          <article>
-            <small>PRESTIGE</small>
-            <strong>{prestige.prestige_level > 0 ? `Prestige ${prestige.prestige_level}` : "Unranked"}</strong>
-            <span>{prestige.collections_completed} completed collection{prestige.collections_completed === 1 ? "" : "s"} · Rotation {prestige.current_rotation}</span>
           </article>
           <article>
             <small>WEAPON COVERAGE</small>
@@ -297,17 +293,14 @@ export default function MemberDashboard({ user }: { user: User }) {
           <div>
             <p className="eyebrow">THIS MONTH</p>
             <h2>{current ? `${formatMonth(current.billing_cycle)} drop` : "Your first drop"}</h2>
-            <p>{current ? "Follow each fulfillment milestone from assignment through acceptance." : "A monthly order will appear here after a successful subscription payment."}</p>
+            <p>{current ? "Payment is confirmed by Stripe. Trade sent updates when your order is marked sent by the Strafe Crate team." : "A monthly order will appear here after a successful subscription payment."}</p>
           </div>
           <a className="button secondary" href="/settings">Manage delivery profile</a>
         </div>
-        <div className="order-timeline">
+        <div className="order-timeline order-timeline-simple">
           {[
             ["Payment received", Boolean(current)],
-            ["Weapon assigned", Boolean(current?.weapon_categories?.name || current?.fulfillment_order_items?.some((item: any) => item.weapon_category))],
-            ["Skin purchased", ["purchased","ready_to_send","trade_sent","accepted","completed","fulfilled"].includes(String(current?.status))],
             ["Trade sent", ["trade_sent","accepted","completed","fulfilled"].includes(String(current?.status))],
-            ["Accepted", ["accepted","completed","fulfilled"].includes(String(current?.status))],
           ].map(([label, complete], index) => (
             <div className={`timeline-step ${complete ? "complete" : ""}`} key={String(label)}>
               <span>{complete ? "✓" : index + 1}</span>
@@ -319,9 +312,18 @@ export default function MemberDashboard({ user }: { user: User }) {
 
       <DashboardCollectorSummary />
 
-      <section className="panel">
-        <h2>Weapon rotation</h2>
-        <p>Track progress by weapon class. Open a group to see each category.</p>
+      <section className="panel weapon-rotation-panel">
+        <div className="weapon-rotation-header">
+          <div>
+            <h2>Weapon rotation</h2>
+            <p>Track progress by weapon class. Open a group to see each category.</p>
+          </div>
+          <aside className="weapon-prestige-summary">
+            <small>PRESTIGE</small>
+            <strong>{prestige.prestige_level > 0 ? `Prestige ${prestige.prestige_level}` : "Unranked"}</strong>
+            <span>{prestige.collections_completed} completed collection{prestige.collections_completed === 1 ? "" : "s"} · Rotation {prestige.current_rotation}</span>
+          </aside>
+        </div>
         <div className="weapon-groups">
           {["Pistols","SMGs","Rifles","Snipers","Heavy"].map((group) => {
             const groupWeapons = weapons.filter((weapon: any) => {
