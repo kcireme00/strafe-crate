@@ -1,49 +1,51 @@
-# Membership Change Update
+# Membership Change Update — Next-Cycle Only
 
-## Member-facing behavior
+## Core rule
 
-- Current membership is highlighted orange.
-- Current tier only shows `Cancel membership`.
-- Higher tiers show `Upgrade to ...`.
-- Lower tiers show `Downgrade to ...`; the confirmation explains that the downgrade begins at the next renewal.
-- New visitors still receive normal account-linked Checkout.
+Every membership change takes effect at the next successful renewal.
+
+This applies to both:
+
+- Upgrades
+- Downgrades
+
+The current paid cycle is never changed. An existing or fulfilled order is never
+overwritten by a membership change.
+
+## Example
+
+A member currently has Recruit and already received the Recruit order.
+
+They select Elite.
+
+- Recruit remains active through the current paid period.
+- The current Recruit fulfillment order remains unchanged.
+- Stripe schedules Elite for the next renewal.
+- On the next successful renewal, Stripe charges $100.
+- The webhook updates the subscription to Elite.
+- A new Elite fulfillment order is created for that new cycle.
 
 ## Stripe behavior
 
-### Upgrade
-The API updates the existing subscription item using its existing item ID.
+The API uses a Stripe Subscription Schedule with:
 
-- The old Price is replaced.
-- Stripe invoices the prorated difference.
-- The billing date stays unchanged.
-- The next renewal uses only the new tier price.
-- It does not create a second subscription or add both prices.
+1. Current Price through `current_period_end`
+2. Selected Price beginning exactly at `current_period_end`
+3. No proration and no immediate invoice
 
-### Downgrade
-A Stripe Subscription Schedule keeps the current plan through the paid period
-and changes to the lower tier at the next renewal.
+This avoids:
 
-### Cancellation
-The current-tier cancellation button opens the Stripe Customer Portal.
+- Double subscriptions
+- Mid-cycle charges
+- Changing fulfilled orders
+- Duplicate fulfillment orders
+- Proration confusion
 
-## Webhook behavior
+## Member UI
 
-A paid `subscription_update` invoice updates the existing current-cycle order
-instead of generating a second fulfillment order.
-
-## Required environment variables
-
-- STRIPE_PRICE_RECRUIT
-- STRIPE_PRICE_OPERATIVE
-- STRIPE_PRICE_VANGUARD
-- STRIPE_PRICE_ELITE
-- STRIPE_PRICE_MASTER
-- STRIPE_PRICE_PRESTIGE
-- STRIPE_SECRET_KEY
-- STRIPE_WEBHOOK_SECRET
-- SUPABASE_SERVICE_ROLE_KEY
-- NEXT_PUBLIC_SUPABASE_URL
-- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-- NEXT_PUBLIC_SITE_URL
+- Current tier: orange border and red Cancel Membership button
+- Higher tiers: Upgrade
+- Lower tiers: Downgrade
+- Confirmation explains the selected change begins next billing cycle
 
 No additional SQL is required.

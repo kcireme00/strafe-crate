@@ -208,12 +208,7 @@ export default function Home() {
       }
 
       setMembershipMessage(result.message);
-      if (result.action === "upgraded") {
-        setCurrentTier(tierName);
-        setCurrentTierPrice(
-          tiers.find((tier) => tier.name === tierName)?.price ?? null,
-        );
-      }
+
     } catch (error) {
       window.alert(
         error instanceof Error
@@ -357,7 +352,7 @@ export default function Home() {
             <h2>{currentTier ? "Change your membership today!" : "Six collection levels."}</h2>
             <p>
               {currentTier
-                ? `Current plan: ${currentTier} — $${currentTierPrice ?? 0}/month. Upgrades are prorated today; lower-tier changes begin at your next renewal.`
+                ? `Current plan: ${currentTier} — $${currentTierPrice ?? 0}/month. Upgrades and downgrades begin on your next billing cycle so your current order is never changed.`
                 : "Higher tiers receive stronger published minimum-value retention."}
             </p>
             {membershipMessage && (
