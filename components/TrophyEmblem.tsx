@@ -122,6 +122,40 @@ export default function TrophyEmblem({
       );
     }
 
+    case "chatter-1000":
+      return (
+        <Base className={className} title={title ?? "Chatter"}>
+          <path d="M9 13h46v31H30L18 55V44H9V13Z" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M19 25h26M19 33h18" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+        </Base>
+      );
+
+    case "super-chatter-10000":
+      return (
+        <Base className={className} title={title ?? "Super Chatter"}>
+          <path d="M8 12h48v32H35L21 56V44H8V12Z" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" />
+          <path d="m32 18 4 8 9 1-7 6 2 9-8-4-8 4 2-9-7-6 9-1 4-8Z" fill="currentColor" />
+        </Base>
+      );
+
+    case "goated-chatter-100000":
+      return (
+        <Base className={className} title={title ?? "Goated Chatter"}>
+          <path d="M13 20 8 9l15 8M51 20l5-11-15 8" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
+          <path d="M16 20c0-8 8-13 16-13s16 5 16 13v19c0 10-7 18-16 18s-16-8-16-18V20Z" stroke="currentColor" strokeWidth="4" />
+          <path d="M24 31h.01M40 31h.01M25 43c4 4 10 4 14 0" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+        </Base>
+      );
+
+    case "million-chatter":
+      return (
+        <Base className={className} title={title ?? "Super Super Chatter"}>
+          <path d="m9 25 10 7 13-21 13 21 10-7-5 25H14L9 25Z" fill="currentColor" />
+          <path d="M15 54h34" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+          <path d="M25 38h14" stroke="#080c12" strokeWidth="4" strokeLinecap="round" />
+        </Base>
+      );
+
     case "community-regular":
       return (
         <Base className={className} title={title ?? "Community Regular"}>

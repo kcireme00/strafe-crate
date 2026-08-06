@@ -64,6 +64,7 @@ export default function MemberDashboard({ user }: { user: User }) {
   const [prestige, setPrestige] = useState<{ prestige_level: number; collections_completed: number; current_rotation: number }>({ prestige_level: 0, collections_completed: 0, current_rotation: 1 });
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [dropView, setDropView] = useState<"current" | "previous">("current");
 
   useEffect(() => {
     (async () => {
@@ -157,7 +158,42 @@ export default function MemberDashboard({ user }: { user: User }) {
     history.map((item: any) => item.weapon_categories?.name).filter(Boolean),
   );
   const tier: any = subscription?.membership_tiers;
-  const current = orders[0];
+
+  const monthKey = (value: Date | string) => {
+    const date = value instanceof Date ? value : new Date(value);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  };
+
+  const now = new Date();
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const currentMonthKey = monthKey(currentMonthStart);
+  const previousMonthKey = monthKey(previousMonthStart);
+
+  const current = orders.find((order: any) =>
+    monthKey(order.billing_cycle || order.cycle_month || order.created_at) === currentMonthKey
+  ) ?? null;
+  const previous = orders.find((order: any) =>
+    monthKey(order.billing_cycle || order.cycle_month || order.created_at) === previousMonthKey
+  ) ?? null;
+  const selectedDrop = dropView === "current" ? current : previous;
+  const selectedDropStart = dropView === "current" ? currentMonthStart : previousMonthStart;
+
+  const selectedItems = selectedDrop?.fulfillment_order_items?.length
+    ? selectedDrop.fulfillment_order_items
+    : selectedDrop
+      ? [{
+          weapon_category: selectedDrop.weapon_categories?.name || selectedDrop.weapon_category,
+          skin_name: selectedDrop.skin_name,
+          exterior: selectedDrop.exterior,
+        }]
+      : [];
+
+  const primaryItem = selectedItems[0] ?? null;
+  const selectedWeapon = primaryItem?.weapon_category || selectedDrop?.weapon_categories?.name || "Not assigned";
+  const selectedSkin = primaryItem?.skin_name || "Pending";
+  const selectedExterior = primaryItem?.exterior || "Pending";
+
   const tierName = tier?.name || "Membership Pending";
   const theme = tierThemes[tier?.name] || {
     color: "#ff7a2f",
@@ -289,25 +325,93 @@ export default function MemberDashboard({ user }: { user: User }) {
 
 
       <section className="dashboard-monthly-focus panel">
-        <div className="panel-head">
+        <div className="drop-period-tabs" role="tablist" aria-label="Drop cycle">
+          <button
+            type="button"
+            className={dropView === "current" ? "active" : ""}
+            onClick={() => setDropView("current")}
+          >
+            This month
+          </button>
+          <button
+            type="button"
+            className={dropView === "previous" ? "active" : ""}
+            onClick={() => setDropView("previous")}
+          >
+            Last month
+          </button>
+        </div>
+
+        <div className="panel-head drop-panel-heading">
           <div>
-            <p className="eyebrow">THIS MONTH</p>
-            <h2>{current ? `${formatMonth(current.billing_cycle)} drop` : "Your first drop"}</h2>
-            <p>{current ? "Payment is confirmed by Stripe. Trade sent updates when your order is marked sent by the Strafe Crate team." : "A monthly order will appear here after a successful subscription payment."}</p>
+            <p className="eyebrow">{dropView === "current" ? "CURRENT CYCLE" : "PREVIOUS CYCLE"}</p>
+            <h2>{formatMonth(selectedDropStart.toISOString())} drop</h2>
+            <p>
+              {selectedDrop
+                ? "Payment is confirmed by Stripe. Weapon, skin, and exterior reflect the details entered by the Strafe Crate team."
+                : dropView === "current"
+                  ? "Your current-cycle order will appear after a successful subscription payment."
+                  : "No order was recorded for the previous cycle."}
+            </p>
           </div>
           <a className="button secondary" href="/settings">Manage delivery profile</a>
         </div>
-        <div className="order-timeline order-timeline-simple">
+
+        <div className="drop-detail-grid">
           {[
-            ["Payment received", Boolean(current)],
-            ["Trade sent", ["trade_sent","accepted","completed","fulfilled"].includes(String(current?.status))],
-          ].map(([label, complete], index) => (
-            <div className={`timeline-step ${complete ? "complete" : ""}`} key={String(label)}>
-              <span>{complete ? "✓" : index + 1}</span>
-              <strong>{String(label)}</strong>
-            </div>
+            {
+              number: 1,
+              label: "Payment received",
+              value: selectedDrop ? "Confirmed" : "Waiting for payment",
+              complete: Boolean(selectedDrop),
+            },
+            {
+              number: 2,
+              label: "Weapon",
+              value: selectedWeapon,
+              complete: Boolean(selectedDrop && selectedWeapon !== "Not assigned"),
+            },
+            {
+              number: 3,
+              label: "Skin",
+              value: selectedSkin,
+              complete: Boolean(selectedDrop && selectedSkin !== "Pending"),
+            },
+            {
+              number: 4,
+              label: "Exterior / wear",
+              value: selectedExterior,
+              complete: Boolean(selectedDrop && selectedExterior !== "Pending"),
+            },
+            {
+              number: 5,
+              label: "Trade sent",
+              value: ["trade_sent","accepted","completed","fulfilled"].includes(String(selectedDrop?.status))
+                ? "Sent"
+                : "Not sent yet",
+              complete: ["trade_sent","accepted","completed","fulfilled"].includes(String(selectedDrop?.status)),
+            },
+          ].map((step) => (
+            <article className={`drop-detail-card ${step.complete ? "complete" : ""}`} key={step.label}>
+              <span className="drop-step-number">{step.complete ? "✓" : step.number}</span>
+              <div>
+                <small>{step.label}</small>
+                <strong>{step.value}</strong>
+              </div>
+            </article>
           ))}
         </div>
+
+        {selectedItems.length > 1 && (
+          <div className="drop-extra-items">
+            <small>MULTI-SKIN DROP</small>
+            {selectedItems.map((item: any, index: number) => (
+              <span key={item.id || `${item.skin_name}-${index}`}>
+                {index + 1}. {item.weapon_category || "Weapon pending"} · {item.skin_name || "Skin pending"} · {item.exterior || "Wear pending"}
+              </span>
+            ))}
+          </div>
+        )}
       </section>
 
       <DashboardCollectorSummary />

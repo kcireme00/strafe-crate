@@ -41,6 +41,8 @@ export default function LiveChat({ user }: { user: User }) {
   const [playerCard, setPlayerCard] = useState<any>(null);
   const [playerCardAnchor, setPlayerCardAnchor] = useState<DOMRect | null>(null);
   const [identities, setIdentities] = useState<Record<string, CommunityIdentityData>>({});
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminBusy, setAdminBusy] = useState<string | null>(null);
 
   async function loadIdentities(userIds: string[]) {
     const unique = Array.from(new Set(userIds)).filter(Boolean);
@@ -71,12 +73,19 @@ export default function LiveChat({ user }: { user: User }) {
     let active = true;
 
     async function load() {
-      const { data, error } = await supabase
-        .from("chat_messages")
-        .select("id,user_id,body,display_name_snapshot,tier_name_snapshot,level_snapshot,created_at")
-        .is("deleted_at", null)
-        .order("created_at", { ascending: false })
-        .limit(100);
+      const [{ data, error }, profileResult] = await Promise.all([
+        supabase
+          .from("chat_messages")
+          .select("id,user_id,body,display_name_snapshot,tier_name_snapshot,level_snapshot,created_at")
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false })
+          .limit(100),
+        supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
+      ]);
+
+      if (active) {
+        setIsAdmin((profileResult.data as { role?: string } | null)?.role === "admin");
+      }
 
       if (!active) return;
       if (error) setStatus(error.message);
@@ -106,7 +115,7 @@ export default function LiveChat({ user }: { user: User }) {
       active = false;
       void supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [supabase, user.id]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -169,6 +178,65 @@ export default function LiveChat({ user }: { user: User }) {
     setStatus("");
   }
 
+  async function adminAction(
+    action: "delete_message" | "mute_1h" | "mute_24h" | "mute_7d" | "unmute",
+    targetUserId: string,
+    messageId?: string,
+  ) {
+    if (!isAdmin) return;
+
+    const label = {
+      delete_message: "delete this message",
+      mute_1h: "mute this member for 1 hour",
+      mute_24h: "mute this member for 24 hours",
+      mute_7d: "mute this member for 7 days",
+      unmute: "remove this member's mute",
+    }[action];
+
+    if (!window.confirm(`Admin action: ${label}?`)) return;
+
+    setAdminBusy(messageId || targetUserId);
+    const { data, error } = await (supabase as any).rpc(
+      "admin_chat_direct_action",
+      {
+        moderation_action: action,
+        target_user_id: targetUserId,
+        target_message_id: messageId || null,
+      },
+    );
+    setAdminBusy(null);
+
+    if (error) {
+      setStatus(error.message);
+      return;
+    }
+
+    setStatus(String(data || "Admin action completed."));
+    if (action === "delete_message" && messageId) {
+      setMessages((current) => current.filter((message) => message.id !== messageId));
+    }
+  }
+
+  async function clearEntireChat() {
+    if (!isAdmin) return;
+    const confirmation = window.prompt(
+      'Type CLEAR CHAT to remove every visible community message. This action is recorded in the moderation log.',
+    );
+    if (confirmation !== "CLEAR CHAT") return;
+
+    setAdminBusy("clear-chat");
+    const { data, error } = await (supabase as any).rpc("admin_clear_chat");
+    setAdminBusy(null);
+
+    if (error) {
+      setStatus(error.message);
+      return;
+    }
+
+    setMessages([]);
+    setStatus(String(data || "Community chat cleared."));
+  }
+
   async function report(messageId: string) {
     const { error } = await (supabase.from("chat_reports") as any).insert({
       message_id: messageId,
@@ -189,6 +257,16 @@ export default function LiveChat({ user }: { user: User }) {
         <div className="community-rules">
           <strong>Keep it clean.</strong>
           <span>No links, profanity, slurs, harassment, spam, scams, or credential requests. Violations trigger an automatic timeout.</span>
+          {isAdmin && (
+            <button
+              className="admin-clear-chat"
+              type="button"
+              disabled={adminBusy === "clear-chat"}
+              onClick={() => void clearEntireChat()}
+            >
+              {adminBusy === "clear-chat" ? "Clearing…" : "Clear entire chat"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -226,11 +304,43 @@ export default function LiveChat({ user }: { user: User }) {
                 </div>
                 <p>{message.body}</p>
               </div>
-              {message.user_id !== user.id && (
+              {isAdmin ? (
+                <div className="chat-admin-actions">
+                  <button
+                    type="button"
+                    disabled={adminBusy === message.id}
+                    onClick={() => void adminAction("delete_message", message.user_id, message.id)}
+                  >
+                    Delete
+                  </button>
+                  {message.user_id !== user.id && (
+                    <select
+                      aria-label={`Moderate ${message.display_name_snapshot}`}
+                      defaultValue=""
+                      disabled={adminBusy === message.id}
+                      onChange={(event) => {
+                        const action = event.target.value as
+                          | "mute_1h"
+                          | "mute_24h"
+                          | "mute_7d"
+                          | "unmute";
+                        if (action) void adminAction(action, message.user_id, message.id);
+                        event.currentTarget.value = "";
+                      }}
+                    >
+                      <option value="">Moderate</option>
+                      <option value="mute_1h">Mute 1 hour</option>
+                      <option value="mute_24h">Mute 24 hours</option>
+                      <option value="mute_7d">Mute 7 days</option>
+                      <option value="unmute">Remove mute</option>
+                    </select>
+                  )}
+                </div>
+              ) : message.user_id !== user.id ? (
                 <button className="chat-report" type="button" onClick={() => report(message.id)}>
                   Report
                 </button>
-              )}
+              ) : null}
             </article>
           ))}
           {!messages.length && <p className="chat-empty">No messages yet. Start the collector conversation.</p>}
