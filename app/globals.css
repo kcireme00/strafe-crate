@@ -1105,3 +1105,65 @@
   color: #ff914e;
   line-height: 1.35;
 }
+
+
+/* Membership change controls */
+.current-membership-plan {
+  position: relative;
+  border-color: #ff7628 !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 118, 40, 0.48),
+    0 18px 55px rgba(255, 104, 31, 0.14);
+  background:
+    radial-gradient(circle at 85% 8%, rgba(255, 118, 40, 0.16), transparent 35%),
+    #0a0f16;
+}
+
+.current-membership-plan .tier-name,
+.current-membership-plan .price {
+  color: #ff8a3d;
+}
+
+.current-membership-badge {
+  display: inline-flex;
+  margin-bottom: 18px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 118, 40, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 118, 40, 0.1);
+  color: #ff8a3d;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.cancel-membership-button {
+  width: 100%;
+  margin-top: auto;
+  border: 1px solid rgba(255, 76, 76, 0.72);
+  background: linear-gradient(180deg, #d93636 0%, #b72020 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 28px rgba(183, 32, 32, 0.22);
+}
+
+.cancel-membership-button:hover {
+  border-color: #ff6b6b;
+  background: linear-gradient(180deg, #e34848 0%, #c62828 100%);
+  transform: translateY(-1px);
+}
+
+.cancel-membership-button:focus-visible {
+  outline: 2px solid rgba(255, 107, 107, 0.92);
+  outline-offset: 3px;
+}
+
+.membership-change-message {
+  width: min(760px, 100%);
+  margin: 18px auto 0;
+  padding: 13px 16px;
+  border: 1px solid rgba(76, 211, 124, 0.35);
+  border-radius: 10px;
+  background: rgba(76, 211, 124, 0.08);
+  color: #8ee9ad;
+  font-size: 0.85rem;
+}

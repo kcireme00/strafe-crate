@@ -200,6 +200,32 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 }
 
+
+async function updateCurrentCycleForMembershipChange(
+  userId: string,
+  subscription: Stripe.Subscription,
+  invoice: Stripe.Invoice,
+) {
+  const admin = getSupabaseAdmin();
+  const sync = await syncSubscription(userId, subscription, invoice.amount_paid);
+  const cycleMonth = monthStartFromUnix(sync.periodStart);
+
+  const { error } = await admin
+    .from("fulfillment_orders")
+    .update({
+      tier_name: sync.tierName,
+      membership_value: sync.amount / 100,
+      updated_at: new Date().toISOString(),
+      admin_notes:
+        `Membership changed to ${sync.tierName}. Stripe proration invoice ${invoice.id} was paid; the existing cycle order was updated rather than duplicated.`,
+    })
+    .eq("user_id", userId)
+    .eq("cycle_month", cycleMonth)
+    .eq("order_type", "membership");
+
+  if (error) throw error;
+}
+
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const invoiceAny = invoice as any;
   const subscriptionId = typeof invoiceAny.subscription === "string"
@@ -212,6 +238,16 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const customerId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id ?? null;
   const userId = await resolveUserId(customerId, subscriptionId);
   if (!userId) throw new Error("Unable to match paid invoice to a Strafe Crate user.");
+
+  const billingReason = (invoice as any).billing_reason;
+  if (billingReason === "subscription_update") {
+    await updateCurrentCycleForMembershipChange(
+      userId,
+      subscription,
+      invoice,
+    );
+    return;
+  }
 
   await createPaidCycleOrder(userId, subscription, invoice);
 }

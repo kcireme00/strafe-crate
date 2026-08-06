@@ -23,6 +23,10 @@ export default function Home() {
   const [fulfillmentReady, setFulfillmentReady] = useState(false);
   const [checkoutNotice, setCheckoutNotice] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [currentTier, setCurrentTier] = useState<string | null>(null);
+  const [currentTierPrice, setCurrentTierPrice] = useState<number | null>(null);
+  const [membershipStatus, setMembershipStatus] = useState<string | null>(null);
+  const [membershipMessage, setMembershipMessage] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
 
@@ -38,12 +42,49 @@ export default function Home() {
       if (session?.user) {
         const { data } = await supabase
           .from("profiles")
-          .select("fulfillment_ready")
+          .select("steam_trade_url")
           .eq("id", session.user.id)
           .maybeSingle();
-        if (active) setFulfillmentReady(Boolean((data as { fulfillment_ready?: boolean } | null)?.fulfillment_ready));
+
+        const { data: subscription } = await supabase
+          .from("subscriptions")
+          .select("status,tier_id")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        let loadedTier: string | null = null;
+        let loadedPrice: number | null = null;
+
+        if (
+          subscription?.tier_id &&
+          ["active", "trialing", "past_due"].includes(
+            String(subscription.status ?? "").toLowerCase(),
+          )
+        ) {
+          const { data: tier } = await supabase
+            .from("membership_tiers")
+            .select("name,monthly_price_cents")
+            .eq("id", subscription.tier_id)
+            .maybeSingle();
+
+          loadedTier = tier?.name ?? null;
+          loadedPrice =
+            typeof tier?.monthly_price_cents === "number"
+              ? tier.monthly_price_cents / 100
+              : null;
+        }
+
+        if (active) {
+          setFulfillmentReady(Boolean(data?.steam_trade_url?.trim()));
+          setMembershipStatus(subscription?.status ?? null);
+          setCurrentTier(loadedTier);
+          setCurrentTierPrice(loadedPrice);
+        }
       } else {
         setFulfillmentReady(false);
+        setMembershipStatus(null);
+        setCurrentTier(null);
+        setCurrentTierPrice(null);
       }
     }
 
@@ -114,6 +155,82 @@ export default function Home() {
       window.alert(message);
     } finally {
       setCheckoutLoading(null);
+    }
+  }
+
+
+  async function changeMembership(tierName: string) {
+    setCheckoutLoading(tierName);
+    setMembershipMessage(null);
+
+    try {
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (!session?.access_token) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const response = await fetch("/api/stripe/change-membership", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ tier: tierName }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to change membership.");
+      }
+
+      setMembershipMessage(result.message);
+      if (result.action === "upgraded") {
+        setCurrentTier(tierName);
+        setCurrentTierPrice(
+          tiers.find((tier) => tier.name === tierName)?.price ?? null,
+        );
+      }
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to change membership.",
+      );
+    } finally {
+      setCheckoutLoading(null);
+    }
+  }
+
+  async function openBillingPortal() {
+    try {
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (!session?.access_token) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const response = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.url) {
+        throw new Error(
+          result.error || "Unable to open membership cancellation.",
+        );
+      }
+
+      window.location.href = result.url;
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to open membership cancellation.",
+      );
     }
   }
 
@@ -212,20 +329,95 @@ export default function Home() {
 
       <section className="section band" id="plans">
         <div className="shell">
-          <div className="center"><p className="eyebrow">MEMBERSHIPS</p><h2>Six collection levels.</h2><p>Higher tiers receive stronger published minimum-value retention.</p></div>
+          <div className="center">
+            <p className="eyebrow">MEMBERSHIPS</p>
+            <h2>{currentTier ? "Change your membership today!" : "Six collection levels."}</h2>
+            <p>
+              {currentTier
+                ? `Current plan: ${currentTier} — $${currentTierPrice ?? 0}/month. Upgrades are prorated today; lower-tier changes begin at your next renewal.`
+                : "Higher tiers receive stronger published minimum-value retention."}
+            </p>
+            {membershipMessage && (
+              <p className="membership-change-message">{membershipMessage}</p>
+            )}
+          </div>
           <div className="pricing">
-            {tiers.map((tier) => (
-              <article className={`plan tier-${tier.color}`} key={tier.name}>
-                <TierEmblem tier={tier.name} className="plan-tier-rank" />
-                <p className="tier-name">{tier.name.toUpperCase()}</p>
-                <p className="price">${tier.price}<small>/month</small></p>
-                <p className="tier-subtitle">{tier.subtitle}</p>
-                <ul><li>One curated CS2 skin per active cycle</li><li>Trade sent by the 14th</li><li>Private collection history</li><li>{tier.price >= 100 ? "Upgrade eligible" : "Standard fulfillment"}</li></ul>
-                <button className="button tier-button" type="button" onClick={() => void startCheckout(tier.name)} disabled={checkoutLoading === tier.name}>
-                  {checkoutLoading === tier.name ? "Opening secure checkout…" : signedIn ? `Choose ${tier.name} →` : `Create account →`}
-                </button>
-              </article>
-            ))}
+            {tiers.map((tier) => {
+              const isCurrent = currentTier === tier.name;
+              const hasMembership = Boolean(currentTier);
+              const isHigher =
+                hasMembership &&
+                currentTierPrice !== null &&
+                tier.price > currentTierPrice;
+              const isLower =
+                hasMembership &&
+                currentTierPrice !== null &&
+                tier.price < currentTierPrice;
+
+              return (
+                <article
+                  className={`plan tier-${tier.color} ${
+                    isCurrent ? "current-membership-plan" : ""
+                  }`}
+                  key={tier.name}
+                >
+                  {isCurrent && (
+                    <span className="current-membership-badge">
+                      CURRENT MEMBERSHIP
+                    </span>
+                  )}
+                  <TierEmblem tier={tier.name} className="plan-tier-rank" />
+                  <p className="tier-name">{tier.name.toUpperCase()}</p>
+                  <p className="price">
+                    ${tier.price}<small>/month</small>
+                  </p>
+                  <p className="tier-subtitle">{tier.subtitle}</p>
+                  <ul>
+                    <li>One curated CS2 skin per active cycle</li>
+                    <li>Trade sent by the 14th</li>
+                    <li>Private collection history</li>
+                    <li>
+                      {tier.price >= 100
+                        ? "Skin-upgrade program eligible"
+                        : "Standard fulfillment"}
+                    </li>
+                  </ul>
+
+                  {isCurrent ? (
+                    <button
+                      className="button cancel-membership-button"
+                      type="button"
+                      onClick={() => void openBillingPortal()}
+                    >
+                      Cancel membership
+                    </button>
+                  ) : (
+                    <button
+                      className="button tier-button"
+                      type="button"
+                      onClick={() =>
+                        void (
+                          hasMembership
+                            ? changeMembership(tier.name)
+                            : startCheckout(tier.name)
+                        )
+                      }
+                      disabled={checkoutLoading === tier.name}
+                    >
+                      {checkoutLoading === tier.name
+                        ? "Updating membership…"
+                        : !signedIn
+                          ? "Create account →"
+                          : isHigher
+                            ? `Upgrade to ${tier.name} →`
+                            : isLower
+                              ? `Downgrade to ${tier.name} →`
+                              : `Choose ${tier.name} →`}
+                    </button>
+                  )}
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
