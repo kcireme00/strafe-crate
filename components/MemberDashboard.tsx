@@ -64,6 +64,18 @@ function toRoman(value: number) {
   return result;
 }
 
+
+function formatNextFirst(value?: string | null) {
+  const source = value ? new Date(value) : new Date();
+  const base = Number.isNaN(source.getTime()) ? new Date() : source;
+  const first = new Date(base.getFullYear(), base.getMonth() + 1, 1);
+  return first.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 function formatDate(value?: string | null) {
   if (!value) return "Not scheduled";
   const date = new Date(value);
@@ -259,7 +271,7 @@ export default function MemberDashboard({ user }: { user: User }) {
           {profile.role === "admin" && (
             <a className="button secondary" href="/admin">Admin dashboard</a>
           )}
-          <button className="text-button" onClick={logout}>Log out</button>
+
         </div>
       </div>
 
@@ -352,9 +364,17 @@ export default function MemberDashboard({ user }: { user: User }) {
 
         <div className="member-side-metrics member-side-metrics-balanced">
           <article className="subscription-metric-card">
-            <small>SUBSCRIPTION</small>
-            <strong>{subscription?.cancel_at_period_end ? "Cancels at period end" : (subscription?.status || "Pending")}</strong>
-            <span>{subscription?.current_period_end ? `${subscription?.cancel_at_period_end ? "Access through" : "Renews"} ${formatDate(subscription.current_period_end)}` : "Choose a membership to activate billing"}</span>
+            <div className="subscription-metric-copy">
+              <small>SUBSCRIPTION</small>
+              <strong>{subscription?.cancel_at_period_end ? "Cancelling" : (subscription?.status || "Pending")}</strong>
+              <span>
+                {subscription?.status
+                  ? subscription.cancel_at_period_end
+                    ? `Access through ${formatNextFirst(subscription.current_period_end)}`
+                    : `Renews ${formatNextFirst(subscription.current_period_end)}`
+                  : "Choose a membership to activate billing"}
+              </span>
+            </div>
             {subscription?.status && <BillingPortalButton />}
           </article>
           <article>
