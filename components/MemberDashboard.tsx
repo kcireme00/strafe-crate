@@ -84,13 +84,14 @@ export default function MemberDashboard({ user }: { user: User }) {
   const [history, setHistory] = useState<any[]>([]);
   const [prestige, setPrestige] = useState<{ prestige_level: number; collections_completed: number; current_rotation: number }>({ prestige_level: 0, collections_completed: 0, current_rotation: 1 });
   const [featuredTrophies, setFeaturedTrophies] = useState<Array<{ slug: string; name: string; featured_slot: number }>>([]);
+  const [memberLevel, setMemberLevel] = useState(1);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [dropView, setDropView] = useState<"current" | "previous">("current");
 
   useEffect(() => {
     (async () => {
-      const [p, s, o, w, h, prestigeResult, featuredResult] = await Promise.all([
+      const [p, s, o, w, h, prestigeResult, featuredResult, playerCardResult] = await Promise.all([
         supabase
           .from("profiles")
           .select("id,full_name,display_name,email,role,steam_profile_url,steam_trade_url,account_approved,created_at")
@@ -117,7 +118,8 @@ export default function MemberDashboard({ user }: { user: User }) {
           .select("weapon_categories(name),rotation_number,received_at")
           .eq("user_id", user.id),
         (supabase as any).rpc("get_my_prestige_state"),
-        (supabase as any).rpc("get_my_featured_trophies")
+        (supabase as any).rpc("get_my_featured_trophies"),
+        (supabase as any).rpc("get_public_player_card", { target_user_id: user.id })
       ]);
 
       if (p.error) setMessage(p.error.message);
@@ -137,6 +139,12 @@ export default function MemberDashboard({ user }: { user: User }) {
             .filter((item) => item.featured_slot)
             .sort((a, b) => a.featured_slot - b.featured_slot),
         );
+      }
+      if (!playerCardResult.error) {
+        const cardRow = Array.isArray(playerCardResult.data)
+          ? playerCardResult.data[0]
+          : playerCardResult.data;
+        setMemberLevel(Math.max(1, Number(cardRow?.level ?? 1)));
       }
       setLoading(false);
     })();
@@ -308,6 +316,10 @@ export default function MemberDashboard({ user }: { user: User }) {
             </div>
 
             <div className="member-card-footer">
+              <div className="member-card-level-stat">
+                <small>LEVEL</small>
+                <strong>{memberLevel}</strong>
+              </div>
               <div>
                 <small>UPGRADES</small>
                 <strong>{tier?.upgrade_eligible ? "YES" : "NO"}</strong>
@@ -339,7 +351,7 @@ export default function MemberDashboard({ user }: { user: User }) {
         </div>
 
         <div className="member-side-metrics member-side-metrics-balanced">
-          <article>
+          <article className="subscription-metric-card">
             <small>SUBSCRIPTION</small>
             <strong>{subscription?.cancel_at_period_end ? "Cancels at period end" : (subscription?.status || "Pending")}</strong>
             <span>{subscription?.current_period_end ? `${subscription?.cancel_at_period_end ? "Access through" : "Renews"} ${formatDate(subscription.current_period_end)}` : "Choose a membership to activate billing"}</span>

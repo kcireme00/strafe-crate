@@ -1655,3 +1655,48 @@
   padding:6px 11px;
   margin-right:88px;
 }
+
+
+/* Final member-card and side-metric cleanup */
+.member-identity-balanced .member-card-footer{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  right:220px;
+  gap:13px;
+}
+.member-card-level-stat strong{
+  color:var(--tier-color);
+}
+.member-side-metrics-balanced .subscription-metric-card{
+  display:grid;
+  grid-template-rows:auto auto auto auto;
+  align-content:center;
+  gap:2px;
+  overflow:visible;
+  padding:13px 18px;
+}
+.member-side-metrics-balanced .subscription-metric-card small,
+.member-side-metrics-balanced .subscription-metric-card strong,
+.member-side-metrics-balanced .subscription-metric-card span{
+  position:static;
+  margin:0;
+  line-height:1.25;
+}
+.member-side-metrics-balanced .subscription-metric-card .button{
+  position:static;
+  width:100%;
+  min-height:32px;
+  height:32px;
+  margin:7px 0 0;
+  padding:0 10px;
+  line-height:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+@media(max-width:680px){
+  .member-identity-balanced .member-card-footer{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px 16px;
+    bottom:92px;
+  }
+}

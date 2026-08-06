@@ -179,7 +179,7 @@ export default function LiveChat({ user }: { user: User }) {
   }
 
   async function adminAction(
-    action: "delete_message" | "mute_1h" | "mute_24h" | "mute_7d" | "unmute",
+    action: "delete_message" | "mute_1h" | "mute_24h" | "mute_7d" | "mute_forever" | "unmute",
     targetUserId: string,
     messageId?: string,
   ) {
@@ -190,6 +190,7 @@ export default function LiveChat({ user }: { user: User }) {
       mute_1h: "mute this member for 1 hour",
       mute_24h: "mute this member for 24 hours",
       mute_7d: "mute this member for 7 days",
+      mute_forever: "mute this member permanently",
       unmute: "remove this member's mute",
     }[action];
 
@@ -323,6 +324,7 @@ export default function LiveChat({ user }: { user: User }) {
                           | "mute_1h"
                           | "mute_24h"
                           | "mute_7d"
+                          | "mute_forever"
                           | "unmute";
                         if (action) void adminAction(action, message.user_id, message.id);
                         event.currentTarget.value = "";
@@ -332,6 +334,7 @@ export default function LiveChat({ user }: { user: User }) {
                       <option value="mute_1h">Mute 1 hour</option>
                       <option value="mute_24h">Mute 24 hours</option>
                       <option value="mute_7d">Mute 7 days</option>
+                      <option value="mute_forever">Mute permanently</option>
                       <option value="unmute">Remove mute</option>
                     </select>
                   )}

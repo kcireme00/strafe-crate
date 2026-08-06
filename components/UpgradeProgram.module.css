@@ -23,3 +23,40 @@
 .checklist label{height:100%;min-height:72px;box-sizing:border-box}
 .warning,.existingRequest,.noItems,.lockMessage{box-sizing:border-box}
 .panel>*{min-width:0}
+
+/* Final acknowledgement alignment */
+.checklist{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  width:100%;
+}
+.checklist label{
+  width:100%;
+  min-height:72px;
+  margin:0;
+  padding:16px 18px;
+  display:grid;
+  grid-template-columns:22px minmax(0,1fr);
+  align-items:center;
+  column-gap:16px;
+  border:1px solid #273240;
+  border-radius:10px;
+  background:#090e15;
+  color:#b0bac7;
+  cursor:pointer;
+}
+.checklist input{
+  width:18px;
+  height:18px;
+  margin:0;
+  justify-self:center;
+  align-self:center;
+  accent-color:#ff7628;
+}
+.checklist label span{
+  width:100%;
+  margin:0;
+  text-align:left;
+  line-height:1.5;
+}
