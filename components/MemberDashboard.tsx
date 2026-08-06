@@ -78,7 +78,7 @@ export default function MemberDashboard({ user }: { user: User }) {
           .maybeSingle(),
         supabase
           .from("fulfillment_orders")
-          .select("id,billing_cycle,delivery_due_date,status,skin_name,exterior,weapon_categories(name)")
+          .select("id,billing_cycle,delivery_due_date,status,skin_name,exterior,weapon_categories(name),fulfillment_order_items(id,weapon_category,skin_name,exterior,acquisition_cost,sort_order)")
           .eq("user_id", user.id)
           .order("billing_cycle", { ascending: false }),
         supabase
@@ -266,14 +266,12 @@ export default function MemberDashboard({ user }: { user: User }) {
             <article className="trade-up-metric">
               <small>TRADE UP ACCESS</small>
               <strong>Eligible</strong>
-              <span>Send a previously delivered item before the monthly cutoff.</span>
+              <span>Review the upgrade terms and submit a next-cycle upgrade intent.</span>
               <a
                 className="button trade-up-button"
-                href="https://steamcommunity.com/tradeoffer/new/?partner=249207205&token=N1oHNTyP"
-                target="_blank"
-                rel="noreferrer noopener"
+                href="/upgrades"
               >
-                Open official trade link
+                Start an upgrade
               </a>
             </article>
           )}
@@ -293,7 +291,7 @@ export default function MemberDashboard({ user }: { user: User }) {
         <div className="order-timeline">
           {[
             ["Payment received", Boolean(current)],
-            ["Weapon assigned", Boolean(current?.weapon_categories?.name)],
+            ["Weapon assigned", Boolean(current?.weapon_categories?.name || current?.fulfillment_order_items?.some((item: any) => item.weapon_category))],
             ["Skin purchased", ["purchased","ready_to_send","trade_sent","accepted","completed","fulfilled"].includes(String(current?.status))],
             ["Trade sent", ["trade_sent","accepted","completed","fulfilled"].includes(String(current?.status))],
             ["Accepted", ["accepted","completed","fulfilled"].includes(String(current?.status))],
@@ -341,8 +339,8 @@ export default function MemberDashboard({ user }: { user: User }) {
             {orders.map((order: any) => (
               <div className="data-row" key={order.id}>
                 <span>{order.billing_cycle}</span>
-                <span>{order.weapon_categories?.name || "Not assigned"}</span>
-                <span>{order.skin_name || "Pending"}</span>
+                <span>{order.fulfillment_order_items?.length ? order.fulfillment_order_items.map((item: any) => item.weapon_category || "Unassigned").join(", ") : order.weapon_categories?.name || "Not assigned"}</span>
+                <span>{order.fulfillment_order_items?.length ? order.fulfillment_order_items.map((item: any) => [item.skin_name, item.exterior].filter(Boolean).join(" · ") || "Pending").join(" / ") : order.skin_name || "Pending"}</span>
                 <span>{order.status.replaceAll("_", " ")}</span>
               </div>
             ))}

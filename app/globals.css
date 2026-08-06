@@ -1075,3 +1075,15 @@
 
 /* Checkout fulfillment requirement */
 .checkout-guard-backdrop{position:fixed;inset:0;z-index:220;padding:24px;background:rgba(2,5,9,.78);backdrop-filter:blur(9px);display:grid;place-items:center}.checkout-guard-card{position:relative;width:min(590px,96vw);padding:30px;border:1px solid rgba(255,118,40,.42);border-radius:18px;background:radial-gradient(circle at 90% 5%,rgba(255,118,40,.1),transparent 38%),#0d131c;box-shadow:0 32px 100px rgba(0,0,0,.58)}.checkout-guard-card h2{margin:8px 0 10px;font-size:clamp(2rem,5vw,3.2rem);line-height:.98}.checkout-guard-card>p:not(.eyebrow){margin:0;color:var(--muted);line-height:1.6}.checkout-guard-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border:1px solid var(--line);border-radius:9px;background:#080d13;color:#fff;font-size:1.3rem;cursor:pointer}.checkout-guard-actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}.plan .tier-button{width:100%;font:inherit;cursor:pointer}
+
+
+/* Reward cache visual refresh */
+.reward-catalog-grid article{position:relative;overflow:hidden;isolation:isolate}
+.reward-cache-art{position:relative;width:72px;height:72px;display:grid;place-items:center;margin-bottom:4px;color:var(--cache-color,#ff7628)}
+.reward-cache-art svg{position:relative;z-index:2;width:58px;height:58px;fill:none;stroke:currentColor;stroke-width:3;stroke-linejoin:round;filter:drop-shadow(0 0 10px color-mix(in srgb,currentColor 35%,transparent))}
+.reward-cache-art .reward-cache-detail{stroke:currentColor;stroke-width:3;stroke-linecap:round}.reward-cache-art .reward-cache-detail-fill{fill:currentColor;stroke:none}
+.reward-cache-glow{position:absolute;inset:8px;border-radius:50%;background:currentColor;opacity:.12;filter:blur(12px)}
+.reward-cache-field{--cache-color:#438cff;background:radial-gradient(circle at 88% 5%,rgba(67,140,255,.11),transparent 38%),#090e15!important;border-color:rgba(67,140,255,.38)!important}
+.reward-cache-veteran{--cache-color:#a354f0;background:radial-gradient(circle at 88% 5%,rgba(163,84,240,.12),transparent 38%),#090e15!important;border-color:rgba(163,84,240,.4)!important}
+.reward-cache-arsenal{--cache-color:#e5b12f;background:radial-gradient(circle at 88% 5%,rgba(229,177,47,.12),transparent 38%),#090e15!important;border-color:rgba(229,177,47,.42)!important}
+.reward-catalog-grid article>small{color:var(--cache-color)!important}.reward-cache-value{display:flex!important;flex-direction:column!important}.reward-cache-value b{color:var(--cache-color)}

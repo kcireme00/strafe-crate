@@ -93,6 +93,12 @@ export default function Page() {
           agreements, fees, restrictions, and technical availability.
         </p>
       </section>
+      <section>
+        <h2>Multiple-skin fulfillment</h2>
+        <p>
+          A membership drop may be fulfilled with one skin or divided across several skins when necessary to meet the applicable membership value, inventory availability, or upgrade requirements. Each delivered item will appear in the member’s order history.
+        </p>
+      </section>
     </LegalPage>
   );
 }

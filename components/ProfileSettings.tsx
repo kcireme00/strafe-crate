@@ -96,7 +96,7 @@ export default function ProfileSettings() {
           <a href={STEAM_TRADE_URL_HELP} target="_blank" rel="noopener noreferrer">
             HERE
           </a>
-          , copy your Trade URL, and paste it below. A Steam profile URL is not required.
+          , copy your Trade URL, and paste it below.
         </span>
       </div>
 
