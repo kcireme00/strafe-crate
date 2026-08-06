@@ -5,8 +5,48 @@ import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Strafe Crate",
-  description: "Premium monthly CS2 skin memberships.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://strafecrate.com",
+  ),
+  title: {
+    default: "Strafe Crate",
+    template: "%s | Strafe Crate",
+  },
+  description:
+    "Premium monthly CS2 skin memberships with transparent fulfillment and collector progression.",
+  applicationName: "Strafe Crate",
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/strafe-crate-mark.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  openGraph: {
+    title: "Strafe Crate",
+    description:
+      "Premium monthly CS2 skin memberships with transparent fulfillment and collector progression.",
+    url: "https://strafecrate.com",
+    siteName: "Strafe Crate",
+    images: [
+      {
+        url: "/icon.png",
+        width: 512,
+        height: 512,
+        alt: "Strafe Crate logo",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Strafe Crate",
+    description:
+      "Premium monthly CS2 skin memberships with transparent fulfillment and collector progression.",
+    images: ["/icon.png"],
+  },
 };
 
 export default function Layout({
