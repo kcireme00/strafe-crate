@@ -194,7 +194,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     : subscription.latest_invoice?.id;
   if (latestInvoiceId) {
     const invoice = await stripe.invoices.retrieve(latestInvoiceId);
-    if (invoice.paid) await createPaidCycleOrder(userId, subscription, invoice);
+    if (invoice.status === "paid") {
+      await createPaidCycleOrder(userId, subscription, invoice);
+    }
   }
 }
 
