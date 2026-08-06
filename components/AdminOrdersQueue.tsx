@@ -220,6 +220,7 @@ export default function AdminOrdersQueue() {
         cycle_month: newOrder.cycle_month,
         tier_name: newOrder.tier_name || null,
         status: "draft",
+        is_test: true,
       })
       .select("id")
       .single();

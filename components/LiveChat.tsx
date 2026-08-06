@@ -18,6 +18,10 @@ type CommunityIdentityData = {
   featured_trophy_rarity: "common" | "rare" | "epic" | "legendary" | null;
 };
 
+
+const LINK_PATTERN = /(?:https?:\/\/|www\.|steamcommunity\.com\/tradeoffer|discord\.gg|[a-z0-9-]+\.(?:com|net|org|gg|io|co)(?:\/|\b))/i;
+const CLIENT_BLOCKED_LANGUAGE = /\b(?:fuck|fucking|shit|bitch|cunt|asshole|motherfucker|whore|slut)\b/i;
+
 type Message = {
   id: string;
   user_id: string;
@@ -116,17 +120,34 @@ export default function LiveChat({ user }: { user: User }) {
     const cleaned = body.trim();
     if (!cleaned) return;
 
+    if (LINK_PATTERN.test(cleaned)) {
+      setStatus("Links are not permitted in community chat.");
+      return;
+    }
+
+    if (CLIENT_BLOCKED_LANGUAGE.test(cleaned)) {
+      setStatus("That message contains language that is not permitted.");
+      return;
+    }
+
     setStatus("Sending...");
-    const { error } = await (supabase.from("chat_messages") as any).insert({
-      user_id: user.id,
-      body: cleaned,
+    const { data, error } = await (supabase as any).rpc("post_chat_message", {
+      message_body: cleaned,
     });
 
-    if (error) setStatus(error.message);
-    else {
-      setBody("");
-      setStatus("");
+    if (error) {
+      setStatus(error.message);
+      return;
     }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if (!result?.posted) {
+      setStatus(result?.message || "This message was blocked.");
+      return;
+    }
+
+    setBody("");
+    setStatus("");
   }
 
   async function openCard(userId: string, anchor: HTMLElement) {
@@ -167,7 +188,7 @@ export default function LiveChat({ user }: { user: User }) {
         </div>
         <div className="community-rules">
           <strong>Keep it clean.</strong>
-          <span>No spam, scams, harassment, trade-link impersonation, or credential requests.</span>
+          <span>No links, profanity, slurs, harassment, spam, scams, or credential requests. Violations trigger an automatic timeout.</span>
         </div>
       </div>
 
@@ -238,7 +259,7 @@ export default function LiveChat({ user }: { user: User }) {
                   void send();
                 }
               }}
-              placeholder="Message the Strafe Crate community..."
+              placeholder="Message the community — links and offensive language are blocked"
             />
 
             <div className="chat-input-actions">

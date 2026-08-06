@@ -4,6 +4,7 @@ import { useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
 import AdminOrdersQueue from "@/components/AdminOrdersQueue";
 import AdminChatReports from "@/components/AdminChatReports";
+import AdminBusinessMetrics from "@/components/AdminBusinessMetrics";
 import styles from "./admin.module.css";
 
 type Tab = "orders" | "reports";
@@ -33,6 +34,8 @@ function AdminHub() {
             <strong>FOUNDER ADMIN</strong>
           </div>
         </header>
+
+        <AdminBusinessMetrics />
 
         <nav className={styles.tabs} aria-label="Admin sections">
           {tabs.map(([value, label]) => (

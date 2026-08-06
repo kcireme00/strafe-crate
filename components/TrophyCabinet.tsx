@@ -98,14 +98,12 @@ export default function TrophyCabinet() {
   async function saveFeatured() {
     setStatus("Saving featured trophies...");
 
-    const trophyIds = selected.filter(
-      (value): value is string => Boolean(value),
-    );
-
     const { error } = await (supabase as any).rpc(
-      "set_my_featured_trophies",
+      "set_my_featured_trophy_slots",
       {
-        selected_trophy_ids: trophyIds,
+        slot_1_trophy_id: selected[0],
+        slot_2_trophy_id: selected[1],
+        slot_3_trophy_id: selected[2],
       },
     );
 

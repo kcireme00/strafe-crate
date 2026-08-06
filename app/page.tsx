@@ -27,6 +27,8 @@ const tiers = [
 
 export default function Home() {
   const [signedIn, setSignedIn] = useState(false);
+  const [fulfillmentReady, setFulfillmentReady] = useState(false);
+  const [checkoutNotice, setCheckoutNotice] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
 
@@ -36,12 +38,24 @@ export default function Home() {
 
     async function loadSession() {
       const { data: { session } } = await supabase.auth.getSession();
-      if (active) setSignedIn(Boolean(session?.user));
+      if (!active) return;
+      setSignedIn(Boolean(session?.user));
+
+      if (session?.user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("fulfillment_ready")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        if (active) setFulfillmentReady(Boolean((data as { fulfillment_ready?: boolean } | null)?.fulfillment_ready));
+      } else {
+        setFulfillmentReady(false);
+      }
     }
 
     void loadSession();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active) setSignedIn(Boolean(session?.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      if (active) void loadSession();
     });
 
     return () => {
@@ -49,6 +63,27 @@ export default function Home() {
       subscription.unsubscribe();
     };
   }, []);
+
+
+  function startCheckout(tierName: string) {
+    if (!signedIn) {
+      window.location.href = "/signup";
+      return;
+    }
+
+    if (!fulfillmentReady) {
+      setCheckoutNotice(tierName);
+      return;
+    }
+
+    const checkoutUrl = checkoutLinks[tierName];
+    if (!checkoutUrl) {
+      setCheckoutNotice("missing-link");
+      return;
+    }
+
+    window.location.href = checkoutUrl;
+  }
 
   function updateTilt(clientX: number, clientY: number, strength = 1) {
     const card = cardRef.current;
@@ -154,7 +189,9 @@ export default function Home() {
                 <p className="price">${tier.price}<small>/month</small></p>
                 <p className="tier-subtitle">{tier.subtitle}</p>
                 <ul><li>One curated CS2 skin per active cycle</li><li>Trade sent by the 14th</li><li>Private collection history</li><li>{tier.price >= 100 ? "Upgrade eligible" : "Standard fulfillment"}</li></ul>
-                <Link className="button tier-button" href={signedIn ? (checkoutLinks[tier.name] || "/dashboard") : "/signup"}>{signedIn ? `Choose ${tier.name} →` : `Create account →`}</Link>
+                <button className="button tier-button" type="button" onClick={() => startCheckout(tier.name)}>
+                  {signedIn ? `Choose ${tier.name} →` : `Create account →`}
+                </button>
               </article>
             ))}
           </div>
@@ -164,6 +201,25 @@ export default function Home() {
       <TierMemberTracker />
 
       <section className="trust-center shell"><article><strong>Transparent valuation</strong><p>A defined Steam reference-value floor for every tier.</p></article><article><strong>Secure billing</strong><p>Subscription payments are processed securely through Stripe.</p></article><article><strong>Collection rotation</strong><p>The system aims to avoid duplicate weapon categories until a rotation is complete.</p></article></section>
+
+      {checkoutNotice && (
+        <div className="checkout-guard-backdrop" onMouseDown={() => setCheckoutNotice(null)}>
+          <section className="checkout-guard-card" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
+            <button className="checkout-guard-close" type="button" onClick={() => setCheckoutNotice(null)}>×</button>
+            <p className="eyebrow">DELIVERY REQUIREMENT</p>
+            <h2>{checkoutNotice === "missing-link" ? "Checkout is not configured." : "Complete your Steam delivery profile."}</h2>
+            <p>
+              {checkoutNotice === "missing-link"
+                ? "This membership payment link has not been connected yet. Please contact support before attempting checkout."
+                : `Before purchasing ${checkoutNotice}, save a valid Steam profile URL and Steam trade URL. This prevents failed or misdirected fulfillment.`}
+            </p>
+            <div className="checkout-guard-actions">
+              {checkoutNotice !== "missing-link" && <Link className="button primary" href="/settings">Complete delivery profile</Link>}
+              <button className="button secondary" type="button" onClick={() => setCheckoutNotice(null)}>Go back</button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
