@@ -44,6 +44,26 @@ function formatMonth(value?: string | null) {
   return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
+
+function toRoman(value: number) {
+  const number = Math.max(1, Math.floor(value || 1));
+  const numerals: Array<[number, string]> = [
+    [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+    [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
+  ];
+
+  let remaining = number;
+  let result = "";
+  for (const [amount, symbol] of numerals) {
+    while (remaining >= amount) {
+      result += symbol;
+      remaining -= amount;
+    }
+  }
+  return result;
+}
+
 function formatDate(value?: string | null) {
   if (!value) return "Not scheduled";
   const date = new Date(value);
@@ -235,7 +255,7 @@ export default function MemberDashboard({ user }: { user: User }) {
         </div>
       </div>
 
-      <section className="member-identity-stack">
+      <section className="member-identity-layout member-identity-balanced">
         <div className="member-card-stage">
           <div
             ref={cardRef}
@@ -285,7 +305,6 @@ export default function MemberDashboard({ user }: { user: User }) {
             <div className="member-card-main">
               <small>MEMBER</small>
               <h2>{memberName}</h2>
-              <p>{tier ? `${tier.name} member` : "Choose a membership to activate your collection."}</p>
             </div>
 
             <div className="member-card-footer">
@@ -295,7 +314,7 @@ export default function MemberDashboard({ user }: { user: User }) {
               </div>
               <div>
                 <small>PRESTIGE</small>
-                <strong>{prestige.prestige_level > 0 ? `P${prestige.prestige_level}` : "UNRANKED"}</strong>
+                <strong>{toRoman(Math.max(1, prestige.prestige_level))}</strong>
               </div>
               <div>
                 <small>MEMBER SINCE</small>
@@ -319,7 +338,7 @@ export default function MemberDashboard({ user }: { user: User }) {
           <p className="member-card-hint">Move or gently drag the card to view the finish.</p>
         </div>
 
-        <div className="member-dashboard-metrics">
+        <div className="member-side-metrics member-side-metrics-balanced">
           <article>
             <small>SUBSCRIPTION</small>
             <strong>{subscription?.cancel_at_period_end ? "Cancels at period end" : (subscription?.status || "Pending")}</strong>
@@ -455,7 +474,7 @@ export default function MemberDashboard({ user }: { user: User }) {
           </div>
           <aside className="weapon-prestige-summary">
             <small>PRESTIGE</small>
-            <strong>{prestige.prestige_level > 0 ? `Prestige ${prestige.prestige_level}` : "Unranked"}</strong>
+            <strong>Prestige {toRoman(Math.max(1, prestige.prestige_level))}</strong>
             <span>{prestige.collections_completed} completed collection{prestige.collections_completed === 1 ? "" : "s"} · Rotation {prestige.current_rotation}</span>
           </aside>
         </div>

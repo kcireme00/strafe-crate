@@ -1534,3 +1534,114 @@
     gap:16px;
   }
 }
+
+
+/* Balanced member identity layout: card left, three equal metrics right */
+.member-identity-balanced{
+  display:grid;
+  grid-template-columns:minmax(0,2fr) minmax(300px,.95fr);
+  gap:18px;
+  align-items:start;
+  margin-bottom:24px;
+}
+.member-identity-balanced .member-card-stage{
+  min-width:0;
+}
+.member-identity-balanced .member-tier-card{
+  width:100%;
+  height:330px;
+  min-height:330px;
+  max-height:330px;
+}
+.member-side-metrics-balanced{
+  display:grid;
+  grid-template-rows:repeat(3,102px);
+  gap:12px;
+  height:330px;
+}
+.member-side-metrics-balanced article{
+  min-height:0;
+  height:102px;
+  padding:15px 18px;
+  justify-content:center;
+}
+.member-side-metrics-balanced article strong{
+  margin:4px 0 1px;
+  font-size:1.13rem;
+}
+.member-side-metrics-balanced article span{
+  font-size:.7rem;
+}
+.member-side-metrics-balanced article .button{
+  min-height:36px;
+  margin-top:8px;
+  padding:8px 10px;
+  font-size:.67rem;
+}
+.member-side-metrics-balanced .trade-up-metric{
+  display:none;
+}
+
+/* Keep the card clean and prevent bottom labels from colliding */
+.member-identity-balanced .member-card-main{
+  margin-top:48px;
+}
+.member-identity-balanced .member-card-main h2{
+  margin-bottom:0;
+}
+.member-identity-balanced .member-card-footer{
+  left:28px;
+  right:220px;
+  bottom:29px;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+.member-identity-balanced .member-card-footer small{
+  white-space:nowrap;
+}
+.member-identity-balanced .member-card-footer strong{
+  margin-top:5px;
+  white-space:nowrap;
+}
+.member-identity-balanced .member-card-trophies{
+  right:28px;
+  bottom:24px;
+}
+.member-identity-balanced .member-card-hint{
+  margin-top:10px;
+}
+
+@media(max-width:900px){
+  .member-identity-balanced{
+    grid-template-columns:1fr;
+  }
+  .member-side-metrics-balanced{
+    height:auto;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:none;
+  }
+  .member-side-metrics-balanced article{
+    height:auto;
+    min-height:124px;
+  }
+}
+@media(max-width:680px){
+  .member-side-metrics-balanced{
+    grid-template-columns:1fr;
+  }
+  .member-identity-balanced .member-tier-card{
+    height:390px;
+    min-height:390px;
+    max-height:none;
+  }
+  .member-identity-balanced .member-card-footer{
+    right:28px;
+    bottom:92px;
+  }
+  .member-identity-balanced .member-card-trophies{
+    left:28px;
+    right:auto;
+    bottom:25px;
+  }
+}
