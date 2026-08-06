@@ -1087,3 +1087,21 @@
 .reward-cache-veteran{--cache-color:#a354f0;background:radial-gradient(circle at 88% 5%,rgba(163,84,240,.12),transparent 38%),#090e15!important;border-color:rgba(163,84,240,.4)!important}
 .reward-cache-arsenal{--cache-color:#e5b12f;background:radial-gradient(circle at 88% 5%,rgba(229,177,47,.12),transparent 38%),#090e15!important;border-color:rgba(229,177,47,.42)!important}
 .reward-catalog-grid article>small{color:var(--cache-color)!important}.reward-cache-value{display:flex!important;flex-direction:column!important}.reward-cache-value b{color:var(--cache-color)}
+
+.billing-portal-control {
+  margin-top: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.billing-portal-button {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  font-size: .68rem;
+}
+
+.billing-portal-control small {
+  color: #ff914e;
+  line-height: 1.35;
+}

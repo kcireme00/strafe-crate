@@ -79,6 +79,7 @@ export default function SiteHeader() {
             <Link href="/trophies">Trophies</Link>
             <Link href="/community">Community</Link>
             <Link href="/settings">Settings</Link>
+            {profile?.role === "admin" && <Link href="/upgrades">Upgrades</Link>}
             {profile?.role === "admin" && <Link href="/admin">Admin</Link>}
             <Link className="nav-member" href="/dashboard">{memberName}</Link>
             <button className="nav-logout" type="button" onClick={logOut}>

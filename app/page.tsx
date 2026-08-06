@@ -7,13 +7,13 @@ import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
 import TierMemberTracker from "@/components/TierMemberTracker";
 
-const checkoutLinks: Record<string, string | undefined> = {
-  Recruit: process.env.NEXT_PUBLIC_STRIPE_RECRUIT_URL,
-  Operative: process.env.NEXT_PUBLIC_STRIPE_OPERATIVE_URL,
-  Vanguard: process.env.NEXT_PUBLIC_STRIPE_VANGUARD_URL,
-  Elite: process.env.NEXT_PUBLIC_STRIPE_ELITE_URL,
-  Master: process.env.NEXT_PUBLIC_STRIPE_MASTER_URL,
-  Prestige: process.env.NEXT_PUBLIC_STRIPE_PRESTIGE_URL,
+const checkoutLinks: Record<string, string> = {
+  Recruit: process.env.NEXT_PUBLIC_STRIPE_RECRUIT_URL || "https://buy.stripe.com/6oUaEY5YQc292HO6iBebu05",
+  Operative: process.env.NEXT_PUBLIC_STRIPE_OPERATIVE_URL || "https://buy.stripe.com/eVq00kevmc29dms9uNebu04",
+  Vanguard: process.env.NEXT_PUBLIC_STRIPE_VANGUARD_URL || "https://buy.stripe.com/7sY14o0Ew7LTaag8qJebu03",
+  Elite: process.env.NEXT_PUBLIC_STRIPE_ELITE_URL || "https://buy.stripe.com/9B614o3QI5DLeqw5exebu02",
+  Master: process.env.NEXT_PUBLIC_STRIPE_MASTER_URL || "https://buy.stripe.com/5kQaEYgDu7LTbekfTbebu01",
+  Prestige: process.env.NEXT_PUBLIC_STRIPE_PRESTIGE_URL || "https://buy.stripe.com/3cI7sM0Ewfel1DK0Yhebu00",
 };
 
 const tiers = [
@@ -28,6 +28,7 @@ const tiers = [
 export default function Home() {
   const [signedIn, setSignedIn] = useState(false);
   const [fulfillmentReady, setFulfillmentReady] = useState(false);
+  const [checkoutUser, setCheckoutUser] = useState<{ id: string; email: string } | null>(null);
   const [checkoutNotice, setCheckoutNotice] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
@@ -40,6 +41,7 @@ export default function Home() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!active) return;
       setSignedIn(Boolean(session?.user));
+      setCheckoutUser(session?.user ? { id: session.user.id, email: session.user.email ?? "" } : null);
 
       if (session?.user) {
         const { data } = await supabase
@@ -82,7 +84,10 @@ export default function Home() {
       return;
     }
 
-    window.location.href = checkoutUrl;
+    const url = new URL(checkoutUrl);
+    if (checkoutUser?.id) url.searchParams.set("client_reference_id", checkoutUser.id);
+    if (checkoutUser?.email) url.searchParams.set("locked_prefilled_email", checkoutUser.email);
+    window.location.href = url.toString();
   }
 
   function updateTilt(clientX: number, clientY: number, strength = 1) {

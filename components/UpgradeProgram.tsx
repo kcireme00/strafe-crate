@@ -40,12 +40,18 @@ export default function UpgradeProgram() {
   const [checks, setChecks] = useState<boolean[]>(acknowledgements.map(() => false));
   const [status, setStatus] = useState("Loading upgrade access...");
   const [submitting, setSubmitting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   async function load() {
-    const [eligibilityResult, itemsResult] = await Promise.all([
+    const { data: { user } } = await supabase.auth.getUser();
+    const [eligibilityResult, itemsResult, profileResult] = await Promise.all([
       (supabase as any).rpc("get_my_upgrade_eligibility"),
       (supabase as any).rpc("get_my_upgrade_items"),
+      user
+        ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
     ]);
+    setIsAdmin((profileResult.data as { role?: string } | null)?.role === "admin");
 
     if (eligibilityResult.error) {
       setStatus(eligibilityResult.error.message);
@@ -74,6 +80,7 @@ export default function UpgradeProgram() {
   const canProceed = Boolean(
     eligibility?.eligible && selectedItem && allChecked && !submitting,
   );
+  const canViewProgram = Boolean(eligibility?.eligible || isAdmin);
 
   async function proceed() {
     if (!canProceed) return;
@@ -123,17 +130,22 @@ export default function UpgradeProgram() {
             <h2>{eligibility?.tier_name ?? "Membership required"}</h2>
           </div>
           <span className={eligibility?.eligible ? styles.eligible : styles.locked}>
-            {eligibility?.eligible ? "ELIGIBLE" : "ELITE+ REQUIRED"}
+            {eligibility?.eligible ? "ELIGIBLE" : isAdmin ? "ADMIN PREVIEW" : "ELITE+ REQUIRED"}
           </span>
         </div>
 
-        {!eligibility?.eligible ? (
+        {!canViewProgram ? (
           <div className={styles.lockMessage}>
             Upgrade access is available to active Elite, Master, and Prestige members.
           </div>
         ) : (
           <>
-            {eligibility.existing_request_id && (
+            {isAdmin && !eligibility?.eligible && (
+              <div className={styles.existingRequest}>
+                Admin preview mode. Members only see submission controls when an active Elite, Master, or Prestige subscription is synced from Stripe.
+              </div>
+            )}
+            {eligibility?.existing_request_id && (
               <div className={styles.existingRequest}>
                 A request is already recorded for {new Date(eligibility.target_cycle).toLocaleDateString("en-US", { month: "long", year: "numeric" })}. Current status: <strong>{eligibility.existing_status?.replaceAll("_", " ")}</strong>.
               </div>
@@ -175,7 +187,7 @@ export default function UpgradeProgram() {
               ))}
             </div>
 
-            <button className={styles.proceed} type="button" disabled={!canProceed} onClick={() => void proceed()}>
+            <button className={styles.proceed} type="button" disabled={!canProceed || (isAdmin && !eligibility?.eligible)} onClick={() => void proceed()}>
               {submitting ? "Recording request..." : "Proceed to official Steam trade"}
             </button>
           </>

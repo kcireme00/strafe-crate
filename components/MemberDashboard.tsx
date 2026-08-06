@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import TierEmblem from "@/components/TierEmblem";
 import DashboardCollectorSummary from "@/components/DashboardCollectorSummary";
+import BillingPortalButton from "@/components/BillingPortalButton";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 
@@ -60,12 +61,13 @@ export default function MemberDashboard({ user }: { user: User }) {
   const [orders, setOrders] = useState<any[]>([]);
   const [weapons, setWeapons] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
+  const [prestige, setPrestige] = useState<{ prestige_level: number; collections_completed: number; current_rotation: number }>({ prestige_level: 0, collections_completed: 0, current_rotation: 1 });
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const [p, s, o, w, h] = await Promise.all([
+      const [p, s, o, w, h, prestigeResult] = await Promise.all([
         supabase
           .from("profiles")
           .select("id,full_name,display_name,email,role,steam_profile_url,steam_trade_url,account_approved,created_at")
@@ -90,7 +92,8 @@ export default function MemberDashboard({ user }: { user: User }) {
         supabase
           .from("member_weapon_history")
           .select("weapon_categories(name),rotation_number,received_at")
-          .eq("user_id", user.id)
+          .eq("user_id", user.id),
+        (supabase as any).rpc("get_my_prestige_state")
       ]);
 
       if (p.error) setMessage(p.error.message);
@@ -100,6 +103,10 @@ export default function MemberDashboard({ user }: { user: User }) {
       setOrders(o.data || []);
       setWeapons(w.data || []);
       setHistory(h.data || []);
+      if (!prestigeResult.error) {
+        const prestigeRow = Array.isArray(prestigeResult.data) ? prestigeResult.data[0] : prestigeResult.data;
+        if (prestigeRow) setPrestige(prestigeRow);
+      }
       setLoading(false);
     })();
   }, [supabase, user.id]);
@@ -247,13 +254,19 @@ export default function MemberDashboard({ user }: { user: User }) {
         <div className="member-side-metrics">
           <article>
             <small>SUBSCRIPTION</small>
-            <strong>{subscription?.status || "Pending"}</strong>
-            <span>{subscription?.current_period_end ? `Renews ${formatDate(subscription.current_period_end)}` : "Choose a membership to activate billing"}</span>
+            <strong>{subscription?.cancel_at_period_end ? "Cancels at period end" : (subscription?.status || "Pending")}</strong>
+            <span>{subscription?.current_period_end ? `${subscription?.cancel_at_period_end ? "Access through" : "Renews"} ${formatDate(subscription.current_period_end)}` : "Choose a membership to activate billing"}</span>
+            {subscription?.status && <BillingPortalButton />}
           </article>
           <article>
             <small>CURRENT ORDER</small>
             <strong>{current?.status?.replaceAll("_", " ") || "No active order"}</strong>
             <span>{current ? `Due ${formatDate(current.delivery_due_date)}` : "Created after payment"}</span>
+          </article>
+          <article>
+            <small>PRESTIGE</small>
+            <strong>{prestige.prestige_level > 0 ? `Prestige ${prestige.prestige_level}` : "Unranked"}</strong>
+            <span>{prestige.collections_completed} completed collection{prestige.collections_completed === 1 ? "" : "s"} · Rotation {prestige.current_rotation}</span>
           </article>
           <article>
             <small>WEAPON COVERAGE</small>
