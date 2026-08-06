@@ -62,13 +62,14 @@ export default function MemberDashboard({ user }: { user: User }) {
   const [weapons, setWeapons] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
   const [prestige, setPrestige] = useState<{ prestige_level: number; collections_completed: number; current_rotation: number }>({ prestige_level: 0, collections_completed: 0, current_rotation: 1 });
+  const [featuredTrophies, setFeaturedTrophies] = useState<Array<{ slug: string; name: string; featured_slot: number }>>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [dropView, setDropView] = useState<"current" | "previous">("current");
 
   useEffect(() => {
     (async () => {
-      const [p, s, o, w, h, prestigeResult] = await Promise.all([
+      const [p, s, o, w, h, prestigeResult, featuredResult] = await Promise.all([
         supabase
           .from("profiles")
           .select("id,full_name,display_name,email,role,steam_profile_url,steam_trade_url,account_approved,created_at")
@@ -94,7 +95,8 @@ export default function MemberDashboard({ user }: { user: User }) {
           .from("member_weapon_history")
           .select("weapon_categories(name),rotation_number,received_at")
           .eq("user_id", user.id),
-        (supabase as any).rpc("get_my_prestige_state")
+        (supabase as any).rpc("get_my_prestige_state"),
+        (supabase as any).rpc("get_my_featured_trophies")
       ]);
 
       if (p.error) setMessage(p.error.message);
@@ -107,6 +109,13 @@ export default function MemberDashboard({ user }: { user: User }) {
       if (!prestigeResult.error) {
         const prestigeRow = Array.isArray(prestigeResult.data) ? prestigeResult.data[0] : prestigeResult.data;
         if (prestigeRow) setPrestige(prestigeRow);
+      }
+      if (!featuredResult.error) {
+        setFeaturedTrophies(
+          ((featuredResult.data ?? []) as Array<{ slug: string; name: string; featured_slot: number }>)
+            .filter((item) => item.featured_slot)
+            .sort((a, b) => a.featured_slot - b.featured_slot),
+        );
       }
       setLoading(false);
     })();
@@ -225,7 +234,7 @@ export default function MemberDashboard({ user }: { user: User }) {
         </div>
       </div>
 
-      <section className="member-identity-layout">
+      <section className="member-identity-stack">
         <div className="member-card-stage">
           <div
             ref={cardRef}
@@ -275,20 +284,41 @@ export default function MemberDashboard({ user }: { user: User }) {
             <div className="member-card-main">
               <small>MEMBER</small>
               <h2>{memberName}</h2>
-              <p>{tier ? `${tierPrice} monthly membership · $${referenceMinimum}+ reference-value floor` : "Choose a membership to activate your collection."}</p>
+              <p>{tier ? `${tier.name} member` : "Choose a membership to activate your collection."}</p>
             </div>
 
             <div className="member-card-footer">
-              <div><small>REFERENCE VALUE</small><strong>{referenceMinimum ? `$${referenceMinimum}+` : "PENDING"}</strong></div>
-              <div><small>UPGRADES</small><strong>{tier?.upgrade_eligible ? "ELIGIBLE" : "STANDARD"}</strong></div>
-              <div><small>PRESTIGE</small><strong>{prestige.prestige_level > 0 ? prestige.prestige_level : "UNRANKED"}</strong></div>
-              <div><small>MEMBER SINCE</small><strong>{formatMonth(profile.created_at)}</strong></div>
+              <div>
+                <small>UPGRADES</small>
+                <strong>{tier?.upgrade_eligible ? "YES" : "NO"}</strong>
+              </div>
+              <div>
+                <small>PRESTIGE</small>
+                <strong>{prestige.prestige_level > 0 ? `P${prestige.prestige_level}` : "UNRANKED"}</strong>
+              </div>
+              <div>
+                <small>MEMBER SINCE</small>
+                <strong>{formatMonth(profile.created_at)}</strong>
+              </div>
+            </div>
+
+            <div className="member-card-trophies" aria-label="Featured trophies">
+              {[0, 1, 2].map((index) => {
+                const featured = featuredTrophies.find((item) => item.featured_slot === index + 1);
+                return featured ? (
+                  <span className="member-card-trophy active" key={featured.slug || index} title={featured.name}>
+                    <TrophyEmblem trophy={featured.slug} className="member-card-trophy-emblem" />
+                  </span>
+                ) : (
+                  <span className="member-card-trophy" key={index} aria-hidden="true">◇</span>
+                );
+              })}
             </div>
           </div>
           <p className="member-card-hint">Move or gently drag the card to view the finish.</p>
         </div>
 
-        <div className="member-side-metrics">
+        <div className="member-dashboard-metrics">
           <article>
             <small>SUBSCRIPTION</small>
             <strong>{subscription?.cancel_at_period_end ? "Cancels at period end" : (subscription?.status || "Pending")}</strong>

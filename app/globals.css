@@ -1397,3 +1397,140 @@
   color:#ff6d82;
   cursor:pointer;
 }
+
+
+/* Premium member card cleanup */
+.member-identity-stack{
+  display:grid;
+  gap:14px;
+  margin-bottom:24px;
+}
+.member-card-stage{
+  width:100%;
+}
+.member-tier-card{
+  width:100%;
+  min-height:330px;
+  max-height:330px;
+}
+.member-card-main{
+  margin-top:42px;
+}
+.member-card-main p{
+  color:var(--tier-color);
+  font-size:.82rem;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+.member-card-footer{
+  left:28px;
+  right:220px;
+  bottom:28px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+.member-card-footer strong{
+  font-size:.8rem;
+}
+.member-card-footer>div:nth-child(1) strong,
+.member-card-footer>div:nth-child(2) strong{
+  color:var(--tier-color);
+}
+.member-card-trophies{
+  position:absolute;
+  right:28px;
+  bottom:25px;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.member-card-trophy{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border:1px dashed rgba(255,255,255,.24);
+  border-radius:11px;
+  background:rgba(8,12,18,.75);
+  color:#6f7d90;
+  font-size:1rem;
+}
+.member-card-trophy.active{
+  border-style:solid;
+  border-color:color-mix(in srgb,var(--tier-color) 55%,transparent);
+  color:var(--tier-color);
+  box-shadow:inset 0 0 18px var(--tier-soft);
+}
+.member-card-trophy-emblem{
+  width:24px;
+  height:24px;
+}
+.member-dashboard-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.member-dashboard-metrics article{
+  min-height:132px;
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:linear-gradient(145deg,#121722,#0d1119);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.member-dashboard-metrics small{
+  color:#91a3b9;
+  font-size:.62rem;
+  letter-spacing:.09em;
+}
+.member-dashboard-metrics strong{
+  margin:5px 0 2px;
+  font-size:1.25rem;
+  text-transform:capitalize;
+}
+.member-dashboard-metrics span{
+  color:var(--muted);
+  font-size:.75rem;
+}
+.member-dashboard-metrics .button{
+  width:100%;
+  margin-top:12px;
+}
+.member-dashboard-metrics .trade-up-metric{
+  grid-column:1/-1;
+}
+@media(max-width:760px){
+  .member-tier-card{
+    min-height:390px;
+    max-height:none;
+  }
+  .member-card-footer{
+    right:28px;
+    bottom:88px;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .member-card-trophies{
+    left:28px;
+    right:auto;
+    bottom:24px;
+  }
+  .member-dashboard-metrics{
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:560px){
+  .member-card-footer{
+    grid-template-columns:1fr;
+    gap:8px;
+    bottom:94px;
+  }
+  .member-card-footer>div{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+}
