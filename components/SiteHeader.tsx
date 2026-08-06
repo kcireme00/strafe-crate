@@ -22,34 +22,55 @@ export default function SiteHeader() {
     const supabase = getSupabase();
     let active = true;
 
-    async function loadHeader() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!active) return;
-
-      if (!session?.user) {
-        setSignedIn(false);
-        setProfile(null);
-        setReady(true);
-        return;
-      }
-
-      setSignedIn(true);
-
+    async function loadProfile(userId: string) {
       const { data } = await supabase
         .from("profiles")
         .select("full_name,display_name,role")
-        .eq("id", session.user.id)
-        .single();
+        .eq("id", userId)
+        .maybeSingle();
 
       if (!active) return;
       setProfile((data as HeaderProfile | null) ?? null);
+    }
+
+    async function loadHeader() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!active) return;
+
+      const sessionUser = session?.user ?? null;
+      setSignedIn(Boolean(sessionUser));
       setReady(true);
+
+      if (!sessionUser) {
+        setProfile(null);
+        return;
+      }
+
+      await loadProfile(sessionUser.id);
     }
 
     void loadHeader();
 
-    const { data: { subscription } } =
-      supabase.auth.onAuthStateChange(() => void loadHeader());
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+
+      const sessionUser = session?.user ?? null;
+      setSignedIn(Boolean(sessionUser));
+      setReady(true);
+
+      if (!sessionUser) {
+        setProfile(null);
+        return;
+      }
+
+      // Run profile retrieval outside the auth callback stack.
+      window.setTimeout(() => void loadProfile(sessionUser.id), 0);
+    });
 
     return () => {
       active = false;

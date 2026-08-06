@@ -16,6 +16,8 @@ export default function AuthForm({ mode }: { mode: Mode }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
   const [rememberMe, setRememberMe] = useState(() =>
     getRememberMePreference(),
   );
@@ -35,11 +37,36 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         return;
       }
       if (mode === "signup") {
-        if (!acceptedTerms) throw new Error("You must agree to the Terms of Service and Privacy Policy.");
-        const base = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
-        const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName }, emailRedirectTo: `${base}/auth/callback` } });
+        if (!acceptedTerms) {
+          throw new Error(
+            "You must agree to the Terms of Service and Privacy Policy.",
+          );
+        }
+
+        const base =
+          process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: fullName },
+            emailRedirectTo: `${base}/auth/callback`,
+          },
+        });
+
         if (error) throw error;
-        setMessage("Account created. Open the confirmation email before logging in.");
+
+        // With email confirmation enabled, Supabase returns a user but no
+        // active session. Show a dedicated trust-building verification view.
+        if (data.user && !data.session) {
+          setVerificationEmail(email);
+          return;
+        }
+
+        // This fallback covers projects where email confirmation is disabled.
+        window.location.assign("/dashboard");
+        return;
       }
       if (mode === "forgot") {
         const base = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
@@ -56,6 +83,87 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Something went wrong.");
     } finally { setLoading(false); }
+  }
+
+
+  async function resendVerification() {
+    if (!verificationEmail || resending) return;
+
+    setResending(true);
+    setMessage("");
+
+    try {
+      const base =
+        process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+
+      const { error } = await getSupabase().auth.resend({
+        type: "signup",
+        email: verificationEmail,
+        options: {
+          emailRedirectTo: `${base}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+      setMessage("A new verification email was sent.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to resend the verification email.",
+      );
+    } finally {
+      setResending(false);
+    }
+  }
+
+  if (mode === "signup" && verificationEmail) {
+    return (
+      <section className="verify-email-card" aria-live="polite">
+        <div className="verify-email-icon" aria-hidden="true">
+          ✓
+        </div>
+
+        <p className="eyebrow">ONE MORE STEP</p>
+        <h2>Verify your email</h2>
+
+        <p className="verify-email-lead">
+          We sent a secure verification link to:
+        </p>
+
+        <strong className="verify-email-address">
+          {verificationEmail}
+        </strong>
+
+        <div className="verify-email-steps">
+          <span><b>1</b> Open the email from Strafe Crate.</span>
+          <span><b>2</b> Select <strong>Verify email</strong>.</span>
+          <span><b>3</b> Return here and sign in.</span>
+        </div>
+
+        <a className="button primary full" href="/login">
+          Continue to sign in
+        </a>
+
+        <button
+          className="verify-email-resend"
+          type="button"
+          disabled={resending}
+          onClick={() => void resendVerification()}
+        >
+          {resending ? "Sending…" : "Didn’t receive it? Resend email"}
+        </button>
+
+        <p className="verify-email-help">
+          Check your spam or promotions folder. Support:{" "}
+          <a href="mailto:strafecrate@gmail.com">
+            strafecrate@gmail.com
+          </a>
+        </p>
+
+        {message && <p className="form-message">{message}</p>}
+      </section>
+    );
   }
 
   return <form className="auth-form" onSubmit={submit}>

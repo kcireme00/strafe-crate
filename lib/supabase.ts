@@ -3,9 +3,9 @@ import { createClient } from "@supabase/supabase-js";
 type BrowserClient = ReturnType<typeof createClient>;
 
 let browserClient: BrowserClient | undefined;
-let browserClientPersistence: boolean | undefined;
 
 const REMEMBER_ME_KEY = "strafe-crate-remember-me";
+const AUTH_STORAGE_KEY = "strafe-crate-auth";
 
 function readRememberMePreference() {
   if (typeof window === "undefined") return true;
@@ -14,27 +14,51 @@ function readRememberMePreference() {
 
 export function setRememberMePreference(remember: boolean) {
   if (typeof window === "undefined") return;
-
   window.localStorage.setItem(REMEMBER_ME_KEY, String(remember));
-
-  // Recreate the browser client if the requested storage mode changed.
-  // This runs before sign-in, so the new session is written to the correct store.
-  if (browserClientPersistence !== remember) {
-    browserClient = undefined;
-    browserClientPersistence = undefined;
-  }
 }
 
 export function getRememberMePreference() {
   return readRememberMePreference();
 }
 
-export function getSupabase() {
-  const remember = readRememberMePreference();
+/**
+ * One storage adapter is shared by the entire site.
+ *
+ * It checks both storage locations when reading so the header, AuthGuard,
+ * dashboard, and Checkout all see the same session. New session writes follow
+ * the current Remember Me preference and remove stale copies.
+ */
+const browserAuthStorage = {
+  getItem(key: string) {
+    if (typeof window === "undefined") return null;
 
-  if (browserClient && browserClientPersistence === remember) {
-    return browserClient;
-  }
+    return (
+      window.localStorage.getItem(key) ??
+      window.sessionStorage.getItem(key)
+    );
+  },
+
+  setItem(key: string, value: string) {
+    if (typeof window === "undefined") return;
+
+    if (readRememberMePreference()) {
+      window.localStorage.setItem(key, value);
+      window.sessionStorage.removeItem(key);
+    } else {
+      window.sessionStorage.setItem(key, value);
+      window.localStorage.removeItem(key);
+    }
+  },
+
+  removeItem(key: string) {
+    if (typeof window === "undefined") return;
+    window.localStorage.removeItem(key);
+    window.sessionStorage.removeItem(key);
+  },
+};
+
+export function getSupabase() {
+  if (browserClient) return browserClient;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -43,25 +67,15 @@ export function getSupabase() {
     throw new Error("Missing Supabase environment variables.");
   }
 
-  const storage =
-    typeof window === "undefined"
-      ? undefined
-      : remember
-        ? window.localStorage
-        : window.sessionStorage;
-
   browserClient = createClient(url, key, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      storage,
-      storageKey: remember
-        ? "strafe-crate-auth"
-        : "strafe-crate-auth-session",
+      storage: browserAuthStorage,
+      storageKey: AUTH_STORAGE_KEY,
     },
   });
 
-  browserClientPersistence = remember;
   return browserClient;
 }

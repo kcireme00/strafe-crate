@@ -70,9 +70,16 @@ export default function AuthGuard({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+
       if (!session?.user) {
+        setUser(null);
         router.replace("/login");
+        return;
       }
+
+      setUser(session.user);
+      setReady(true);
     });
 
     return () => {
