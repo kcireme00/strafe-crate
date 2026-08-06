@@ -69,7 +69,10 @@ async function resolvePriceForTier(stripe: Stripe, tierName: string) {
   const matchingPrice = prices.data.find((price) => {
     if (price.unit_amount !== expectedAmount || !price.recurring) return false;
     const product = price.product;
-    const productName = typeof product === "string" ? "" : product.name;
+    const productName =
+      typeof product === "string" || product.deleted
+        ? ""
+        : product.name;
     return productName.toLowerCase().includes(tierName.toLowerCase());
   });
 
