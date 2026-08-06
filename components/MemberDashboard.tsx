@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import TierEmblem from "@/components/TierEmblem";
+import TrophyEmblem from "@/components/TrophyEmblem";
 import DashboardCollectorSummary from "@/components/DashboardCollectorSummary";
 import BillingPortalButton from "@/components/BillingPortalButton";
 import type { User } from "@supabase/supabase-js";
