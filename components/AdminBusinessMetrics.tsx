@@ -26,17 +26,33 @@ export default function AdminBusinessMetrics() {
   const supabase = useMemo(() => getSupabase(), []);
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [status, setStatus] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   async function load() {
+    setRefreshing(true);
+    setStatus("Refreshing recorded financials...");
     const { data, error } = await (supabase as any).rpc("get_admin_business_metrics");
-    if (error) setStatus(error.message);
-    else {
+    if (error) {
+      setStatus(error.message);
+    } else {
       setMetrics((data ?? []) as Metric[]);
+      setLastUpdated(new Date());
       setStatus("");
     }
+    setRefreshing(false);
   }
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+
+    const refreshAfterSave = () => void load();
+    window.addEventListener("strafe:order-saved", refreshAfterSave);
+
+    return () => {
+      window.removeEventListener("strafe:order-saved", refreshAfterSave);
+    };
+  }, []);
 
   return (
     <section className={styles.metricsPanel}>
@@ -46,7 +62,14 @@ export default function AdminBusinessMetrics() {
           <h2>Revenue & Profit</h2>
           <p>Recorded paid-cycle revenue minus recorded skin acquisition cost. Test orders are excluded.</p>
         </div>
-        <button type="button" onClick={() => void load()}>Refresh metrics</button>
+        <div className={styles.metricsRefreshArea}>
+          {lastUpdated && (
+            <small>Updated {lastUpdated.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" })}</small>
+          )}
+          <button type="button" disabled={refreshing} onClick={() => void load()}>
+            {refreshing ? "Refreshing..." : "Refresh metrics"}
+          </button>
+        </div>
       </div>
 
       <div className={styles.metricsGrid}>

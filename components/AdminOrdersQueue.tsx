@@ -202,7 +202,8 @@ export default function AdminOrdersQueue() {
       return;
     }
 
-    setStatus("Order saved.");
+    setStatus("Order saved. Revenue and profit refreshed.");
+    window.dispatchEvent(new CustomEvent("strafe:order-saved"));
     await load();
   }
 
@@ -420,7 +421,20 @@ export default function AdminOrdersQueue() {
               return (
                 <tr key={order.order_id}>
                   <td className={styles.memberCell}>
-                    <strong>{order.display_name}</strong>
+                    {order.trade_offer_url ? (
+                      <a
+                        className={styles.memberTradeLink}
+                        href={order.trade_offer_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Open this member’s saved Steam trade offer link"
+                      >
+                        {order.display_name}
+                        <span className={styles.tradeLinkBadge}>Steam trade ↗</span>
+                      </a>
+                    ) : (
+                      <strong>{order.display_name}</strong>
+                    )}
                     <span>{order.email}</span>
                     <small>
                       {new Date(order.cycle_month).toLocaleDateString("en-US", {

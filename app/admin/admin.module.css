@@ -409,3 +409,45 @@
 }
 
 .metricsPanel{margin-bottom:22px;padding:22px;border:1px solid #202a37;border-radius:14px;background:radial-gradient(circle at 92% 8%,rgba(255,122,40,.07),transparent 34%),#0d131c}.metricsHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:16px}.metricsHeading h2{margin:5px 0 4px;font-size:1.9rem}.metricsHeading p{margin:0;color:#91a0b3}.metricsHeading button{padding:9px 12px;border:1px solid #293544;border-radius:8px;background:#0a1018;color:#dce3eb;font:inherit;font-size:.68rem;font-weight:850;cursor:pointer}.metricsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metricsGrid article{padding:17px;border:1px solid #273240;border-radius:11px;background:#090e15}.metricsGrid article>small{color:#ff8b3c;font-size:.55rem;font-weight:900;letter-spacing:.1em}.metricsGrid article>strong{display:block;margin:8px 0 13px;font-size:1.75rem}.metricsGrid article>div{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid #1d2632;color:#8795a8;font-size:.66rem}.metricsGrid article>div b{color:#e7ebf1}.metricsGrid article>p{margin:9px 0 0;color:#667386;font-size:.6rem}@media(max-width:800px){.metricsHeading{align-items:flex-start;flex-direction:column}.metricsGrid{grid-template-columns:1fr}}
+
+
+.memberTradeLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #f4f7fb;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.memberTradeLink:hover {
+  color: #ff914e;
+}
+
+.tradeLinkBadge {
+  padding: 3px 6px;
+  border: 1px solid rgba(255, 118, 40, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 118, 40, 0.08);
+  color: #ff914e !important;
+  font-size: 0.5rem !important;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.metricsRefreshArea {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.metricsRefreshArea small {
+  color: #718095;
+  font-size: 0.58rem;
+}
+
+.metricsRefreshArea button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
