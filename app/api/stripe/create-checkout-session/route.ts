@@ -14,13 +14,13 @@ type TierName =
   | "Master"
   | "Prestige";
 
-const priceEnvironmentVariables: Record<TierName, string> = {
-  Recruit: "STRIPE_PRICE_RECRUIT",
-  Operative: "STRIPE_PRICE_OPERATIVE",
-  Vanguard: "STRIPE_PRICE_VANGUARD",
-  Elite: "STRIPE_PRICE_ELITE",
-  Master: "STRIPE_PRICE_MASTER",
-  Prestige: "STRIPE_PRICE_PRESTIGE",
+const stripeLookupKeys: Record<TierName, string> = {
+  Recruit: "strafe_recruit_monthly",
+  Operative: "strafe_operative_monthly",
+  Vanguard: "strafe_vanguard_monthly",
+  Elite: "strafe_elite_monthly",
+  Master: "strafe_master_monthly",
+  Prestige: "strafe_prestige_monthly",
 };
 
 const expectedAmounts: Record<TierName, number> = {
@@ -43,7 +43,7 @@ class CheckoutError extends Error {
 }
 
 function isTierName(value: string): value is TierName {
-  return Object.prototype.hasOwnProperty.call(priceEnvironmentVariables, value);
+  return Object.prototype.hasOwnProperty.call(stripeLookupKeys, value);
 }
 
 async function getAuthenticatedUser(request: NextRequest) {
@@ -60,50 +60,43 @@ async function getAuthenticatedUser(request: NextRequest) {
   return data.user;
 }
 
-async function validatePrice(
+async function findPriceByLookupKey(
   stripe: Stripe,
   tierName: TierName,
 ): Promise<Stripe.Price> {
-  const variableName = priceEnvironmentVariables[tierName];
-  const priceId = process.env[variableName]?.trim();
+  const lookupKey = stripeLookupKeys[tierName];
 
-  if (!priceId) {
-    throw new CheckoutError(
-      `${variableName} is missing in Vercel. Add the recurring Stripe Price ID for ${tierName}.`,
-      "PRICE_ENV_MISSING",
-      500,
-    );
-  }
-
-  const price = await stripe.prices.retrieve(priceId, {
-    expand: ["product"],
+  const prices = await stripe.prices.list({
+    active: true,
+    lookup_keys: [lookupKey],
+    limit: 10,
+    expand: ["data.product"],
   });
 
-  if (!price.active || !price.recurring) {
+  const matching = prices.data.filter(
+    (price) =>
+      Boolean(price.recurring) &&
+      price.currency.toLowerCase() === "usd" &&
+      price.unit_amount === expectedAmounts[tierName],
+  );
+
+  if (matching.length === 0) {
     throw new CheckoutError(
-      `The configured ${tierName} Stripe Price is not an active recurring price.`,
-      "INVALID_PRICE",
+      `Stripe lookup key ${lookupKey} is not assigned to an active $${expectedAmounts[tierName] / 100}/month Price. Add that lookup key to the ${tierName} recurring Price in Stripe.`,
+      "LOOKUP_KEY_NOT_FOUND",
       500,
     );
   }
 
-  if (price.currency.toLowerCase() !== "usd") {
+  if (matching.length > 1) {
     throw new CheckoutError(
-      `The configured ${tierName} Stripe Price must use USD.`,
-      "INVALID_PRICE_CURRENCY",
+      `Stripe lookup key ${lookupKey} matches more than one active recurring Price. Leave the lookup key on only the current ${tierName} Price.`,
+      "LOOKUP_KEY_DUPLICATE",
       500,
     );
   }
 
-  if (price.unit_amount !== expectedAmounts[tierName]) {
-    throw new CheckoutError(
-      `The configured ${tierName} Stripe Price is $${(price.unit_amount ?? 0) / 100}, but Strafe Crate expects $${expectedAmounts[tierName] / 100}.`,
-      "PRICE_AMOUNT_MISMATCH",
-      500,
-    );
-  }
-
-  return price;
+  return matching[0];
 }
 
 async function findOrCreateCustomer(
@@ -204,8 +197,8 @@ export async function POST(request: NextRequest) {
     stage = "connect to Stripe";
     const stripe = getStripe();
 
-    stage = "validate the configured Stripe Price";
-    const price = await validatePrice(stripe, tierName);
+    stage = "find the Stripe Price by lookup key";
+    const price = await findPriceByLookupKey(stripe, tierName);
 
     stage = "identify the Stripe customer";
     const customerId = await findOrCreateCustomer(stripe, user, profile);
