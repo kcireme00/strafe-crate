@@ -20,7 +20,8 @@ type Order = {
   weapon_category: string | null;
   skin_name: string | null;
   exterior: string | null;
-  steam_reference_value: number | null;
+  membership_value: number | null;
+  order_type: string | null;
   acquisition_cost: number | null;
   trade_offer_url: string | null;
   trade_offer_id: string | null;
@@ -178,11 +179,11 @@ export default function AdminOrdersQueue() {
         weapon_category: order.weapon_category || null,
         skin_name: order.skin_name || null,
         exterior: order.exterior || null,
-        steam_reference_value:
-          order.steam_reference_value === null ||
-          order.steam_reference_value === undefined
+        membership_value:
+          order.membership_value === null ||
+          order.membership_value === undefined
             ? null
-            : Number(order.steam_reference_value),
+            : Number(order.membership_value),
         acquisition_cost:
           order.acquisition_cost === null ||
           order.acquisition_cost === undefined
@@ -401,7 +402,7 @@ export default function AdminOrdersQueue() {
               <th>Tier</th>
               <th>Weapon</th>
               <th>Skin / Exterior</th>
-              <th>Steam Value</th>
+              <th>Membership value</th>
               <th>Cost</th>
               <th>Trade ID</th>
               <th>Status</th>
@@ -412,9 +413,9 @@ export default function AdminOrdersQueue() {
           <tbody>
             {visibleOrders.map((order) => {
               const spread =
-                order.steam_reference_value != null &&
+                order.membership_value != null &&
                 order.acquisition_cost != null
-                  ? Number(order.steam_reference_value) -
+                  ? Number(order.membership_value) -
                     Number(order.acquisition_cost)
                   : null;
 
@@ -436,12 +437,16 @@ export default function AdminOrdersQueue() {
                       <strong>{order.display_name}</strong>
                     )}
                     <span>{order.email}</span>
-                    <small>
-                      {new Date(order.cycle_month).toLocaleDateString("en-US", {
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </small>
+                    {order.order_type === "reward" ? (
+                      <small className={styles.rewardOrderBadge}>REWARD · NO BILLING CYCLE</small>
+                    ) : (
+                      <small>
+                        {new Date(order.cycle_month).toLocaleDateString("en-US", {
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </small>
+                    )}
                   </td>
 
                   <td>
@@ -519,12 +524,12 @@ export default function AdminOrdersQueue() {
                       type="number"
                       min="0"
                       step="0.01"
-                      value={order.steam_reference_value ?? ""}
+                      value={order.membership_value ?? ""}
                       placeholder="0.00"
                       onChange={(event) =>
                         changeOrder(
                           order.order_id,
-                          "steam_reference_value",
+                          "membership_value",
                           event.target.value
                             ? Number(event.target.value)
                             : null,
@@ -533,7 +538,7 @@ export default function AdminOrdersQueue() {
                     />
                     {spread !== null && (
                       <small className={styles.spread}>
-                        Spread ${spread.toFixed(2)}
+                        Profit ${spread.toFixed(2)}
                       </small>
                     )}
                   </td>

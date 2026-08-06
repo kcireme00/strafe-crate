@@ -7,7 +7,7 @@ export default function Page() {
         <h2>1. Information we collect</h2>
         <p>
           We may collect your name, display name, email address, account
-          identifiers, Steam profile URL, Steam trade URL, subscription tier,
+          identifiers, Steam trade URL, subscription tier,
           billing status, fulfillment history, reward history, XP, trophies,
           community messages, reports, moderation history, and technical
           security logs.

@@ -451,3 +451,5 @@
   opacity: 0.55;
   cursor: wait;
 }
+
+.rewardOrderBadge { color: #ff914e !important; font-weight: 900; letter-spacing: .08em; }

@@ -12,6 +12,9 @@ type Profile = {
   fulfillment_ready: boolean;
 };
 
+const STEAM_TRADE_URL_HELP =
+  "http://steamcommunity.com/my/tradeoffers/privacy";
+
 export default function ProfileSettings() {
   const supabase = useMemo(() => getSupabase(), []);
   const [profile, setProfile] = useState<Profile>({
@@ -25,10 +28,7 @@ export default function ProfileSettings() {
 
   useEffect(() => {
     async function load() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data, error } = await supabase
@@ -44,7 +44,7 @@ export default function ProfileSettings() {
     }
 
     void load();
-  }, []);
+  }, [supabase]);
 
   async function saveProfile() {
     setStatus("Saving profile...");
@@ -54,6 +54,7 @@ export default function ProfileSettings() {
       {
         new_full_name: profile.full_name ?? "",
         new_display_name: profile.display_name ?? "",
+        // Retain any older optional profile URL without requiring the member to edit it.
         new_steam_profile_url: profile.steam_profile_url ?? "",
         new_steam_trade_url: profile.steam_trade_url ?? "",
       },
@@ -65,12 +66,12 @@ export default function ProfileSettings() {
     }
 
     const saved = Array.isArray(data) ? data[0] : data;
-    if (saved) setProfile(saved as Profile);
+    if (saved) setProfile({ ...profile, ...saved } as Profile);
 
     setStatus(
       saved?.fulfillment_ready
-        ? "Profile saved. Your account is fulfillment ready."
-        : "Both valid Steam URLs are required before fulfillment.",
+        ? "Profile saved. Your account is ready for Steam fulfillment."
+        : "Save a valid Steam trade URL before purchasing a membership or redeeming a reward.",
     );
   }
 
@@ -80,30 +81,22 @@ export default function ProfileSettings() {
         <div>
           <p className={styles.eyebrow}>FULFILLMENT PROFILE</p>
           <h2>Profile and Steam settings</h2>
-          <p>
-            Keep account identity and delivery details in one dedicated
-            section.
-          </p>
+          <p>Save the trade link used to deliver membership and reward items.</p>
         </div>
 
-        <span
-          className={
-            profile.fulfillment_ready
-              ? styles.readyBadge
-              : styles.requiredBadge
-          }
-        >
-          {profile.fulfillment_ready
-            ? "FULFILLMENT READY"
-            : "ACTION REQUIRED"}
+        <span className={profile.fulfillment_ready ? styles.readyBadge : styles.requiredBadge}>
+          {profile.fulfillment_ready ? "FULFILLMENT READY" : "ACTION REQUIRED"}
         </span>
       </div>
 
       <div className={styles.notice}>
-        <strong>Required before delivery</strong>
+        <strong>Steam trade URL required</strong>
         <span>
-          A valid Steam profile and trade URL are required before an order
-          can move into purchasing or fulfillment.
+          Open your Steam trade settings {" "}
+          <a href={STEAM_TRADE_URL_HELP} target="_blank" rel="noopener noreferrer">
+            HERE
+          </a>
+          , copy your Trade URL, and paste it below. A Steam profile URL is not required.
         </span>
       </div>
 
@@ -112,12 +105,7 @@ export default function ProfileSettings() {
           Full name
           <input
             value={profile.full_name ?? ""}
-            onChange={(event) =>
-              setProfile({
-                ...profile,
-                full_name: event.target.value,
-              })
-            }
+            onChange={(event) => setProfile({ ...profile, full_name: event.target.value })}
           />
         </label>
 
@@ -125,54 +113,25 @@ export default function ProfileSettings() {
           Display name
           <input
             value={profile.display_name ?? ""}
-            onChange={(event) =>
-              setProfile({
-                ...profile,
-                display_name: event.target.value,
-              })
-            }
+            onChange={(event) => setProfile({ ...profile, display_name: event.target.value })}
           />
         </label>
 
-        <label>
-          Steam profile URL <b>Required</b>
-          <input
-            value={profile.steam_profile_url ?? ""}
-            placeholder="https://steamcommunity.com/id/yourname"
-            onChange={(event) =>
-              setProfile({
-                ...profile,
-                steam_profile_url: event.target.value,
-              })
-            }
-          />
-        </label>
-
-        <label>
+        <label className={styles.tradeUrlField}>
           Steam trade URL <b>Required</b>
           <input
             value={profile.steam_trade_url ?? ""}
             placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
-            onChange={(event) =>
-              setProfile({
-                ...profile,
-                steam_trade_url: event.target.value,
-              })
-            }
+            onChange={(event) => setProfile({ ...profile, steam_trade_url: event.target.value })}
           />
         </label>
       </div>
 
       <p className={styles.security}>
-        Never enter your Steam password, Steam Guard code, session cookie,
-        or API key.
+        Never enter your Steam password, Steam Guard code, session cookie, or API key.
       </p>
 
-      <button
-        type="button"
-        className={styles.saveButton}
-        onClick={() => void saveProfile()}
-      >
+      <button type="button" className={styles.saveButton} onClick={() => void saveProfile()}>
         Save fulfillment profile
       </button>
 

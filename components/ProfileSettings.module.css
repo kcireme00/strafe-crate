@@ -154,3 +154,6 @@
     white-space: normal;
   }
 }
+
+.notice a { color: #ff914e; font-weight: 900; text-decoration: underline; text-underline-offset: 3px; }
+.tradeUrlField { grid-column: 1 / -1; }

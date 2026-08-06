@@ -211,7 +211,7 @@ export default function Home() {
             <p>
               {checkoutNotice === "missing-link"
                 ? "This membership payment link has not been connected yet. Please contact support before attempting checkout."
-                : `Before purchasing ${checkoutNotice}, save a valid Steam profile URL and Steam trade URL. This prevents failed or misdirected fulfillment.`}
+                : `Before purchasing ${checkoutNotice}, save a valid Steam trade URL. This is required so your monthly item can be sent to the correct account.`}
             </p>
             <div className="checkout-guard-actions">
               {checkoutNotice !== "missing-link" && <Link className="button primary" href="/settings">Complete delivery profile</Link>}
