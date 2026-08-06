@@ -1746,3 +1746,28 @@
 .dashboard-top .top-actions:empty{
   display:none;
 }
+
+
+/* Keep billing portal loading/failure states inside the subscription card */
+.billing-portal-control{
+  width:100%;
+  min-width:0;
+}
+.billing-portal-status{
+  display:block;
+  width:100%;
+  margin:4px 0 0;
+  color:#ff9a5d;
+  font-size:.55rem;
+  line-height:1.15;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.subscription-metric-card:has(.billing-portal-status){
+  gap:3px;
+}
+.subscription-metric-card:has(.billing-portal-status) .billing-portal-button{
+  min-height:25px;
+  height:25px;
+}

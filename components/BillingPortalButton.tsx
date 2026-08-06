@@ -26,7 +26,8 @@ export default function BillingPortalButton() {
     setLoading(false);
 
     if (!response.ok || !result.url) {
-      setStatus(result.error || "Unable to open billing management.");
+      console.error("Billing portal failed:", result.error);
+      setStatus("Billing portal unavailable. Please try again.");
       return;
     }
 
@@ -36,9 +37,13 @@ export default function BillingPortalButton() {
   return (
     <div className="billing-portal-control">
       <button type="button" className="button secondary billing-portal-button" onClick={() => void openPortal()} disabled={loading}>
-        {loading ? "Opening billing..." : "Manage or cancel membership"}
+        {loading
+          ? "Opening billing..."
+          : status
+            ? "Retry billing portal"
+            : "Manage or cancel membership"}
       </button>
-      {status && <small>{status}</small>}
+      {status && <small className="billing-portal-status">{status}</small>}
     </div>
   );
 }

@@ -46,6 +46,14 @@ function isTierName(value: string): value is TierName {
   return Object.prototype.hasOwnProperty.call(stripePriceEnvKeys, value);
 }
 
+
+function firstOfNextMonthUnix() {
+  const now = new Date();
+  return Math.floor(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0) / 1000,
+  );
+}
+
 async function getAuthenticatedUser(request: NextRequest) {
   const authorization = request.headers.get("authorization");
   const token = authorization?.startsWith("Bearer ")
@@ -216,6 +224,8 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_SITE_URL || "https://strafecrate.com"
     ).replace(/\/$/, "");
 
+    const firstBillingDate = firstOfNextMonthUnix();
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,
@@ -225,16 +235,29 @@ export async function POST(request: NextRequest) {
       cancel_url: `${siteUrl}/#plans?checkout=cancelled`,
       allow_promotion_codes: true,
       billing_address_collection: "auto",
+      payment_method_collection: "always",
       metadata: {
         supabase_user_id: user.id,
         membership_tier: tierName,
         checkout_source: "strafe_crate_account_linked_api",
+        first_paid_cycle: new Date(firstBillingDate * 1000)
+          .toISOString()
+          .slice(0, 10),
       },
       subscription_data: {
+        trial_end: firstBillingDate,
+        trial_settings: {
+          end_behavior: {
+            missing_payment_method: "cancel",
+          },
+        },
         metadata: {
           supabase_user_id: user.id,
           membership_tier: tierName,
           checkout_source: "strafe_crate_account_linked_api",
+          first_paid_cycle: new Date(firstBillingDate * 1000)
+            .toISOString()
+            .slice(0, 10),
         },
       },
     });

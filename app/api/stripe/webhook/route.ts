@@ -187,17 +187,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const userId = await resolveUserId(customerId, subscriptionId, session.client_reference_id);
   if (!userId) throw new Error("Unable to match Stripe checkout to a Strafe Crate user.");
 
+  // Checkout only saves the payment method and creates a trialing subscription.
+  // Fulfillment is created only after a positive paid invoice on the first.
   await syncSubscription(userId, subscription, session.amount_total);
-
-  const latestInvoiceId = typeof subscription.latest_invoice === "string"
-    ? subscription.latest_invoice
-    : subscription.latest_invoice?.id;
-  if (latestInvoiceId) {
-    const invoice = await stripe.invoices.retrieve(latestInvoiceId);
-    if (invoice.status === "paid") {
-      await createPaidCycleOrder(userId, subscription, invoice);
-    }
-  }
 }
 
 
@@ -238,6 +230,13 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const customerId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id ?? null;
   const userId = await resolveUserId(customerId, subscriptionId);
   if (!userId) throw new Error("Unable to match paid invoice to a Strafe Crate user.");
+
+  // Stripe can emit invoice.paid for a $0 trial invoice.
+  // Sync the subscription, but never create fulfillment until money was collected.
+  if ((invoice.amount_paid ?? 0) <= 0) {
+    await syncSubscription(userId, subscription, invoice.amount_paid);
+    return;
+  }
 
   const billingReason = (invoice as any).billing_reason;
   if (billingReason === "subscription_update") {
