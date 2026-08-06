@@ -6,16 +6,24 @@ import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const paymentLinks: Record<string, string> = {
-  Recruit: "https://buy.stripe.com/6oUaEY5YQc292HO6iBebu05",
-  Operative: "https://buy.stripe.com/eVq00kevmc29dms9uNebu04",
-  Vanguard: "https://buy.stripe.com/7sY14o0Ew7LTaag8qJebu03",
-  Elite: "https://buy.stripe.com/9B614o3QI5DLeqw5exebu02",
-  Master: "https://buy.stripe.com/5kQaEYgDu7LTbekfTbebu01",
-  Prestige: "https://buy.stripe.com/3cI7sM0Ewfel1DK0Yhebu00",
+type TierName =
+  | "Recruit"
+  | "Operative"
+  | "Vanguard"
+  | "Elite"
+  | "Master"
+  | "Prestige";
+
+const priceEnvironmentVariables: Record<TierName, string> = {
+  Recruit: "STRIPE_PRICE_RECRUIT",
+  Operative: "STRIPE_PRICE_OPERATIVE",
+  Vanguard: "STRIPE_PRICE_VANGUARD",
+  Elite: "STRIPE_PRICE_ELITE",
+  Master: "STRIPE_PRICE_MASTER",
+  Prestige: "STRIPE_PRICE_PRESTIGE",
 };
 
-const tierAmounts: Record<string, number> = {
+const expectedAmounts: Record<TierName, number> = {
   Recruit: 2500,
   Operative: 5000,
   Vanguard: 7500,
@@ -34,6 +42,10 @@ class CheckoutError extends Error {
   }
 }
 
+function isTierName(value: string): value is TierName {
+  return Object.prototype.hasOwnProperty.call(priceEnvironmentVariables, value);
+}
+
 async function getAuthenticatedUser(request: NextRequest) {
   const authorization = request.headers.get("authorization");
   const token = authorization?.startsWith("Bearer ")
@@ -48,65 +60,61 @@ async function getAuthenticatedUser(request: NextRequest) {
   return data.user;
 }
 
-async function resolvePriceForTier(stripe: Stripe, tierName: string) {
-  const expectedLink = paymentLinks[tierName];
-  const expectedAmount = tierAmounts[tierName];
+async function validatePrice(
+  stripe: Stripe,
+  tierName: TierName,
+): Promise<Stripe.Price> {
+  const variableName = priceEnvironmentVariables[tierName];
+  const priceId = process.env[variableName]?.trim();
 
-  // Reuse the recurring Price behind the live Payment Link you already built.
-  const links = await stripe.paymentLinks.list({ active: true, limit: 100 });
-  const matchingLink = links.data.find((link) => link.url === expectedLink);
-
-  if (matchingLink) {
-    const lineItems = await stripe.paymentLinks.listLineItems(matchingLink.id, {
-      limit: 10,
-      expand: ["data.price.product"],
-    });
-
-    const recurringItem = lineItems.data.find(
-      (item) =>
-        item.price?.active &&
-        item.price.recurring &&
-        item.price.unit_amount === expectedAmount,
-    );
-
-    if (recurringItem?.price) return recurringItem.price;
-  }
-
-  // Fallback if a Payment Link was renamed or recreated.
-  const prices = await stripe.prices.list({
-    active: true,
-    type: "recurring",
-    currency: "usd",
-    limit: 100,
-    expand: ["data.product"],
-  });
-
-  const matchingPrice = prices.data.find((price) => {
-    if (price.unit_amount !== expectedAmount || !price.recurring) return false;
-
-    const product = price.product;
-    if (typeof product === "string" || product.deleted) return true;
-
-    return product.name.toLowerCase().includes(tierName.toLowerCase());
-  });
-
-  if (!matchingPrice) {
+  if (!priceId) {
     throw new CheckoutError(
-      `Stripe could not find the active $${expectedAmount / 100}/month ${tierName} price. Confirm the Payment Link is active in the same live Stripe account as STRIPE_SECRET_KEY.`,
-      "PRICE_NOT_FOUND",
+      `${variableName} is missing in Vercel. Add the recurring Stripe Price ID for ${tierName}.`,
+      "PRICE_ENV_MISSING",
       500,
     );
   }
 
-  return matchingPrice;
+  const price = await stripe.prices.retrieve(priceId, {
+    expand: ["product"],
+  });
+
+  if (!price.active || !price.recurring) {
+    throw new CheckoutError(
+      `The configured ${tierName} Stripe Price is not an active recurring price.`,
+      "INVALID_PRICE",
+      500,
+    );
+  }
+
+  if (price.currency.toLowerCase() !== "usd") {
+    throw new CheckoutError(
+      `The configured ${tierName} Stripe Price must use USD.`,
+      "INVALID_PRICE_CURRENCY",
+      500,
+    );
+  }
+
+  if (price.unit_amount !== expectedAmounts[tierName]) {
+    throw new CheckoutError(
+      `The configured ${tierName} Stripe Price is $${(price.unit_amount ?? 0) / 100}, but Strafe Crate expects $${expectedAmounts[tierName] / 100}.`,
+      "PRICE_AMOUNT_MISMATCH",
+      500,
+    );
+  }
+
+  return price;
 }
 
 async function findOrCreateCustomer(
   stripe: Stripe,
   user: { id: string; email?: string | null },
-  profile: { email?: string | null; display_name?: string | null; full_name?: string | null },
+  profile: {
+    email?: string | null;
+    display_name?: string | null;
+    full_name?: string | null;
+  },
 ) {
-  // This does not rely on a stripe_customer_id column being present in Supabase.
   try {
     const result = await stripe.customers.search({
       query: `metadata['supabase_user_id']:'${user.id}'`,
@@ -115,13 +123,12 @@ async function findOrCreateCustomer(
     const existing = result.data[0];
     if (existing && !existing.deleted) return existing.id;
   } catch (error) {
-    // Customer Search can be temporarily unavailable immediately after account changes.
-    console.warn("Stripe customer metadata search skipped:", error);
+    console.warn("Stripe customer metadata search unavailable:", error);
   }
 
   const email = user.email ?? profile.email ?? undefined;
   if (email) {
-    const customers = await stripe.customers.list({ email, limit: 10 });
+    const customers = await stripe.customers.list({ email, limit: 100 });
     const existing = customers.data.find(
       (customer) => customer.metadata.supabase_user_id === user.id,
     );
@@ -140,34 +147,32 @@ async function findOrCreateCustomer(
   return customer.id;
 }
 
-function linkedPaymentLinkUrl(
-  tierName: string,
-  userId: string,
-  email?: string | null,
-) {
-  const url = new URL(paymentLinks[tierName]);
-  url.searchParams.set("client_reference_id", userId);
-  if (email) url.searchParams.set("locked_prefilled_email", email);
-  return url.toString();
-}
-
 export async function POST(request: NextRequest) {
-  let stage = "authenticate";
+  let stage = "authenticate the member";
 
   try {
     const user = await getAuthenticatedUser(request);
     if (!user) {
-      throw new CheckoutError("Please sign in again before checkout.", "AUTH_REQUIRED", 401);
+      throw new CheckoutError(
+        "Please sign in again before checkout.",
+        "AUTH_REQUIRED",
+        401,
+      );
     }
 
-    stage = "validate tier";
+    stage = "validate the membership tier";
     const body = (await request.json()) as { tier?: string };
-    const tierName = body.tier?.trim() ?? "";
-    if (!paymentLinks[tierName]) {
-      throw new CheckoutError("Invalid membership tier.", "INVALID_TIER", 400);
+    const requestedTier = body.tier?.trim() ?? "";
+    if (!isTierName(requestedTier)) {
+      throw new CheckoutError(
+        "Invalid membership tier.",
+        "INVALID_TIER",
+        400,
+      );
     }
+    const tierName = requestedTier;
 
-    stage = "load member profile";
+    stage = "load the member profile";
     const admin = getSupabaseAdmin();
     const { data: profile, error: profileError } = await admin
       .from("profiles")
@@ -182,10 +187,13 @@ export async function POST(request: NextRequest) {
       );
     }
     if (!profile) {
-      throw new CheckoutError("Member profile not found.", "PROFILE_NOT_FOUND", 404);
+      throw new CheckoutError(
+        "Member profile not found.",
+        "PROFILE_NOT_FOUND",
+        404,
+      );
     }
-
-    if (!profile.steam_trade_url) {
+    if (!profile.steam_trade_url?.trim()) {
       throw new CheckoutError(
         "Save your Steam trade URL before starting checkout.",
         "PROFILE_REQUIRED",
@@ -193,75 +201,65 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const accountEmail = user.email ?? profile.email ?? null;
-    const fallbackUrl = linkedPaymentLinkUrl(
-      tierName,
-      user.id,
-      accountEmail,
-    );
+    stage = "connect to Stripe";
+    const stripe = getStripe();
 
-    try {
-      stage = "connect to Stripe";
-      const stripe = getStripe();
+    stage = "validate the configured Stripe Price";
+    const price = await validatePrice(stripe, tierName);
 
-      stage = "resolve membership price";
-      const price = await resolvePriceForTier(stripe, tierName);
+    stage = "identify the Stripe customer";
+    const customerId = await findOrCreateCustomer(stripe, user, profile);
 
-      stage = "identify Stripe customer";
-      const customerId = await findOrCreateCustomer(stripe, user, profile);
+    stage = "create the linked Stripe Checkout Session";
+    const siteUrl = (
+      process.env.NEXT_PUBLIC_SITE_URL || "https://strafecrate.com"
+    ).replace(/\/$/, "");
 
-      stage = "create Stripe Checkout Session";
-      const siteUrl = (
-        process.env.NEXT_PUBLIC_SITE_URL || "https://strafecrate.com"
-      ).replace(/\/$/, "");
-
-      const session = await stripe.checkout.sessions.create({
-        mode: "subscription",
-        customer: customerId,
-        client_reference_id: user.id,
-        line_items: [{ price: price.id, quantity: 1 }],
-        success_url: `${siteUrl}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${siteUrl}/#plans?checkout=cancelled`,
-        allow_promotion_codes: true,
-        billing_address_collection: "auto",
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId,
+      client_reference_id: user.id,
+      line_items: [{ price: price.id, quantity: 1 }],
+      success_url: `${siteUrl}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/#plans?checkout=cancelled`,
+      allow_promotion_codes: true,
+      billing_address_collection: "auto",
+      metadata: {
+        supabase_user_id: user.id,
+        membership_tier: tierName,
+        checkout_source: "strafe_crate_account_linked_api",
+      },
+      subscription_data: {
         metadata: {
           supabase_user_id: user.id,
           membership_tier: tierName,
+          checkout_source: "strafe_crate_account_linked_api",
         },
-        subscription_data: {
-          metadata: {
-            supabase_user_id: user.id,
-            membership_tier: tierName,
-          },
-        },
-      });
+      },
+    });
 
-      if (session.url) {
-        return NextResponse.json({
-          url: session.url,
-          checkout_mode: "session",
-        });
-      }
-    } catch (stripeError) {
-      console.error(
-        "Stripe Checkout Session unavailable; using linked Payment Link",
-        { stage, stripeError },
+    if (!session.url) {
+      throw new CheckoutError(
+        "Stripe created a Checkout Session without a redirect URL.",
+        "CHECKOUT_URL_MISSING",
       );
     }
 
-    // Failsafe: the existing hosted Payment Link still receives the exact
-    // authenticated Supabase account ID and locked account email. The Stripe
-    // webhook receives client_reference_id and can reconcile the purchase.
     return NextResponse.json({
-      url: fallbackUrl,
-      checkout_mode: "linked_payment_link",
+      url: session.url,
+      checkout_mode: "account_linked_api_session",
     });
   } catch (error) {
     const checkoutError = error instanceof CheckoutError ? error : null;
-    const baseMessage = error instanceof Error ? error.message : "Unknown server error.";
-    const message = checkoutError?.message ?? `Checkout failed while trying to ${stage}: ${baseMessage}`;
+    const baseMessage =
+      error instanceof Error ? error.message : "Unknown server error.";
+    const message =
+      checkoutError?.message ?? `Checkout failed while trying to ${stage}: ${baseMessage}`;
 
-    console.error("Create Stripe Checkout Session error", { stage, error });
+    console.error("Create account-linked Stripe Checkout Session error", {
+      stage,
+      error,
+    });
 
     return NextResponse.json(
       {
