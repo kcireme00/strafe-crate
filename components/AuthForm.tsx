@@ -1,7 +1,11 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSupabase } from "@/lib/supabase";
+import {
+  getRememberMePreference,
+  getSupabase,
+  setRememberMePreference,
+} from "@/lib/supabase";
 
 type Mode = "login" | "signup" | "forgot" | "reset";
 export default function AuthForm({ mode }: { mode: Mode }) {
@@ -12,9 +16,16 @@ export default function AuthForm({ mode }: { mode: Mode }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() =>
+    getRememberMePreference(),
+  );
 
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setLoading(true); setMessage("");
+    if (mode === "login") {
+      setRememberMePreference(rememberMe);
+    }
+
     const supabase = getSupabase();
     try {
       if (mode === "login") {
@@ -52,6 +63,16 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     {mode !== "reset" && <label>Email address<input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></label>}
     {mode !== "forgot" && <label>{mode === "reset" ? "New password" : "Password"}<input type="password" minLength={8} value={password} onChange={e => setPassword(e.target.value)} required /></label>}
     {mode === "signup" && <label className="terms-check"><input type="checkbox" checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} required/><span>By creating an account, I agree to the <a href="/terms" target="_blank">Terms of Service</a>, <a href="/privacy" target="_blank">Privacy Policy</a>, <a href="/membership-policy" target="_blank">Membership and Value Policy</a>, and recurring billing terms.</span></label>}
+    {mode === "login" && (
+      <label className="remember-me-check">
+        <input
+          type="checkbox"
+          checked={rememberMe}
+          onChange={e => setRememberMe(e.target.checked)}
+        />
+        <span>Remember me on this device</span>
+      </label>
+    )}
     <button className="button primary full" disabled={loading}>{loading ? "Working..." : mode === "login" ? "Log in" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset email" : "Update password"}</button>
     {message && <p className="form-message">{message}</p>}
   </form>;

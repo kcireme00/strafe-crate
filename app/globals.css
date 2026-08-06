@@ -1167,3 +1167,26 @@
   color: #8ee9ad;
   font-size: 0.85rem;
 }
+
+
+/* Login persistence */
+.remember-me-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -2px 0 16px;
+  color: #aeb9c8;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.remember-me-check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #ff7628;
+}
+
+.remember-me-check span {
+  line-height: 1.2;
+}
