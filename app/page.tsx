@@ -18,6 +18,17 @@ const tiers = [
   { name: "Prestige", price: 200, minimum: 188, color: "crimson", letter: "P", subtitle: "The flagship membership." },
 ];
 
+
+type SubscriptionRow = {
+  status: string | null;
+  tier_id: string | null;
+};
+
+type MembershipTierRow = {
+  name: string | null;
+  monthly_price_cents: number | null;
+};
+
 export default function Home() {
   const [signedIn, setSignedIn] = useState(false);
   const [fulfillmentReady, setFulfillmentReady] = useState(false);
@@ -46,11 +57,14 @@ export default function Home() {
           .eq("id", session.user.id)
           .maybeSingle();
 
-        const { data: subscription } = await supabase
+        const { data: subscriptionData } = await supabase
           .from("subscriptions")
           .select("status,tier_id")
           .eq("user_id", session.user.id)
           .maybeSingle();
+
+        const subscription =
+          subscriptionData as SubscriptionRow | null;
 
         let loadedTier: string | null = null;
         let loadedPrice: number | null = null;
@@ -61,11 +75,14 @@ export default function Home() {
             String(subscription.status ?? "").toLowerCase(),
           )
         ) {
-          const { data: tier } = await supabase
+          const { data: tierData } = await supabase
             .from("membership_tiers")
             .select("name,monthly_price_cents")
             .eq("id", subscription.tier_id)
             .maybeSingle();
+
+          const tier =
+            tierData as MembershipTierRow | null;
 
           loadedTier = tier?.name ?? null;
           loadedPrice =
