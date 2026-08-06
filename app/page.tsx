@@ -452,7 +452,7 @@ export default function Home() {
             <h2>{checkoutNotice === "missing-link" ? "Checkout is not configured." : "Complete your Steam delivery profile."}</h2>
             <p>
               {checkoutNotice === "missing-link"
-                ? "This membership payment link has not been connected yet. Please contact support before attempting checkout."
+                ? "This membership payment link has not been connected yet. Please email strafecrate@gmail.com before attempting checkout."
                 : `Before purchasing ${checkoutNotice}, save a valid Steam trade URL. This is required so your monthly item can be sent to the correct account.`}
             </p>
             <div className="checkout-guard-actions">

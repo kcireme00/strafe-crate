@@ -34,6 +34,9 @@ type Order = {
   upgrade_source_exterior: string | null;
   upgrade_target_cycle: string | null;
   is_upgrade: boolean;
+  rotation_cycle: number;
+  used_weapon_categories: string[];
+  used_skin_names: string[];
   dirty?: boolean;
 };
 
@@ -58,7 +61,7 @@ export default function AdminOrdersQueue() {
   async function load() {
     setStatus("Loading orders...");
     const [ordersResult, membersResult] = await Promise.all([
-      (supabase as any).rpc("get_admin_fulfillment_orders_v3"),
+      (supabase as any).rpc("get_admin_fulfillment_orders_v4"),
       (supabase as any).rpc("get_admin_member_directory"),
     ]);
     if (ordersResult.error) { setStatus(ordersResult.error.message); return; }
@@ -67,6 +70,9 @@ export default function AdminOrdersQueue() {
       ...order,
       items: Array.isArray(order.items) && order.items.length ? order.items : [blankItem(1)],
       is_upgrade: Boolean(order.is_upgrade),
+      rotation_cycle: Number(order.rotation_cycle || 1),
+      used_weapon_categories: Array.isArray(order.used_weapon_categories) ? order.used_weapon_categories : [],
+      used_skin_names: Array.isArray(order.used_skin_names) ? order.used_skin_names : [],
     })));
     setMembers((membersResult.data ?? []) as Member[]);
     setStatus("");
@@ -123,7 +129,7 @@ export default function AdminOrdersQueue() {
       acquisition_cost: item.acquisition_cost == null ? null : Number(item.acquisition_cost),
       sort_order: index + 1,
     }));
-    const { error } = await (supabase as any).rpc("save_admin_fulfillment_order_v3", {
+    const { error } = await (supabase as any).rpc("save_admin_fulfillment_order_v4", {
       target_order_id: order.order_id,
       new_tier_name: order.tier_name || null,
       new_membership_value: order.membership_value == null ? null : Number(order.membership_value),
@@ -207,8 +213,24 @@ export default function AdminOrdersQueue() {
             <div className={styles.orderItems}>
               {order.items.map((item,index)=><div className={styles.orderItem} key={item.id}>
                 <span className={styles.itemNumber}>SKIN {index+1}</span>
-                <label>Weapon<select value={item.weapon_category??""} onChange={(event)=>patchItem(order.order_id,item.id,{weapon_category:event.target.value})}><option value="">Select</option>{weapons.map((weapon)=><option key={weapon}>{weapon}</option>)}</select><button type="button" onClick={()=>void randomizeWeapon(order,item.id)}>Randomize unused</button></label>
-                <label>Skin<input value={item.skin_name??""} placeholder={order.order_type==="reward"?"Reward":"Skin name"} onChange={(event)=>patchItem(order.order_id,item.id,{skin_name:event.target.value})}/></label>
+                <label>Weapon
+                  <select value={item.weapon_category??""} onChange={(event)=>patchItem(order.order_id,item.id,{weapon_category:event.target.value})}>
+                    <option value="">Select</option>
+                    {weapons.map((weapon) => {
+                      const alreadyFilled = order.used_weapon_categories.some((used) => used.toLowerCase() === weapon.toLowerCase());
+                      const selectedHere = item.weapon_category?.toLowerCase() === weapon.toLowerCase();
+                      return <option key={weapon} disabled={alreadyFilled && !selectedHere}>{weapon}{alreadyFilled && !selectedHere ? " · already filled" : ""}</option>;
+                    })}
+                  </select>
+                  <button type="button" onClick={()=>void randomizeWeapon(order,item.id)}>Randomize unused</button>
+                  <small>Rotation {order.rotation_cycle}: {order.used_weapon_categories.length ? `${order.used_weapon_categories.length} weapon${order.used_weapon_categories.length === 1 ? "" : "s"} already filled` : "no weapons filled yet"}</small>
+                </label>
+                <label>Skin
+                  <input value={item.skin_name??""} placeholder={order.order_type==="reward"?"Reward":"Skin name"} onChange={(event)=>patchItem(order.order_id,item.id,{skin_name:event.target.value})}/>
+                  {item.skin_name && order.used_skin_names.some((used) => used.toLowerCase() === item.skin_name?.trim().toLowerCase()) && (
+                    <small className={styles.rotationWarning}>Already fulfilled in this Prestige rotation. Choose a different skin.</small>
+                  )}
+                </label>
                 <label>Exterior<input value={item.exterior??""} placeholder={order.order_type==="reward"?"Reward":"Exterior"} onChange={(event)=>patchItem(order.order_id,item.id,{exterior:event.target.value})}/></label>
                 <label>Cost<input type="number" min="0" step="0.01" value={item.acquisition_cost??""} placeholder="0.00" onChange={(event)=>patchItem(order.order_id,item.id,{acquisition_cost:event.target.value?Number(event.target.value):null})}/></label>
                 {order.items.length>1 && <button className={styles.removeItem} type="button" onClick={()=>removeItem(order.order_id,item.id)}>Remove</button>}

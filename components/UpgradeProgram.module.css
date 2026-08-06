@@ -8,3 +8,18 @@
   .panel{display:grid;grid-template-columns:minmax(0,1fr);align-content:start}
   .itemPicker,.warning,.checklist,.proceed,.status,.existingRequest,.noItems{width:100%}
 }
+
+/* Strict alignment for upgrade-program boxes */
+.explainer{align-items:stretch}
+.explainer article{
+  min-height:160px;
+  display:grid;
+  grid-template-rows:auto auto 1fr;
+  align-content:start;
+}
+.explainer article strong{min-height:44px;display:flex;align-items:flex-start}
+.explainer article p{align-self:start}
+.checklist{grid-auto-rows:1fr}
+.checklist label{height:100%;min-height:72px;box-sizing:border-box}
+.warning,.existingRequest,.noItems,.lockMessage{box-sizing:border-box}
+.panel>*{min-width:0}

@@ -98,14 +98,10 @@ export default function PublicPlayerCard({
         <div className="chat-profile-copy">
           <small>STRAFE CRATE PLAYER</small>
           <h3>{card.display_name}</h3>
-          <p>
-            Level {card.level}
-            <span aria-hidden="true"> · </span>
-            {card.tier_name ?? "Membership pending"}
-          </p>
+          <p>{card.tier_name ?? "Membership pending"}</p>
 
           <div className="chat-profile-inline-stats">
-            <span><b>{card.lifetime_xp.toLocaleString()}</b><em>XP</em></span>
+            <span><b>{card.level}</b><em>LEVEL</em></span>
             <span><b>{card.consecutive_paid_months} mo.</b><em>STREAK</em></span>
             <span><b>{Number(card.xp_multiplier).toFixed(2)}×</b><em>MULTIPLIER</em></span>
           </div>

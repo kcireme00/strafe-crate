@@ -50,7 +50,7 @@ export default function Page() {
         <p>
           Records may be retained as reasonably necessary for fulfillment,
           accounting, fraud prevention, chargeback defense, moderation,
-          security, and legal compliance. Contact support to request access,
+          security, and legal compliance. Email strafecrate@gmail.com to request access,
           correction, or deletion where applicable.
         </p>
       </section>

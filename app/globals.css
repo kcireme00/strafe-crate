@@ -1645,3 +1645,13 @@
     bottom:25px;
   }
 }
+
+/* Keep the current-membership pill clear of the tier emblem */
+.current-membership-badge{
+  width:max-content;
+  max-width:calc(100% - 88px);
+  align-self:flex-start;
+  white-space:nowrap;
+  padding:6px 11px;
+  margin-right:88px;
+}

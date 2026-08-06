@@ -95,7 +95,7 @@ export default function Layout({
               <strong>Legal and support</strong>
               <Link href="/terms">Terms of Service</Link>
               <Link href="/privacy">Privacy Policy</Link>
-              <Link href="/contact">Contact</Link>
+              <a href="mailto:strafecrate@gmail.com">strafecrate@gmail.com</a>
             </div>
           </div>
 
