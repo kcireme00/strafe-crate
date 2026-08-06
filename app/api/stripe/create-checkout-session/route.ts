@@ -24,6 +24,16 @@ const tierAmounts: Record<string, number> = {
   Prestige: 20000,
 };
 
+class CheckoutError extends Error {
+  constructor(
+    message: string,
+    readonly code: string,
+    readonly status = 500,
+  ) {
+    super(message);
+  }
+}
+
 async function getAuthenticatedUser(request: NextRequest) {
   const authorization = request.headers.get("authorization");
   const token = authorization?.startsWith("Bearer ")
@@ -39,25 +49,30 @@ async function getAuthenticatedUser(request: NextRequest) {
 }
 
 async function resolvePriceForTier(stripe: Stripe, tierName: string) {
-  const linkUrl = paymentLinks[tierName];
+  const expectedLink = paymentLinks[tierName];
   const expectedAmount = tierAmounts[tierName];
 
-  // First use the exact Payment Link the business already configured.
+  // Reuse the recurring Price behind the live Payment Link you already built.
   const links = await stripe.paymentLinks.list({ active: true, limit: 100 });
-  const matchingLink = links.data.find((link) => link.url === linkUrl);
+  const matchingLink = links.data.find((link) => link.url === expectedLink);
 
   if (matchingLink) {
     const lineItems = await stripe.paymentLinks.listLineItems(matchingLink.id, {
       limit: 10,
       expand: ["data.price.product"],
     });
+
     const recurringItem = lineItems.data.find(
-      (item) => item.price?.recurring && item.price.active,
+      (item) =>
+        item.price?.active &&
+        item.price.recurring &&
+        item.price.unit_amount === expectedAmount,
     );
+
     if (recurringItem?.price) return recurringItem.price;
   }
 
-  // Safe fallback: find the recurring Stripe price matching the tier amount.
+  // Fallback if a Payment Link was renamed or recreated.
   const prices = await stripe.prices.list({
     active: true,
     type: "recurring",
@@ -68,85 +83,116 @@ async function resolvePriceForTier(stripe: Stripe, tierName: string) {
 
   const matchingPrice = prices.data.find((price) => {
     if (price.unit_amount !== expectedAmount || !price.recurring) return false;
+
     const product = price.product;
-    const productName =
-      typeof product === "string" || product.deleted
-        ? ""
-        : product.name;
-    return productName.toLowerCase().includes(tierName.toLowerCase());
+    if (typeof product === "string" || product.deleted) return true;
+
+    return product.name.toLowerCase().includes(tierName.toLowerCase());
   });
 
   if (!matchingPrice) {
-    throw new Error(`Unable to find the active Stripe price for ${tierName}.`);
+    throw new CheckoutError(
+      `Stripe could not find the active $${expectedAmount / 100}/month ${tierName} price. Confirm the Payment Link is active in the same live Stripe account as STRIPE_SECRET_KEY.`,
+      "PRICE_NOT_FOUND",
+      500,
+    );
   }
 
   return matchingPrice;
 }
 
+async function findOrCreateCustomer(
+  stripe: Stripe,
+  user: { id: string; email?: string | null },
+  profile: { email?: string | null; display_name?: string | null; full_name?: string | null },
+) {
+  // This does not rely on a stripe_customer_id column being present in Supabase.
+  try {
+    const result = await stripe.customers.search({
+      query: `metadata['supabase_user_id']:'${user.id}'`,
+      limit: 1,
+    });
+    const existing = result.data[0];
+    if (existing && !existing.deleted) return existing.id;
+  } catch (error) {
+    // Customer Search can be temporarily unavailable immediately after account changes.
+    console.warn("Stripe customer metadata search skipped:", error);
+  }
+
+  const email = user.email ?? profile.email ?? undefined;
+  if (email) {
+    const customers = await stripe.customers.list({ email, limit: 10 });
+    const existing = customers.data.find(
+      (customer) => customer.metadata.supabase_user_id === user.id,
+    );
+    if (existing) return existing.id;
+  }
+
+  const customer = await stripe.customers.create({
+    email,
+    name: profile.display_name || profile.full_name || undefined,
+    metadata: {
+      supabase_user_id: user.id,
+      strafe_crate_member: "true",
+    },
+  });
+
+  return customer.id;
+}
+
 export async function POST(request: NextRequest) {
+  let stage = "authenticate";
+
   try {
     const user = await getAuthenticatedUser(request);
     if (!user) {
-      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+      throw new CheckoutError("Please sign in again before checkout.", "AUTH_REQUIRED", 401);
     }
 
+    stage = "validate tier";
     const body = (await request.json()) as { tier?: string };
     const tierName = body.tier?.trim() ?? "";
     if (!paymentLinks[tierName]) {
-      return NextResponse.json({ error: "Invalid membership tier." }, { status: 400 });
+      throw new CheckoutError("Invalid membership tier.", "INVALID_TIER", 400);
     }
 
+    stage = "load member profile";
     const admin = getSupabaseAdmin();
     const { data: profile, error: profileError } = await admin
       .from("profiles")
-      .select("id,email,display_name,full_name,steam_trade_url,fulfillment_ready,stripe_customer_id")
+      .select("id,email,display_name,full_name,steam_trade_url,fulfillment_ready")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (profileError) throw profileError;
+    if (profileError) {
+      throw new CheckoutError(
+        `Unable to load your member profile: ${profileError.message}`,
+        "PROFILE_LOOKUP_FAILED",
+      );
+    }
     if (!profile) {
-      return NextResponse.json({ error: "Member profile not found." }, { status: 404 });
+      throw new CheckoutError("Member profile not found.", "PROFILE_NOT_FOUND", 404);
     }
 
     if (!profile.fulfillment_ready || !profile.steam_trade_url) {
-      return NextResponse.json(
-        { error: "Save your Steam trade URL before starting checkout.", code: "PROFILE_REQUIRED" },
-        { status: 409 },
+      throw new CheckoutError(
+        "Save your Steam trade URL before starting checkout.",
+        "PROFILE_REQUIRED",
+        409,
       );
     }
 
+    stage = "connect to Stripe";
     const stripe = getStripe();
+
+    stage = "resolve membership price";
     const price = await resolvePriceForTier(stripe, tierName);
+
+    stage = "identify Stripe customer";
+    const customerId = await findOrCreateCustomer(stripe, user, profile);
+
+    stage = "create Stripe Checkout Session";
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://strafecrate.com").replace(/\/$/, "");
-
-    let customerId = profile.stripe_customer_id as string | null;
-    if (customerId) {
-      try {
-        const customer = await stripe.customers.retrieve(customerId);
-        if ((customer as Stripe.DeletedCustomer).deleted) customerId = null;
-      } catch {
-        customerId = null;
-      }
-    }
-
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: user.email ?? profile.email ?? undefined,
-        name: profile.display_name || profile.full_name || undefined,
-        metadata: {
-          supabase_user_id: user.id,
-          strafe_crate_member: "true",
-        },
-      });
-      customerId = customer.id;
-
-      const { error: customerSaveError } = await admin
-        .from("profiles")
-        .update({ stripe_customer_id: customerId })
-        .eq("id", user.id);
-      if (customerSaveError) throw customerSaveError;
-    }
-
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,
@@ -168,11 +214,25 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!session.url) throw new Error("Stripe did not return a checkout URL.");
+    if (!session.url) {
+      throw new CheckoutError("Stripe did not return a checkout URL.", "NO_CHECKOUT_URL");
+    }
+
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to start checkout.";
-    console.error("Create Stripe Checkout Session error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    const checkoutError = error instanceof CheckoutError ? error : null;
+    const baseMessage = error instanceof Error ? error.message : "Unknown server error.";
+    const message = checkoutError?.message ?? `Checkout failed while trying to ${stage}: ${baseMessage}`;
+
+    console.error("Create Stripe Checkout Session error", { stage, error });
+
+    return NextResponse.json(
+      {
+        error: message,
+        code: checkoutError?.code ?? "CHECKOUT_SERVER_ERROR",
+        stage,
+      },
+      { status: checkoutError?.status ?? 500 },
+    );
   }
 }

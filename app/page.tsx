@@ -90,7 +90,16 @@ export default function Home() {
         body: JSON.stringify({ tier: tierName }),
       });
 
-      const result = (await response.json()) as { url?: string; error?: string; code?: string };
+      const responseText = await response.text();
+      let result: { url?: string; error?: string; code?: string; stage?: string } = {};
+
+      try {
+        result = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error(
+          `Checkout server returned ${response.status} without a readable error. Check the latest Vercel Function log for /api/stripe/create-checkout-session.`,
+        );
+      }
       if (!response.ok || !result.url) {
         if (result.code === "PROFILE_REQUIRED") {
           setCheckoutNotice(tierName);
