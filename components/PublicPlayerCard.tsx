@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import TierEmblem from "@/components/TierEmblem";
+import TrophyEmblem from "@/components/TrophyEmblem";
 
 type PublicCard = {
   user_id: string;
@@ -17,6 +18,7 @@ type PublicCard = {
     name: string;
     description: string;
     icon: string;
+    slug: string;
     rarity: string;
     featured_slot: number | null;
   }>;
@@ -125,7 +127,7 @@ export default function PublicPlayerCard({
                   className={trophy ? `rarity-${trophy.rarity}` : "empty"}
                   title={trophy?.description ?? "Empty trophy slot"}
                 >
-                  {trophy?.icon ?? "○"}
+                  {trophy ? <TrophyEmblem trophy={trophy.slug} className="chat-profile-trophy-emblem" /> : "○"}
                 </span>
               );
             })}

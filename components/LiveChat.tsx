@@ -4,6 +4,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 import PublicPlayerCard from "@/components/PublicPlayerCard";
+import CommunityIdentity from "@/components/CommunityIdentity";
+
+type CommunityIdentityData = {
+  user_id: string;
+  display_name: string;
+  role: string;
+  tier_name: string | null;
+  tier_color: string | null;
+  collector_level: number;
+  featured_trophy_slug: string | null;
+  featured_trophy_name: string | null;
+  featured_trophy_rarity: "common" | "rare" | "epic" | "legendary" | null;
+};
 
 type Message = {
   id: string;
@@ -23,6 +36,32 @@ export default function LiveChat({ user }: { user: User }) {
   const [status, setStatus] = useState("");
   const [playerCard, setPlayerCard] = useState<any>(null);
   const [playerCardAnchor, setPlayerCardAnchor] = useState<DOMRect | null>(null);
+  const [identities, setIdentities] = useState<Record<string, CommunityIdentityData>>({});
+
+  async function loadIdentities(userIds: string[]) {
+    const unique = Array.from(new Set(userIds)).filter(Boolean);
+    const missing = unique.filter((id) => !identities[id]);
+    if (!missing.length) return;
+
+    const results = await Promise.all(
+      missing.map(async (id) => {
+        const { data, error } = await (supabase as any).rpc(
+          "get_public_community_identity",
+          { target_user_id: id },
+        );
+        if (error) return null;
+        return (Array.isArray(data) ? data[0] : data) as CommunityIdentityData | null;
+      }),
+    );
+
+    setIdentities((current) => {
+      const next = { ...current };
+      results.forEach((identity) => {
+        if (identity?.user_id) next[identity.user_id] = identity;
+      });
+      return next;
+    });
+  }
 
   useEffect(() => {
     let active = true;
@@ -37,7 +76,11 @@ export default function LiveChat({ user }: { user: User }) {
 
       if (!active) return;
       if (error) setStatus(error.message);
-      else setMessages((data ?? []).reverse() as Message[]);
+      else {
+        const nextMessages = (data ?? []).reverse() as Message[];
+        setMessages(nextMessages);
+        void loadIdentities(nextMessages.map((message) => message.user_id));
+      }
     }
 
     void load();
@@ -50,6 +93,7 @@ export default function LiveChat({ user }: { user: User }) {
         (payload) => {
           const next = payload.new as Message;
           setMessages((current) => [...current.slice(-99), next]);
+          void loadIdentities([next.user_id]);
         },
       )
       .subscribe();
@@ -131,8 +175,9 @@ export default function LiveChat({ user }: { user: User }) {
         <div className="chat-feed" aria-live="polite">
           {messages.map((message) => (
             <article
-              className={`chat-message ${tierClass(message.tier_name_snapshot)} ${message.user_id === user.id ? "own" : ""}`}
+              className={`chat-message ${tierClass(identities[message.user_id]?.tier_name ?? message.tier_name_snapshot)} ${message.user_id === user.id ? "own" : ""}`}
               key={message.id}
+              data-message-id={message.id}
             >
               <button
                 className="chat-avatar"
@@ -143,16 +188,19 @@ export default function LiveChat({ user }: { user: User }) {
               </button>
               <div className="chat-message-body">
                 <div className="chat-meta">
-                  <button
-                    type="button"
-                    onClick={(event) => void openCard(message.user_id, event.currentTarget)}
-                  >
-                    {message.display_name_snapshot}
-                  </button>
-                  <span>Level {message.level_snapshot}</span>
-                  <span className="chat-tier-badge">
-                    {message.tier_name_snapshot ?? "Membership pending"}
-                  </span>
+                  <CommunityIdentity
+                    displayName={identities[message.user_id]?.display_name ?? message.display_name_snapshot}
+                    level={identities[message.user_id]?.collector_level ?? message.level_snapshot}
+                    tierLabel={identities[message.user_id]?.tier_name ?? message.tier_name_snapshot ?? "Membership pending"}
+                    tierColor={identities[message.user_id]?.tier_color}
+                    trophySlug={identities[message.user_id]?.featured_trophy_slug}
+                    trophyName={identities[message.user_id]?.featured_trophy_name}
+                    trophyRarity={identities[message.user_id]?.featured_trophy_rarity}
+                    onClick={() => {
+                      const anchor = document.querySelector(`[data-message-id="${message.id}"] .chat-avatar`) as HTMLElement | null;
+                      if (anchor) void openCard(message.user_id, anchor);
+                    }}
+                  />
                   <time>{new Date(message.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</time>
                 </div>
                 <p>{message.body}</p>

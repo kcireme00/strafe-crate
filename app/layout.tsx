@@ -35,8 +35,10 @@ export default function Layout({
               <strong>Explore</strong>
               <Link href="/#plans">Memberships</Link>
               <Link href="/membership-policy">How value works</Link>
-              <Link href="/rewards">Rewards</Link>
+              <Link href="/rewards">XP & rewards</Link>
+              <Link href="/trophies">Trophies</Link>
               <Link href="/community">Community</Link>
+              <Link href="/settings">Profile settings</Link>
               <Link href="/faq">FAQ</Link>
             </div>
 

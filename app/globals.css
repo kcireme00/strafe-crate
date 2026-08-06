@@ -1051,3 +1051,24 @@
     flex-wrap:wrap;
   }
 }
+
+
+/* Launch sweep: focused dashboard and account pages */
+.dashboard-monthly-focus{margin:22px 0}
+.order-timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:20px}
+.timeline-step{position:relative;padding:14px 10px;border:1px solid var(--line);border-radius:10px;background:#090e15;color:#78869a;display:flex;align-items:center;gap:8px}
+.timeline-step span{width:25px;height:25px;display:grid;place-items:center;border:1px solid currentColor;border-radius:50%;font-size:.65rem;font-weight:900}
+.timeline-step strong{font-size:.68rem}
+.timeline-step.complete{color:var(--green);border-color:rgba(85,230,165,.25);background:rgba(85,230,165,.045)}
+.settings-page{padding:54px 0 100px}
+.settings-hero{margin-bottom:24px}
+.settings-hero h1{margin:7px 0 9px;font-size:clamp(3rem,7vw,6rem);line-height:.92;letter-spacing:-.055em}
+.settings-hero>p:last-child{color:var(--muted)}
+.chat-profile-trophy-emblem{width:18px;height:18px;display:block}
+@media(max-width:900px){.order-timeline{grid-template-columns:1fr}.timeline-step{min-height:52px}}
+
+.reward-catalog-panel{padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.reward-credit-pill{min-width:115px;padding:11px 14px;border:1px solid rgba(255,118,40,.3);border-radius:11px;background:#090e15;display:flex;flex-direction:column}
+.reward-credit-pill small{color:var(--muted);font-size:.52rem;letter-spacing:.1em}.reward-credit-pill strong{font-size:1.45rem}.reward-credit-pill span{color:var(--muted);font-size:.62rem}
+.reward-catalog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}.reward-catalog-grid article{padding:20px;border:1px solid var(--line);border-radius:13px;background:#090e15;display:flex;flex-direction:column}.reward-catalog-icon{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--orange);border-radius:10px;color:var(--orange2);font-weight:900}.reward-catalog-grid small{margin-top:18px;color:var(--orange2);font-size:.55rem;letter-spacing:.1em}.reward-catalog-grid h3{margin:6px 0}.reward-catalog-grid p{flex:1;color:var(--muted)}.reward-catalog-grid article>div{display:flex;flex-direction:column;margin-bottom:14px}.reward-catalog-grid article>div span{color:var(--muted);font-size:.65rem}
+@media(max-width:800px){.reward-catalog-grid{grid-template-columns:1fr}}

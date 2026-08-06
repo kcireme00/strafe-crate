@@ -6,7 +6,7 @@ import AdminOrdersQueue from "@/components/AdminOrdersQueue";
 import AdminChatReports from "@/components/AdminChatReports";
 import styles from "./admin.module.css";
 
-type Tab = "orders" | "reports" | "members" | "rewards";
+type Tab = "orders" | "reports";
 
 function AdminHub() {
   const [tab, setTab] = useState<Tab>("orders");
@@ -14,8 +14,6 @@ function AdminHub() {
   const tabs: Array<[Tab, string]> = [
     ["orders", "Orders"],
     ["reports", "Reports"],
-    ["members", "Members"],
-    ["rewards", "Rewards"],
   ];
 
   return (
@@ -26,7 +24,7 @@ function AdminHub() {
             <p className={styles.eyebrow}>PRIVATE ADMIN</p>
             <h1>Operations Hub</h1>
             <p className={styles.subtitle}>
-              Fulfillment, moderation, members, and rewards in one place.
+              Fulfillment and community moderation in one operating console.
             </p>
           </div>
 
@@ -57,27 +55,6 @@ function AdminHub() {
           </section>
         )}
 
-        {tab === "members" && (
-          <section className={styles.placeholder}>
-            <p className={styles.eyebrow}>MEMBERS</p>
-            <h2>Member controls</h2>
-            <p>
-              Membership approvals, roles, trophies, XP, and account controls
-              will live here.
-            </p>
-          </section>
-        )}
-
-        {tab === "rewards" && (
-          <section className={styles.placeholder}>
-            <p className={styles.eyebrow}>REWARDS</p>
-            <h2>Reward operations</h2>
-            <p>
-              Supply Credit redemptions, XP adjustments, trophy awards, and
-              event rewards will live here.
-            </p>
-          </section>
-        )}
       </div>
     </main>
   );

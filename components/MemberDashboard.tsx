@@ -4,8 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import TierEmblem from "@/components/TierEmblem";
-import LoyaltyPanel from "@/components/LoyaltyPanel";
-import TrophyCabinet from "@/components/TrophyCabinet";
+import DashboardCollectorSummary from "@/components/DashboardCollectorSummary";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 
@@ -61,14 +60,12 @@ export default function MemberDashboard({ user }: { user: User }) {
   const [orders, setOrders] = useState<any[]>([]);
   const [weapons, setWeapons] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
-  const [loyalty, setLoyalty] = useState<any>(null);
-  const [trophies, setTrophies] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const [p, s, o, w, h, l, t] = await Promise.all([
+      const [p, s, o, w, h] = await Promise.all([
         supabase
           .from("profiles")
           .select("id,full_name,display_name,email,role,steam_profile_url,steam_trade_url,account_approved,created_at")
@@ -93,17 +90,7 @@ export default function MemberDashboard({ user }: { user: User }) {
         supabase
           .from("member_weapon_history")
           .select("weapon_categories(name),rotation_number,received_at")
-          .eq("user_id", user.id),
-        supabase
-          .from("loyalty_accounts")
-          .select("lifetime_xp,supply_credits,consecutive_paid_months,xp_multiplier")
           .eq("user_id", user.id)
-          .maybeSingle(),
-        supabase
-          .from("member_trophies")
-          .select("id,featured_slot,awarded_at,trophy_definitions(name,description,icon,rarity)")
-          .eq("user_id", user.id)
-          .order("featured_slot", { ascending: true, nullsFirst: false }),
       ]);
 
       if (p.error) setMessage(p.error.message);
@@ -113,8 +100,6 @@ export default function MemberDashboard({ user }: { user: User }) {
       setOrders(o.data || []);
       setWeapons(w.data || []);
       setHistory(h.data || []);
-      setLoyalty(l.data || null);
-      setTrophies(t.data || []);
       setLoading(false);
     })();
   }, [supabase, user.id]);
@@ -144,25 +129,6 @@ export default function MemberDashboard({ user }: { user: User }) {
     card.style.setProperty("--card-rotate-x", "0deg");
     card.style.setProperty("--card-shift-x", "0px");
     card.style.setProperty("--card-shift-y", "0px");
-  }
-
-  async function save(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!profile) return;
-    setMessage("Saving...");
-
-    const payload = {
-      full_name: profile.full_name,
-      display_name: profile.display_name,
-      steam_profile_url: profile.steam_profile_url || null,
-      steam_trade_url: profile.steam_trade_url || null,
-    };
-
-    const { error } = await (supabase.from("profiles") as any)
-      .update(payload)
-      .eq("id", user.id);
-
-    setMessage(error ? error.message : "Profile saved.");
   }
 
   async function logout() {
@@ -282,7 +248,7 @@ export default function MemberDashboard({ user }: { user: User }) {
           <article>
             <small>SUBSCRIPTION</small>
             <strong>{subscription?.status || "Pending"}</strong>
-            <span>{subscription?.current_period_end ? `Renews ${formatDate(subscription.current_period_end)}` : "Manage billing comes next"}</span>
+            <span>{subscription?.current_period_end ? `Renews ${formatDate(subscription.current_period_end)}` : "Choose a membership to activate billing"}</span>
           </article>
           <article>
             <small>CURRENT ORDER</small>
@@ -315,31 +281,32 @@ export default function MemberDashboard({ user }: { user: User }) {
       </section>
 
 
-      <LoyaltyPanel loyalty={loyalty} />
-
-      <TrophyCabinet />
-
-      <section className="panel profile-panel">
+      <section className="dashboard-monthly-focus panel">
         <div className="panel-head">
           <div>
-            <h2>Profile and Steam settings</h2>
-            <p>This information is private to you and the admin account.</p>
+            <p className="eyebrow">THIS MONTH</p>
+            <h2>{current ? `${formatMonth(current.billing_cycle)} drop` : "Your first drop"}</h2>
+            <p>{current ? "Follow each fulfillment milestone from assignment through acceptance." : "A monthly order will appear here after a successful subscription payment."}</p>
           </div>
-          <span className={profile.account_approved ? "status good" : "status"}>
-            {profile.account_approved ? "APPROVED" : "REVIEW PENDING"}
-          </span>
+          <a className="button secondary" href="/settings">Manage delivery profile</a>
         </div>
-
-        <form className="profile-form" onSubmit={save}>
-          <label>Full name<input value={profile.full_name || ""} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} /></label>
-          <label>Display name<input value={profile.display_name || ""} onChange={(e) => setProfile({ ...profile, display_name: e.target.value })} /></label>
-          <label>Steam profile URL<input type="url" value={profile.steam_profile_url || ""} onChange={(e) => setProfile({ ...profile, steam_profile_url: e.target.value })} /></label>
-          <label>Steam trade URL<input type="url" value={profile.steam_trade_url || ""} onChange={(e) => setProfile({ ...profile, steam_trade_url: e.target.value })} /></label>
-          <p className="security-note">Never enter your Steam password, Steam Guard code, session cookie, or API key.</p>
-          <button className="button primary">Save profile</button>
-          {message && <span className="save-message">{message}</span>}
-        </form>
+        <div className="order-timeline">
+          {[
+            ["Payment received", Boolean(current)],
+            ["Weapon assigned", Boolean(current?.weapon_categories?.name)],
+            ["Skin purchased", ["purchased","ready_to_send","trade_sent","accepted","completed","fulfilled"].includes(String(current?.status))],
+            ["Trade sent", ["trade_sent","accepted","completed","fulfilled"].includes(String(current?.status))],
+            ["Accepted", ["accepted","completed","fulfilled"].includes(String(current?.status))],
+          ].map(([label, complete], index) => (
+            <div className={`timeline-step ${complete ? "complete" : ""}`} key={String(label)}>
+              <span>{complete ? "✓" : index + 1}</span>
+              <strong>{String(label)}</strong>
+            </div>
+          ))}
+        </div>
       </section>
+
+      <DashboardCollectorSummary />
 
       <section className="panel">
         <h2>Weapon rotation</h2>

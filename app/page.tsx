@@ -5,6 +5,16 @@ import Image from "next/image";
 import TierEmblem from "@/components/TierEmblem";
 import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
+import TierMemberTracker from "@/components/TierMemberTracker";
+
+const checkoutLinks: Record<string, string | undefined> = {
+  Recruit: process.env.NEXT_PUBLIC_STRIPE_RECRUIT_URL,
+  Operative: process.env.NEXT_PUBLIC_STRIPE_OPERATIVE_URL,
+  Vanguard: process.env.NEXT_PUBLIC_STRIPE_VANGUARD_URL,
+  Elite: process.env.NEXT_PUBLIC_STRIPE_ELITE_URL,
+  Master: process.env.NEXT_PUBLIC_STRIPE_MASTER_URL,
+  Prestige: process.env.NEXT_PUBLIC_STRIPE_PRESTIGE_URL,
+};
 
 const tiers = [
   { name: "Recruit", price: 25, minimum: 21, color: "slate", letter: "R", subtitle: "Start your collection." },
@@ -144,14 +154,16 @@ export default function Home() {
                 <p className="price">${tier.price}<small>/month</small></p>
                 <p className="tier-subtitle">{tier.subtitle}</p>
                 <ul><li>One curated CS2 skin per active cycle</li><li>Trade sent by the 14th</li><li>Private collection history</li><li>{tier.price >= 100 ? "Upgrade eligible" : "Standard fulfillment"}</li></ul>
-                <Link className="button tier-button" href={signedIn ? "/dashboard" : "/signup"}>{signedIn ? `Join ${tier.name} →` : `Join ${tier.name} →`}</Link>
+                <Link className="button tier-button" href={signedIn ? (checkoutLinks[tier.name] || "/dashboard") : "/signup"}>{signedIn ? `Choose ${tier.name} →` : `Create account →`}</Link>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="trust-center shell"><article><strong>Transparent valuation</strong><p>A defined Steam reference-value floor for every tier.</p></article><article><strong>Secure billing</strong><p>Subscription payments will be processed through Stripe.</p></article><article><strong>Collection rotation</strong><p>The system aims to avoid duplicate weapon categories until a rotation is complete.</p></article></section>
+      <TierMemberTracker />
+
+      <section className="trust-center shell"><article><strong>Transparent valuation</strong><p>A defined Steam reference-value floor for every tier.</p></article><article><strong>Secure billing</strong><p>Subscription payments are processed securely through Stripe.</p></article><article><strong>Collection rotation</strong><p>The system aims to avoid duplicate weapon categories until a rotation is complete.</p></article></section>
     </main>
   );
 }

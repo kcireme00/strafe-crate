@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
 import LoyaltyPanel from "@/components/LoyaltyPanel";
 import { getSupabase } from "@/lib/supabase";
+import RewardCatalog from "@/components/RewardCatalog";
 import styles from "./RewardsProgressPage.module.css";
 
 type Loyalty = {
@@ -54,14 +55,7 @@ function Content() {
         <div className={styles.stack}>
           <LoyaltyPanel loyalty={loyalty} />
 
-          <section className={styles.rewardPanel}>
-            <p>SUPPLY REWARDS</p>
-            <h2>Reward catalog</h2>
-            <span>
-              Redeem Supply Credits for available bonus drops when catalog
-              rewards become active.
-            </span>
-          </section>
+          <RewardCatalog />
         </div>
       </div>
     </main>

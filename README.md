@@ -1,98 +1,27 @@
-# Clean Progression Pages + Community Trophy Sync
+# Strafe Crate Launch Candidate
 
-## 1. Run SQL first
+## Required Supabase migration
+Run `supabase/launch-sweep.sql` once in the Supabase SQL Editor.
 
-Open:
+## Required Vercel environment variables
+Copy `.env.example` and set the Supabase values plus all six Stripe Payment Link URLs.
 
-supabase/featured-trophy-community-sync.sql
+## Member experience
+- `/dashboard`: membership card, current drop timeline, weapon coverage, compact collector summary, rotation, and history.
+- `/rewards`: full XP and Supply Credit progression plus live reward catalog.
+- `/trophies`: trophy slot picker and achievement management.
+- `/settings`: display name and required Steam delivery URLs.
+- `/community`: tier-colored identity, level, and exact saved slot-one trophy emblem.
 
-Paste it into Supabase SQL Editor as a NEW query and run it.
+## Launch checks
+1. Create a fresh account and confirm email.
+2. Save valid Steam profile and trade URLs under Settings.
+3. Test every Stripe Payment Link in test mode.
+4. Confirm the subscription webhook creates/updates the subscription and fulfillment order.
+5. Confirm the order appears in Admin > Orders and randomize an unused weapon.
+6. Move the order through purchasing, ready to send, trade sent, accepted, and fulfilled.
+7. Confirm dashboard timeline, weapon history, XP, Supply Credits, trophy unlocks, tier count, and chat identity update.
+8. Test cancellation, failed payment, reports, timeout/ban, and reward redemption.
 
-## 2. Add files
-
-Add:
-
-- components/DashboardCollectorSummary.tsx
-- components/DashboardCollectorSummary.module.css
-- components/RewardsProgressPage.tsx
-- components/RewardsProgressPage.module.css
-- components/TrophiesPage.tsx
-- components/TrophiesPage.module.css
-- components/CommunityIdentity.tsx
-- components/CommunityIdentity.module.css
-
-Replace:
-
-- app/rewards/page.tsx
-
-Add:
-
-- app/trophies/page.tsx
-
-Keep:
-
-- components/TrophyCabinet.tsx
-- components/TrophyEmblem.tsx
-
-## 3. Clean MemberDashboard.tsx
-
-Import:
-
-import DashboardCollectorSummary from "@/components/DashboardCollectorSummary";
-
-REMOVE from the dashboard:
-
-- <LoyaltyPanel loyalty={loyalty} />
-- <TrophyCabinet />
-- <ProfileSettings />
-- the old inline Profile and Steam Settings section
-
-ADD only:
-
-<DashboardCollectorSummary />
-
-Recommended dashboard:
-
-1. Player card and current order
-2. Monthly fulfillment timeline
-3. Collection snapshot / weapon coverage
-4. DashboardCollectorSummary
-5. Recent activity / drop history
-
-Nothing else.
-
-## 4. Dedicated pages
-
-/rewards:
-- full XP
-- multiplier
-- paid streak
-- Supply Credits
-- reward catalog
-
-/trophies:
-- trophy cabinet
-- slot picker
-- achievement management
-
-## 5. Community chat identity
-
-Import in LiveChat.tsx:
-
-import CommunityIdentity from "@/components/CommunityIdentity";
-
-Replace the current username / level / membership badges with the component
-shown in:
-
-components/CommunityIdentityExample.tsx
-
-The exact saved featured trophy in slot 1 is returned by:
-
-get_public_community_identity(user_id)
-
-This ensures the emblem beside the chat username matches the first trophy shown
-on the public player card.
-
-## 6. Commit
-
-Clean progression pages and sync community trophy identity
+## Build verification note
+The repository was syntax-checked locally. A full dependency install/build could not be executed in the editing environment because its npm registry did not contain `@supabase/supabase-js`; Vercel/GitHub should run the final production build using the normal public npm registry.
