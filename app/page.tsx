@@ -105,7 +105,7 @@ export default function Home() {
           setCheckoutNotice(tierName);
           return;
         }
-        throw new Error(result.error || "Unable to start checkout.");
+        throw new Error(result.error || `Unable to start checkout (HTTP ${response.status}).`);
       }
 
       window.location.href = result.url;

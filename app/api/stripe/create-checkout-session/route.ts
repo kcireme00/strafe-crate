@@ -140,6 +140,17 @@ async function findOrCreateCustomer(
   return customer.id;
 }
 
+function linkedPaymentLinkUrl(
+  tierName: string,
+  userId: string,
+  email?: string | null,
+) {
+  const url = new URL(paymentLinks[tierName]);
+  url.searchParams.set("client_reference_id", userId);
+  if (email) url.searchParams.set("locked_prefilled_email", email);
+  return url.toString();
+}
+
 export async function POST(request: NextRequest) {
   let stage = "authenticate";
 
@@ -160,7 +171,7 @@ export async function POST(request: NextRequest) {
     const admin = getSupabaseAdmin();
     const { data: profile, error: profileError } = await admin
       .from("profiles")
-      .select("id,email,display_name,full_name,steam_trade_url,fulfillment_ready")
+      .select("id,email,display_name,full_name,steam_trade_url")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -174,7 +185,7 @@ export async function POST(request: NextRequest) {
       throw new CheckoutError("Member profile not found.", "PROFILE_NOT_FOUND", 404);
     }
 
-    if (!profile.fulfillment_ready || !profile.steam_trade_url) {
+    if (!profile.steam_trade_url) {
       throw new CheckoutError(
         "Save your Steam trade URL before starting checkout.",
         "PROFILE_REQUIRED",
@@ -182,43 +193,69 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    stage = "connect to Stripe";
-    const stripe = getStripe();
+    const accountEmail = user.email ?? profile.email ?? null;
+    const fallbackUrl = linkedPaymentLinkUrl(
+      tierName,
+      user.id,
+      accountEmail,
+    );
 
-    stage = "resolve membership price";
-    const price = await resolvePriceForTier(stripe, tierName);
+    try {
+      stage = "connect to Stripe";
+      const stripe = getStripe();
 
-    stage = "identify Stripe customer";
-    const customerId = await findOrCreateCustomer(stripe, user, profile);
+      stage = "resolve membership price";
+      const price = await resolvePriceForTier(stripe, tierName);
 
-    stage = "create Stripe Checkout Session";
-    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://strafecrate.com").replace(/\/$/, "");
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer: customerId,
-      client_reference_id: user.id,
-      line_items: [{ price: price.id, quantity: 1 }],
-      success_url: `${siteUrl}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl}/#plans?checkout=cancelled`,
-      allow_promotion_codes: true,
-      billing_address_collection: "auto",
-      metadata: {
-        supabase_user_id: user.id,
-        membership_tier: tierName,
-      },
-      subscription_data: {
+      stage = "identify Stripe customer";
+      const customerId = await findOrCreateCustomer(stripe, user, profile);
+
+      stage = "create Stripe Checkout Session";
+      const siteUrl = (
+        process.env.NEXT_PUBLIC_SITE_URL || "https://strafecrate.com"
+      ).replace(/\/$/, "");
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        customer: customerId,
+        client_reference_id: user.id,
+        line_items: [{ price: price.id, quantity: 1 }],
+        success_url: `${siteUrl}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${siteUrl}/#plans?checkout=cancelled`,
+        allow_promotion_codes: true,
+        billing_address_collection: "auto",
         metadata: {
           supabase_user_id: user.id,
           membership_tier: tierName,
         },
-      },
-    });
+        subscription_data: {
+          metadata: {
+            supabase_user_id: user.id,
+            membership_tier: tierName,
+          },
+        },
+      });
 
-    if (!session.url) {
-      throw new CheckoutError("Stripe did not return a checkout URL.", "NO_CHECKOUT_URL");
+      if (session.url) {
+        return NextResponse.json({
+          url: session.url,
+          checkout_mode: "session",
+        });
+      }
+    } catch (stripeError) {
+      console.error(
+        "Stripe Checkout Session unavailable; using linked Payment Link",
+        { stage, stripeError },
+      );
     }
 
-    return NextResponse.json({ url: session.url });
+    // Failsafe: the existing hosted Payment Link still receives the exact
+    // authenticated Supabase account ID and locked account email. The Stripe
+    // webhook receives client_reference_id and can reconcile the purchase.
+    return NextResponse.json({
+      url: fallbackUrl,
+      checkout_mode: "linked_payment_link",
+    });
   } catch (error) {
     const checkoutError = error instanceof CheckoutError ? error : null;
     const baseMessage = error instanceof Error ? error.message : "Unknown server error.";
