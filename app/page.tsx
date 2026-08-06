@@ -7,14 +7,7 @@ import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
 import TierMemberTracker from "@/components/TierMemberTracker";
 
-const checkoutLinks: Record<string, string> = {
-  Recruit: process.env.NEXT_PUBLIC_STRIPE_RECRUIT_URL || "https://buy.stripe.com/6oUaEY5YQc292HO6iBebu05",
-  Operative: process.env.NEXT_PUBLIC_STRIPE_OPERATIVE_URL || "https://buy.stripe.com/eVq00kevmc29dms9uNebu04",
-  Vanguard: process.env.NEXT_PUBLIC_STRIPE_VANGUARD_URL || "https://buy.stripe.com/7sY14o0Ew7LTaag8qJebu03",
-  Elite: process.env.NEXT_PUBLIC_STRIPE_ELITE_URL || "https://buy.stripe.com/9B614o3QI5DLeqw5exebu02",
-  Master: process.env.NEXT_PUBLIC_STRIPE_MASTER_URL || "https://buy.stripe.com/5kQaEYgDu7LTbekfTbebu01",
-  Prestige: process.env.NEXT_PUBLIC_STRIPE_PRESTIGE_URL || "https://buy.stripe.com/3cI7sM0Ewfel1DK0Yhebu00",
-};
+
 
 const tiers = [
   { name: "Recruit", price: 25, minimum: 21, color: "slate", letter: "R", subtitle: "Start your collection." },
@@ -28,8 +21,8 @@ const tiers = [
 export default function Home() {
   const [signedIn, setSignedIn] = useState(false);
   const [fulfillmentReady, setFulfillmentReady] = useState(false);
-  const [checkoutUser, setCheckoutUser] = useState<{ id: string; email: string } | null>(null);
   const [checkoutNotice, setCheckoutNotice] = useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
 
@@ -41,7 +34,6 @@ export default function Home() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!active) return;
       setSignedIn(Boolean(session?.user));
-      setCheckoutUser(session?.user ? { id: session.user.id, email: session.user.email ?? "" } : null);
 
       if (session?.user) {
         const { data } = await supabase
@@ -67,7 +59,7 @@ export default function Home() {
   }, []);
 
 
-  function startCheckout(tierName: string) {
+  async function startCheckout(tierName: string) {
     if (!signedIn) {
       window.location.href = "/signup";
       return;
@@ -78,16 +70,42 @@ export default function Home() {
       return;
     }
 
-    const checkoutUrl = checkoutLinks[tierName];
-    if (!checkoutUrl) {
-      setCheckoutNotice("missing-link");
-      return;
-    }
+    setCheckoutLoading(tierName);
+    setCheckoutNotice(null);
 
-    const url = new URL(checkoutUrl);
-    if (checkoutUser?.id) url.searchParams.set("client_reference_id", checkoutUser.id);
-    if (checkoutUser?.email) url.searchParams.set("locked_prefilled_email", checkoutUser.email);
-    window.location.href = url.toString();
+    try {
+      const supabase = getSupabase();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const response = await fetch("/api/stripe/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ tier: tierName }),
+      });
+
+      const result = (await response.json()) as { url?: string; error?: string; code?: string };
+      if (!response.ok || !result.url) {
+        if (result.code === "PROFILE_REQUIRED") {
+          setCheckoutNotice(tierName);
+          return;
+        }
+        throw new Error(result.error || "Unable to start checkout.");
+      }
+
+      window.location.href = result.url;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to start checkout.";
+      window.alert(message);
+    } finally {
+      setCheckoutLoading(null);
+    }
   }
 
   function updateTilt(clientX: number, clientY: number, strength = 1) {
@@ -194,8 +212,8 @@ export default function Home() {
                 <p className="price">${tier.price}<small>/month</small></p>
                 <p className="tier-subtitle">{tier.subtitle}</p>
                 <ul><li>One curated CS2 skin per active cycle</li><li>Trade sent by the 14th</li><li>Private collection history</li><li>{tier.price >= 100 ? "Upgrade eligible" : "Standard fulfillment"}</li></ul>
-                <button className="button tier-button" type="button" onClick={() => startCheckout(tier.name)}>
-                  {signedIn ? `Choose ${tier.name} →` : `Create account →`}
+                <button className="button tier-button" type="button" onClick={() => void startCheckout(tier.name)} disabled={checkoutLoading === tier.name}>
+                  {checkoutLoading === tier.name ? "Opening secure checkout…" : signedIn ? `Choose ${tier.name} →` : `Create account →`}
                 </button>
               </article>
             ))}
