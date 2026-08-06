@@ -19,6 +19,10 @@ const tiers = [
 ];
 
 
+type ProfileRow = {
+  steam_trade_url: string | null;
+};
+
 type SubscriptionRow = {
   status: string | null;
   tier_id: string | null;
@@ -51,11 +55,13 @@ export default function Home() {
       setSignedIn(Boolean(session?.user));
 
       if (session?.user) {
-        const { data } = await supabase
+        const { data: profileData } = await supabase
           .from("profiles")
           .select("steam_trade_url")
           .eq("id", session.user.id)
           .maybeSingle();
+
+        const profile = profileData as ProfileRow | null;
 
         const { data: subscriptionData } = await supabase
           .from("subscriptions")
@@ -92,7 +98,7 @@ export default function Home() {
         }
 
         if (active) {
-          setFulfillmentReady(Boolean(data?.steam_trade_url?.trim()));
+          setFulfillmentReady(Boolean(profile?.steam_trade_url?.trim()));
           setMembershipStatus(subscription?.status ?? null);
           setCurrentTier(loadedTier);
           setCurrentTierPrice(loadedPrice);
