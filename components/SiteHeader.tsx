@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Brand from "@/components/Brand";
 import { getSupabase } from "@/lib/supabase";
 
@@ -14,9 +14,11 @@ type HeaderProfile = {
 
 export default function SiteHeader() {
   const router = useRouter();
+  const pathname = usePathname();
   const [signedIn, setSignedIn] = useState(false);
   const [profile, setProfile] = useState<HeaderProfile | null>(null);
   const [ready, setReady] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const supabase = getSupabase();
@@ -78,7 +80,13 @@ export default function SiteHeader() {
     };
   }, []);
 
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   async function logOut() {
+    setMobileOpen(false);
     await getSupabase().auth.signOut();
     router.push("/");
     router.refresh();
@@ -87,33 +95,146 @@ export default function SiteHeader() {
   const memberName =
     profile?.display_name || profile?.full_name || "Member";
 
-  return (
-    <header className="site-header shell">
-      <Brand />
-      <nav aria-label="Main navigation">
-        <Link href="/#plans">Memberships</Link>
+  const signedInLinks = [
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/rewards", label: "Rewards" },
+    { href: "/community", label: "Community" },
+    { href: "/support", label: "Support" },
+    { href: "/settings", label: "Settings" },
+  ];
 
-        {!ready ? null : signedIn ? (
-          <>
-            <Link href="/dashboard">Dashboard</Link>
-            <Link href="/rewards">Rewards</Link>
-            <Link href="/community">Community</Link>
-            <Link href="/support">Support</Link>
-            <Link href="/settings">Settings</Link>
-            {profile?.role === "admin" && <Link href="/upgrades">Upgrades</Link>}
-            {profile?.role === "admin" && <Link href="/admin">Admin</Link>}
-            <Link className="nav-member" href="/dashboard">{memberName}</Link>
-            <button className="nav-logout" type="button" onClick={logOut}>
-              Log out
+  return (
+    <>
+      <header className="site-header shell">
+        <Brand />
+
+        <nav className="desktop-nav" aria-label="Main navigation">
+          <Link href="/#plans">Memberships</Link>
+
+          {!ready ? null : signedIn ? (
+            <>
+              <Link href="/dashboard">Dashboard</Link>
+              <Link href="/rewards">Rewards</Link>
+              <Link href="/community">Community</Link>
+              <Link href="/support">Support</Link>
+              <Link href="/settings">Settings</Link>
+              {profile?.role === "admin" && (
+                <Link href="/upgrades">Upgrades</Link>
+              )}
+              {profile?.role === "admin" && <Link href="/admin">Admin</Link>}
+              <Link className="nav-member" href="/dashboard">
+                {memberName}
+              </Link>
+              <button className="nav-logout" type="button" onClick={logOut}>
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login">Login</Link>
+              <Link className="nav-cta" href="/signup">
+                Create account
+              </Link>
+            </>
+          )}
+        </nav>
+
+        <button
+          type="button"
+          className="mobile-menu-button"
+          aria-label="Open navigation menu"
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen(true)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </header>
+
+      <div
+        className={`mobile-nav-overlay ${mobileOpen ? "open" : ""}`}
+        role="presentation"
+        onMouseDown={() => setMobileOpen(false)}
+      >
+        <aside
+          className={`mobile-nav-drawer ${mobileOpen ? "open" : ""}`}
+          aria-label="Mobile navigation"
+          onMouseDown={(event) => event.stopPropagation()}
+        >
+          <div className="mobile-nav-top">
+            <Brand />
+            <button
+              type="button"
+              className="mobile-nav-close"
+              aria-label="Close navigation menu"
+              onClick={() => setMobileOpen(false)}
+            >
+              ×
             </button>
-          </>
-        ) : (
-          <>
-            <Link href="/login">Login</Link>
-            <Link className="nav-cta" href="/signup">Create account</Link>
-          </>
-        )}
-      </nav>
-    </header>
+          </div>
+
+          {!ready ? null : signedIn ? (
+            <>
+              <div className="mobile-member-card">
+                <small>MEMBER</small>
+                <strong>{memberName}</strong>
+                <span>Strafe Crate account</span>
+              </div>
+
+              <nav className="mobile-nav-links">
+                <Link href="/#plans">Memberships</Link>
+                {signedInLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={
+                      pathname === link.href ||
+                      pathname.startsWith(`${link.href}/`)
+                        ? "active"
+                        : ""
+                    }
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                {profile?.role === "admin" && (
+                  <Link
+                    href="/upgrades"
+                    className={pathname.startsWith("/upgrades") ? "active" : ""}
+                  >
+                    Upgrades
+                  </Link>
+                )}
+                {profile?.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    className={pathname.startsWith("/admin") ? "active" : ""}
+                  >
+                    Admin
+                  </Link>
+                )}
+              </nav>
+
+              <button
+                className="mobile-nav-logout"
+                type="button"
+                onClick={logOut}
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <nav className="mobile-nav-links">
+              <Link href="/#plans">Memberships</Link>
+              <Link href="/login">Login</Link>
+              <Link className="mobile-nav-primary" href="/signup">
+                Create account
+              </Link>
+            </nav>
+          )}
+        </aside>
+      </div>
+    </>
   );
 }
