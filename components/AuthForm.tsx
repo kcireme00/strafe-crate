@@ -46,11 +46,21 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         const base =
           process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
 
+        const referralCode =
+          typeof window !== "undefined"
+            ? window.localStorage.getItem("strafe_referral_code")
+            : null;
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { full_name: fullName },
+            data: {
+              full_name: fullName,
+              ...(referralCode
+                ? { referral_code: referralCode.toUpperCase() }
+                : {}),
+            },
             emailRedirectTo: `${base}/auth/callback`,
           },
         });

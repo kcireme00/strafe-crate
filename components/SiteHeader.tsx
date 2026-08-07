@@ -24,6 +24,37 @@ export default function SiteHeader() {
     const supabase = getSupabase();
     let active = true;
 
+    function captureReferralFromUrl() {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const referral = params.get("ref")?.trim().toUpperCase();
+
+      if (referral && /^[A-Z0-9_-]{3,24}$/.test(referral)) {
+        window.localStorage.setItem("strafe_referral_code", referral);
+      }
+    }
+
+    async function attachPendingReferral() {
+      if (typeof window === "undefined") return;
+      const referral =
+        window.localStorage.getItem("strafe_referral_code")?.trim();
+
+      if (!referral) return;
+
+      const { error } = await (supabase as any).rpc(
+        "claim_referral_code",
+        { referral_code: referral },
+      );
+
+      if (!error) {
+        window.localStorage.removeItem("strafe_referral_code");
+      } else {
+        console.warn("Referral attribution was not attached:", error.message);
+      }
+    }
+
+    captureReferralFromUrl();
+
     async function loadProfile(userId: string) {
       const { data } = await supabase
         .from("profiles")
@@ -52,6 +83,7 @@ export default function SiteHeader() {
       }
 
       await loadProfile(sessionUser.id);
+      await attachPendingReferral();
     }
 
     void loadHeader();
@@ -71,7 +103,10 @@ export default function SiteHeader() {
       }
 
       // Run profile retrieval outside the auth callback stack.
-      window.setTimeout(() => void loadProfile(sessionUser.id), 0);
+      window.setTimeout(() => {
+        void loadProfile(sessionUser.id);
+        void attachPendingReferral();
+      }, 0);
     });
 
     return () => {
@@ -98,6 +133,7 @@ export default function SiteHeader() {
   const signedInLinks = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/rewards", label: "Rewards" },
+    { href: "/referrals", label: "Refer" },
     { href: "/community", label: "Community" },
     { href: "/support", label: "Support" },
     { href: "/settings", label: "Settings" },
@@ -115,6 +151,7 @@ export default function SiteHeader() {
             <>
               <Link href="/dashboard">Dashboard</Link>
               <Link href="/rewards">Rewards</Link>
+              <Link href="/referrals">Refer</Link>
               <Link href="/community">Community</Link>
               <Link href="/support">Support</Link>
               <Link href="/settings">Settings</Link>

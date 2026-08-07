@@ -187,9 +187,29 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const userId = await resolveUserId(customerId, subscriptionId, session.client_reference_id);
   if (!userId) throw new Error("Unable to match Stripe checkout to a Strafe Crate user.");
 
-  // Checkout only saves the payment method and creates a trialing subscription.
-  // Fulfillment is created only after a positive paid invoice on the first.
+  // Checkout saves the payment method and activates the membership in Stripe
+  // (normally as "trialing" until the first-of-month charge).
+  // Fulfillment still waits for a positive paid invoice on the first.
   await syncSubscription(userId, subscription, session.amount_total);
+
+  // Referral credits are intentionally earned at membership activation, not
+  // at the first paid monthly cycle. The SQL function is idempotent and can
+  // award this referred account only once.
+  if (["active", "trialing"].includes(String(subscription.status).toLowerCase())) {
+    const { error: referralError } = await getSupabaseAdmin().rpc(
+      "activate_referral_for_member",
+      {
+        target_user_id: userId,
+        stripe_subscription_id: subscription.id,
+      },
+    );
+
+    if (referralError) {
+      throw new Error(
+        `Referral activation failed: ${referralError.message}`,
+      );
+    }
+  }
 }
 
 
