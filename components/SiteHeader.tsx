@@ -97,7 +97,6 @@ export default function SiteHeader() {
           <>
             <Link href="/dashboard">Dashboard</Link>
             <Link href="/rewards">Rewards</Link>
-            <Link href="/trophies">Trophies</Link>
             <Link href="/community">Community</Link>
             <Link href="/support">Support</Link>
             <Link href="/settings">Settings</Link>

@@ -5,6 +5,7 @@ import AuthGuard from "@/components/AuthGuard";
 import LoyaltyPanel from "@/components/LoyaltyPanel";
 import { getSupabase } from "@/lib/supabase";
 import RewardCatalog from "@/components/RewardCatalog";
+import TrophyCabinet from "@/components/TrophyCabinet";
 import styles from "./RewardsProgressPage.module.css";
 
 type Loyalty = {
@@ -54,6 +55,8 @@ function Content() {
 
         <div className={styles.stack}>
           <LoyaltyPanel loyalty={loyalty} />
+
+          <TrophyCabinet />
 
           <RewardCatalog />
         </div>

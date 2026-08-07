@@ -1,5 +1,5 @@
-import TrophiesPage from "@/components/TrophiesPage";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <TrophiesPage />;
+  redirect("/rewards");
 }

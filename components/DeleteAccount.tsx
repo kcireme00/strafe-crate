@@ -11,15 +11,16 @@ export default function DeleteAccount() {
   const [confirmation, setConfirmation] = useState("");
   const [status, setStatus] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [showFinalWarning, setShowFinalWarning] = useState(false);
+
+  function requestDeletion() {
+    if (confirmation !== "DELETE" || deleting) return;
+    setStatus("");
+    setShowFinalWarning(true);
+  }
 
   async function deleteAccount() {
     if (confirmation !== "DELETE" || deleting) return;
-
-    const accepted = window.confirm(
-      "Delete your Strafe Crate account permanently? Any active Stripe membership will be canceled immediately. This cannot be undone.",
-    );
-
-    if (!accepted) return;
 
     setDeleting(true);
     setStatus("Deleting account and cancelling billing...");
@@ -54,7 +55,9 @@ export default function DeleteAccount() {
           : {};
       } catch {
         result = {
-          error: rawResponse || "The deletion service returned an invalid response.",
+          error:
+            rawResponse ||
+            "The deletion service returned an invalid response.",
         };
       }
 
@@ -72,6 +75,7 @@ export default function DeleteAccount() {
       router.replace("/?account=deleted");
       router.refresh();
     } catch (error) {
+      setShowFinalWarning(false);
       setStatus(
         error instanceof Error
           ? error.message
@@ -82,38 +86,98 @@ export default function DeleteAccount() {
   }
 
   return (
-    <section className={styles.panel}>
-      <div>
-        <p className={styles.eyebrow}>DANGER ZONE</p>
-        <h2>Delete account</h2>
-        <p>
-          This permanently removes your login and public profile. Any active
-          membership is canceled immediately so you cannot be charged again.
-          This action cannot be undone. Certain transaction records may still
-          be retained by Stripe for payment, dispute, and legal obligations.
-        </p>
-      </div>
+    <>
+      <section className={styles.panel}>
+        <div>
+          <p className={styles.eyebrow}>DANGER ZONE</p>
+          <h2>Delete account</h2>
+          <p>
+            This permanently removes your login and public profile. Any active
+            membership is canceled immediately so you cannot be charged again.
+            This action cannot be undone. Certain transaction records may still
+            be retained by Stripe for payment, dispute, and legal obligations.
+          </p>
+        </div>
 
-      <label className={styles.confirmation}>
-        Type <strong>DELETE</strong> to continue
-        <input
-          value={confirmation}
-          autoComplete="off"
-          placeholder="DELETE"
-          onChange={(event) => setConfirmation(event.target.value)}
-        />
-      </label>
+        <label className={styles.confirmation}>
+          Type <strong>DELETE</strong> to continue
+          <input
+            value={confirmation}
+            autoComplete="off"
+            placeholder="DELETE"
+            onChange={(event) => setConfirmation(event.target.value)}
+          />
+        </label>
 
-      <button
-        type="button"
-        className={styles.deleteButton}
-        disabled={confirmation !== "DELETE" || deleting}
-        onClick={() => void deleteAccount()}
-      >
-        {deleting ? "Deleting account..." : "Permanently delete account"}
-      </button>
+        <button
+          type="button"
+          className={styles.deleteButton}
+          disabled={confirmation !== "DELETE" || deleting}
+          onClick={requestDeletion}
+        >
+          {deleting ? "Deleting account..." : "Permanently delete account"}
+        </button>
 
-      {status && <p className={styles.status}>{status}</p>}
-    </section>
+        {status && <p className={styles.status}>{status}</p>}
+      </section>
+
+      {showFinalWarning && (
+        <div
+          className={styles.modalBackdrop}
+          role="presentation"
+          onMouseDown={() => {
+            if (!deleting) setShowFinalWarning(false);
+          }}
+        >
+          <section
+            className={styles.modal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-account-warning-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className={styles.warningIcon} aria-hidden="true">
+              !
+            </div>
+
+            <p className={styles.modalEyebrow}>FINAL CONFIRMATION</p>
+            <h3 id="delete-account-warning-title">
+              Are you absolutely sure?
+            </h3>
+
+            <p className={styles.irreversible}>
+              This action is permanent and cannot be reversed.
+            </p>
+
+            <ul>
+              <li>Your Strafe Crate login and profile will be deleted.</li>
+              <li>Any active membership will be canceled.</li>
+              <li>You will lose access to your dashboard and member features.</li>
+              <li>Deleted account data cannot be restored later.</li>
+            </ul>
+
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.cancelButton}
+                disabled={deleting}
+                onClick={() => setShowFinalWarning(false)}
+              >
+                Keep my account
+              </button>
+
+              <button
+                type="button"
+                className={styles.confirmDeleteButton}
+                disabled={deleting}
+                onClick={() => void deleteAccount()}
+              >
+                {deleting ? "Deleting forever..." : "Yes, delete forever"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+    </>
   );
 }
