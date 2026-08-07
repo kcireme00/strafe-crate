@@ -89,8 +89,8 @@ export default function DeleteAccount() {
         <p>
           This permanently removes your login and public profile. Any active
           membership is canceled immediately so you cannot be charged again.
-          Payment and fulfillment records may be retained in anonymized form
-          for accounting, disputes, and legal obligations.
+          This action cannot be undone. Certain transaction records may still
+          be retained by Stripe for payment, dispute, and legal obligations.
         </p>
       </div>
 
