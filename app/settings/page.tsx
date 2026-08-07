@@ -2,6 +2,7 @@
 
 import AuthGuard from "@/components/AuthGuard";
 import ProfileSettings from "@/components/ProfileSettings";
+import DeleteAccount from "@/components/DeleteAccount";
 
 export default function SettingsPage() {
   return (
@@ -14,6 +15,7 @@ export default function SettingsPage() {
             <p>Keep your public display name and private Steam delivery information current.</p>
           </header>
           <ProfileSettings />
+          <DeleteAccount />
         </main>
       )}
     </AuthGuard>
