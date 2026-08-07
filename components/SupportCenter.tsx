@@ -31,7 +31,7 @@ const categories = [
 ];
 
 export default function SupportCenter() {
-  const supabase = useMemo(() => getSupabase(), []);
+  const supabase = useMemo(() => getSupabase() as any, []);
   const [tab, setTab] = useState<"tickets" | "review">("tickets");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [category, setCategory] = useState("billing");

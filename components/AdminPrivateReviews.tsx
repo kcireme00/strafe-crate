@@ -7,7 +7,7 @@ import styles from "./AdminSupport.module.css";
 type Review={id:string;rating:number;body:string;created_at:string;updated_at:string;profiles:{display_name:string|null;full_name:string|null;email:string|null}|null};
 
 export default function AdminPrivateReviews(){
-  const supabase=useMemo(()=>getSupabase(),[]);
+  const supabase=useMemo(()=>getSupabase() as any,[]);
   const [reviews,setReviews]=useState<Review[]>([]);
   async function load(){const {data}=await supabase.from("private_reviews").select("id,rating,body,created_at,updated_at,profiles!private_reviews_user_id_fkey(display_name,full_name,email)").order("updated_at",{ascending:false});setReviews((data??[]) as unknown as Review[])}
   useEffect(()=>{void load()},[]);

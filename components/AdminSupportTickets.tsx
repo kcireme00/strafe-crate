@@ -11,7 +11,7 @@ type Ticket = {
 };
 
 export default function AdminSupportTickets() {
-  const supabase = useMemo(() => getSupabase(), []);
+  const supabase = useMemo(() => getSupabase() as any, []);
   const [tickets,setTickets]=useState<Ticket[]>([]);
   const [filter,setFilter]=useState("open");
   const [busy,setBusy]=useState<string|null>(null);
