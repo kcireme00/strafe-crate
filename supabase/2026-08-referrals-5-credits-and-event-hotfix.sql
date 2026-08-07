@@ -42,6 +42,69 @@ create table if not exists public.referral_attributions (
 create index if not exists referral_attributions_referrer_idx
 on public.referral_attributions(referrer_user_id, captured_at desc);
 
+
+-- Persist referral attribution to the backend as soon as the member profile is
+-- created. It does NOT depend on the member subscribing immediately.
+create or replace function public.persist_signup_referral()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, auth
+set row_security = off
+as $$
+declare
+  signup_code text;
+  selected_code public.referral_codes%rowtype;
+begin
+  select upper(trim(coalesce(
+    au.raw_user_meta_data ->> 'referral_code',
+    ''
+  )))
+  into signup_code
+  from auth.users au
+  where au.id = new.id;
+
+  if signup_code = '' then
+    return new;
+  end if;
+
+  select rc.*
+  into selected_code
+  from public.referral_codes rc
+  where lower(rc.code) = lower(signup_code)
+    and rc.active = true
+  limit 1;
+
+  if selected_code.id is null
+     or selected_code.owner_user_id = new.id then
+    return new;
+  end if;
+
+  insert into public.referral_attributions(
+    referred_user_id,
+    referral_code_id,
+    referrer_user_id
+  )
+  values (
+    new.id,
+    selected_code.id,
+    selected_code.owner_user_id
+  )
+  on conflict (referred_user_id) do nothing;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists persist_signup_referral_trigger
+on public.profiles;
+
+create trigger persist_signup_referral_trigger
+after insert on public.profiles
+for each row
+execute function public.persist_signup_referral();
+
+
 alter table public.referral_codes enable row level security;
 alter table public.referral_attributions enable row level security;
 

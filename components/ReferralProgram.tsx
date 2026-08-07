@@ -17,6 +17,47 @@ export default function ReferralProgram() {
   const [code, setCode] = useState("");
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const [membershipActivated, setMembershipActivated] = useState(false);
+  const [myAttribution, setMyAttribution] = useState<string | null>(null);
+  const [useCode, setUseCode] = useState("");
+
+  async function loadEligibility() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const [{ data: subscriptions }, { data: attribution }] = await Promise.all([
+      supabase
+        .from("subscriptions")
+        .select("status")
+        .eq("user_id", user.id),
+      supabase
+        .from("referral_attributions")
+        .select("referral_code_id")
+        .eq("referred_user_id", user.id)
+        .maybeSingle(),
+    ]);
+
+    const activated = (subscriptions ?? []).some((row: any) =>
+      ["active", "trialing"].includes(
+        String(row.status ?? "").toLowerCase(),
+      ),
+    );
+
+    setMembershipActivated(activated);
+
+    if (attribution?.referral_code_id) {
+      const { data: codeRow } = await supabase
+        .from("referral_codes")
+        .select("code")
+        .eq("id", attribution.referral_code_id)
+        .maybeSingle();
+
+      setMyAttribution(codeRow?.code ?? "Applied");
+    }
+  }
 
   async function load() {
     const { data, error } = await supabase.rpc("get_my_referral_program");
@@ -32,7 +73,37 @@ export default function ReferralProgram() {
 
   useEffect(() => {
     void load();
+    void loadEligibility();
   }, []);
+
+  async function applyReferral() {
+    const clean = useCode
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9_-]/g, "")
+      .slice(0, 24);
+
+    if (!clean || busy || membershipActivated || myAttribution) return;
+
+    setBusy(true);
+    setStatus("");
+
+    const { error } = await supabase.rpc(
+      "claim_referral_before_membership",
+      { referral_code: clean },
+    );
+
+    setBusy(false);
+
+    if (error) {
+      setStatus(error.message);
+      return;
+    }
+
+    setMyAttribution(clean);
+    setStatus("Referral code applied to your account.");
+    await loadEligibility();
+  }
 
   async function saveCode() {
     const clean = code.trim().toUpperCase();
@@ -62,7 +133,7 @@ export default function ReferralProgram() {
       ? window.location.origin
       : "https://strafecrate.com";
 
-  const referralUrl = code ? `${site}/?ref=${encodeURIComponent(code)}` : "";
+  const referralUrl = code ? `${site}/signup?ref=${encodeURIComponent(code)}` : "";
 
   async function copyLink() {
     if (!referralUrl) return;
@@ -79,6 +150,50 @@ export default function ReferralProgram() {
           Earn <strong>5 Supply Credits</strong> every time someone uses your
           referral code and activates a membership.
         </span>
+      </section>
+
+      <section className={styles.applyPanel}>
+        <div>
+          <p className={styles.eyebrow}>HAVE A REFERRAL CODE?</p>
+          <h2>Apply it before joining.</h2>
+          {myAttribution ? (
+            <span>
+              Referral <strong>{myAttribution}</strong> is attached to your account.
+            </span>
+          ) : membershipActivated ? (
+            <span>
+              Referral entry is locked because this account has already activated a membership.
+            </span>
+          ) : (
+            <span>
+              You can add a referral code here until your first membership is activated.
+            </span>
+          )}
+        </div>
+
+        {!myAttribution && !membershipActivated && (
+          <div className={styles.applyCode}>
+            <input
+              value={useCode}
+              maxLength={24}
+              placeholder="REFERRAL CODE"
+              onChange={(event) =>
+                setUseCode(
+                  event.target.value
+                    .toUpperCase()
+                    .replace(/[^A-Z0-9_-]/g, ""),
+                )
+              }
+            />
+            <button
+              type="button"
+              disabled={busy || useCode.length < 3}
+              onClick={() => void applyReferral()}
+            >
+              Apply
+            </button>
+          </div>
+        )}
       </section>
 
       <section className={styles.panel}>

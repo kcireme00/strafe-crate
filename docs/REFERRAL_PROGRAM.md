@@ -9,7 +9,7 @@ The reward does **not** wait for the first paid monthly cycle. In the current St
 ## Attribution
 
 1. A member creates a customizable code at `/referrals`.
-2. They share `https://strafecrate.com/?ref=CODE`.
+2. They share `https://strafecrate.com/signup?ref=CODE`.
 3. The browser preserves the code.
 4. The code is written into Supabase Auth metadata when the new account is created.
 5. After email verification/login, the account is securely attributed to that code.
@@ -22,3 +22,16 @@ Each referred account can award credits only once, even if it cancels and resubs
 ## Sand Dune event hotfix
 
 The same SQL migration also fixes the `column reference "trophy_id" is ambiguous` error in the Sand Dune event approval function.
+
+
+## Persistence
+
+The selected referral code is stored in Supabase Auth metadata during account
+creation and immediately copied into `public.referral_attributions` when the
+member profile is created.
+
+That means the member does not need to subscribe immediately. The attribution
+remains attached to that account until membership activation, whether that is
+the same day or weeks later.
+
+The 5-credit reward is still limited to one award per referred account.

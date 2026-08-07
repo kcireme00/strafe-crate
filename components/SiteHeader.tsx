@@ -133,7 +133,7 @@ export default function SiteHeader() {
   const signedInLinks = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/rewards", label: "Rewards" },
-    { href: "/referrals", label: "Refer" },
+    { href: "/referrals", label: "Referral" },
     { href: "/community", label: "Community" },
     { href: "/support", label: "Support" },
     { href: "/settings", label: "Settings" },
@@ -151,7 +151,7 @@ export default function SiteHeader() {
             <>
               <Link href="/dashboard">Dashboard</Link>
               <Link href="/rewards">Rewards</Link>
-              <Link href="/referrals">Refer</Link>
+              <Link href="/referrals">Referral</Link>
               <Link href="/community">Community</Link>
               <Link href="/support">Support</Link>
               <Link href="/settings">Settings</Link>

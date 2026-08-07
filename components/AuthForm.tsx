@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   getRememberMePreference,
@@ -16,11 +16,38 @@ export default function AuthForm({ mode }: { mode: Mode }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
   const [rememberMe, setRememberMe] = useState(() =>
     getRememberMePreference(),
   );
+
+
+  useEffect(() => {
+    if (mode !== "signup" || typeof window === "undefined") return;
+
+    const fromUrl = new URLSearchParams(window.location.search)
+      .get("ref")
+      ?.trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9_-]/g, "")
+      .slice(0, 24);
+
+    const saved = window.localStorage
+      .getItem("strafe_referral_code")
+      ?.trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9_-]/g, "")
+      .slice(0, 24);
+
+    const initial = fromUrl || saved || "";
+
+    if (initial) {
+      setReferralCode(initial);
+      window.localStorage.setItem("strafe_referral_code", initial);
+    }
+  }, [mode]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setLoading(true); setMessage("");
@@ -46,10 +73,18 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         const base =
           process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
 
-        const referralCode =
-          typeof window !== "undefined"
-            ? window.localStorage.getItem("strafe_referral_code")
-            : null;
+        const cleanReferralCode = referralCode
+          .trim()
+          .toUpperCase()
+          .replace(/[^A-Z0-9_-]/g, "")
+          .slice(0, 24);
+
+        if (cleanReferralCode && typeof window !== "undefined") {
+          window.localStorage.setItem(
+            "strafe_referral_code",
+            cleanReferralCode,
+          );
+        }
 
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -57,8 +92,8 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           options: {
             data: {
               full_name: fullName,
-              ...(referralCode
-                ? { referral_code: referralCode.toUpperCase() }
+              ...(cleanReferralCode
+                ? { referral_code: cleanReferralCode }
                 : {}),
             },
             emailRedirectTo: `${base}/auth/callback`,
@@ -180,6 +215,31 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     {mode === "signup" && <label>Full name<input value={fullName} onChange={e => setFullName(e.target.value)} required /></label>}
     {mode !== "reset" && <label>Email address<input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></label>}
     {mode !== "forgot" && <label>{mode === "reset" ? "New password" : "Password"}<input type="password" minLength={8} value={password} onChange={e => setPassword(e.target.value)} required /></label>}
+    {mode === "signup" && (
+      <div className="signup-referral-compact">
+        <span>Referral code <em>optional</em></span>
+        <input
+          value={referralCode}
+          maxLength={24}
+          placeholder="Creator code"
+          aria-label="Referral code"
+          onChange={e => {
+            const value = e.target.value
+              .toUpperCase()
+              .replace(/[^A-Z0-9_-]/g, "")
+              .slice(0, 24);
+            setReferralCode(value);
+            if (typeof window !== "undefined") {
+              if (value) {
+                window.localStorage.setItem("strafe_referral_code", value);
+              } else {
+                window.localStorage.removeItem("strafe_referral_code");
+              }
+            }
+          }}
+        />
+      </div>
+    )}
     {mode === "signup" && <label className="terms-check"><input type="checkbox" checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} required/><span>By creating an account, I agree to the <a href="/terms" target="_blank">Terms of Service</a>, <a href="/privacy" target="_blank">Privacy Policy</a>, and <a href="/membership-policy" target="_blank">Membership and Value Policy</a>.</span></label>}
     {mode === "login" && (
       <label className="remember-me-check">
