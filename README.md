@@ -1,27 +1,53 @@
-# Strafe Crate Launch Candidate
+# Strafe Crate
 
-## Required Supabase migration
-Run `supabase/launch-sweep.sql` once in the Supabase SQL Editor.
+Strafe Crate is a Next.js membership platform for recurring CS2 skin fulfillment, member progression, community features, support, and admin operations.
 
-## Required Vercel environment variables
-Copy `.env.example` and set the Supabase values plus all six Stripe Payment Link URLs.
+## Stack
 
-## Member experience
-- `/dashboard`: membership card, current drop timeline, weapon coverage, compact collector summary, rotation, and history.
-- `/rewards`: full XP and Supply Credit progression plus live reward catalog.
-- `/trophies`: trophy slot picker and achievement management.
-- `/settings`: display name and required Steam delivery URLs.
-- `/community`: tier-colored identity, level, and exact saved slot-one trophy emblem.
+- **Frontend / App:** Next.js + TypeScript
+- **Hosting:** Vercel
+- **Auth / Database:** Supabase
+- **Payments:** Stripe
+- **Transactional data:** PostgreSQL through Supabase
+- **Steam fulfillment:** Admin-managed trade workflow
 
-## Launch checks
-1. Create a fresh account and confirm email.
-2. Save valid Steam profile and trade URLs under Settings.
-3. Test every Stripe Payment Link in test mode.
-4. Confirm the subscription webhook creates/updates the subscription and fulfillment order.
-5. Confirm the order appears in Admin > Orders and randomize an unused weapon.
-6. Move the order through purchasing, ready to send, trade sent, accepted, and fulfilled.
-7. Confirm dashboard timeline, weapon history, XP, Supply Credits, trophy unlocks, tier count, and chat identity update.
-8. Test cancellation, failed payment, reports, timeout/ban, and reward redemption.
+## Project structure
 
-## Build verification note
-The repository was syntax-checked locally. A full dependency install/build could not be executed in the editing environment because its npm registry did not contain `@supabase/supabase-js`; Vercel/GitHub should run the final production build using the normal public npm registry.
+```text
+app/                Next.js routes, pages, API endpoints, and global styles
+components/         Reusable UI and feature components
+lib/                Shared client/server utilities
+public/             Static assets
+supabase/           Database schema, functions, policies, and feature migrations
+docs/               Current project documentation
+docs/archive/       Historical implementation notes kept for reference
+```
+
+## Core product areas
+
+- Membership checkout and first-of-month billing
+- Dashboard and fulfillment history
+- Weapon rotation and prestige
+- XP, rewards, and trophy cabinet
+- Community chat and moderation
+- Support tickets and private reviews
+- Admin fulfillment, reports, bans, tickets, reviews, and events
+- Limited-time promotional events
+- Stripe subscription management
+- Account deletion
+
+## Local development
+
+1. Copy `.env.example` to `.env.local`.
+2. Add your Supabase and Stripe credentials.
+3. Install dependencies with `npm install`.
+4. Run `npm run dev`.
+5. Open `http://localhost:3000`.
+
+See `docs/SETUP.md` for environment variables and database setup.
+
+## Production
+
+Deploy through Vercel. Keep all secret credentials server-side. Never expose the Supabase service-role key or Stripe secret key to the browser.
+
+See `docs/SECURITY.md` before launch.
