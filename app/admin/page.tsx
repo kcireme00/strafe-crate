@@ -4,10 +4,11 @@ import { useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
 import AdminOrdersQueue from "@/components/AdminOrdersQueue";
 import AdminChatReports from "@/components/AdminChatReports";
+import AdminChatBans from "@/components/AdminChatBans";
 import AdminBusinessMetrics from "@/components/AdminBusinessMetrics";
 import styles from "./admin.module.css";
 
-type Tab = "orders" | "reports";
+type Tab = "orders" | "reports" | "bans";
 
 function AdminHub() {
   const [tab, setTab] = useState<Tab>("orders");
@@ -15,6 +16,7 @@ function AdminHub() {
   const tabs: Array<[Tab, string]> = [
     ["orders", "Orders"],
     ["reports", "Reports"],
+    ["bans", "Bans"],
   ];
 
   return (
@@ -55,6 +57,12 @@ function AdminHub() {
         {tab === "reports" && (
           <section className={styles.contentPanel}>
             <AdminChatReports />
+          </section>
+        )}
+
+        {tab === "bans" && (
+          <section className={styles.contentPanel}>
+            <AdminChatBans />
           </section>
         )}
 

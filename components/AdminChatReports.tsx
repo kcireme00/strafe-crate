@@ -56,37 +56,15 @@ export default function AdminChatReports() {
   }, []);
 
   async function takeAction(report: ReportRow, action: Action) {
-    const labels: Record<Action, string> = {
-      dismiss: "dismiss this report",
-      delete: "delete this message",
-      timeout_1h: "time this user out for 1 hour",
-      timeout_24h: "time this user out for 24 hours",
-      timeout_7d: "time this user out for 7 days",
-      permanent_ban: "permanently ban this user from chat",
-      remove_ban: "remove this user's chat restriction",
-    };
-
-    if (!window.confirm(`Are you sure you want to ${labels[action]}?`)) {
-      return;
-    }
-
-    const reason =
-      action === "dismiss" || action === "remove_ban"
-        ? null
-        : window.prompt(
-            "Optional internal moderation reason:",
-            report.report_reason || "",
-          );
-
     setBusy(report.report_id);
-    setStatus("Applying moderation action...");
+    setStatus("");
 
     const { data, error } = await (supabase as any).rpc(
       "moderate_chat_report",
       {
         target_report_id: report.report_id,
         moderation_action: action,
-        moderation_reason: reason,
+        moderation_reason: report.report_reason || null,
       },
     );
 
@@ -107,8 +85,8 @@ export default function AdminChatReports() {
       : reports;
 
   return (
-    <main className="admin-reports-shell shell">
-      <div className="admin-reports-heading">
+    <main className="moderationReports">
+      <div className="moderationHeading">
         <div>
           <p className="eyebrow">ADMIN MODERATION</p>
           <h1>Chat reports.</h1>
@@ -118,7 +96,7 @@ export default function AdminChatReports() {
           </p>
         </div>
 
-        <div className="admin-report-summary">
+        <div className="moderationSummary">
           <span>
             <small>OPEN</small>
             <strong>
@@ -135,7 +113,7 @@ export default function AdminChatReports() {
         </div>
       </div>
 
-      <div className="admin-report-toolbar">
+      <div className="moderationToolbar">
         <div>
           <button
             className={filter === "open" ? "active" : ""}
@@ -162,7 +140,7 @@ export default function AdminChatReports() {
         </button>
       </div>
 
-      <section className="admin-report-list">
+      <section className="moderationList">
         {visibleReports.map((report) => {
           const restrictionText = report.permanently_banned
             ? "Permanently banned"
@@ -174,12 +152,12 @@ export default function AdminChatReports() {
 
           return (
             <article
-              className={`admin-report-card status-${report.report_status}`}
+              className={`moderationCard status-${report.report_status}`}
               key={report.report_id}
             >
-              <div className="admin-report-card-top">
+              <div className="moderationCardTop">
                 <div>
-                  <span className="admin-report-status">
+                  <span className="moderationStatus">
                     {report.report_status}
                   </span>
                   <h2>{report.reported_display_name}</h2>
@@ -190,19 +168,19 @@ export default function AdminChatReports() {
                   </p>
                 </div>
 
-                <span className="admin-restriction-badge">
+                <span className="restrictionBadge">
                   {restrictionText}
                 </span>
               </div>
 
               <blockquote>{report.message_body}</blockquote>
 
-              <div className="admin-report-reason">
+              <div className="reportReason">
                 <small>REPORT REASON</small>
                 <p>{report.report_reason || "Member report"}</p>
               </div>
 
-              <div className="admin-report-actions">
+              <div className="moderationActions">
                 <button
                   type="button"
                   disabled={busy === report.report_id}
@@ -269,7 +247,7 @@ export default function AdminChatReports() {
         })}
 
         {!visibleReports.length && (
-          <div className="admin-report-empty">
+          <div className="moderationEmpty">
             <span>✓</span>
             <div>
               <strong>No reports to review.</strong>
@@ -279,7 +257,7 @@ export default function AdminChatReports() {
         )}
       </section>
 
-      {status && <p className="admin-report-page-status">{status}</p>}
+      {status && <p className="moderationPageStatus">{status}</p>}
     </main>
   );
 }
