@@ -99,6 +99,7 @@ export default function SiteHeader() {
             <Link href="/rewards">Rewards</Link>
             <Link href="/trophies">Trophies</Link>
             <Link href="/community">Community</Link>
+            <Link href="/support">Support</Link>
             <Link href="/settings">Settings</Link>
             {profile?.role === "admin" && <Link href="/upgrades">Upgrades</Link>}
             {profile?.role === "admin" && <Link href="/admin">Admin</Link>}
