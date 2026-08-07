@@ -170,7 +170,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     {mode === "signup" && <label>Full name<input value={fullName} onChange={e => setFullName(e.target.value)} required /></label>}
     {mode !== "reset" && <label>Email address<input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></label>}
     {mode !== "forgot" && <label>{mode === "reset" ? "New password" : "Password"}<input type="password" minLength={8} value={password} onChange={e => setPassword(e.target.value)} required /></label>}
-    {mode === "signup" && <label className="terms-check"><input type="checkbox" checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} required/><span>By creating an account, I agree to the <a href="/terms" target="_blank">Terms of Service</a>, <a href="/privacy" target="_blank">Privacy Policy</a>, <a href="/membership-policy" target="_blank">Membership and Value Policy</a>, and recurring billing terms.</span></label>}
+    {mode === "signup" && <label className="terms-check"><input type="checkbox" checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} required/><span>By creating an account, I agree to the <a href="/terms" target="_blank">Terms of Service</a>, <a href="/privacy" target="_blank">Privacy Policy</a>, and <a href="/membership-policy" target="_blank">Membership and Value Policy</a>.</span></label>}
     {mode === "login" && (
       <label className="remember-me-check">
         <input
