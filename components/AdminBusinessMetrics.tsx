@@ -46,10 +46,18 @@ export default function AdminBusinessMetrics() {
   useEffect(() => {
     void load();
 
-    const refreshAfterSave = () => void load();
+    let delayedRefresh: number | undefined;
+
+    const refreshAfterSave = () => {
+      void load();
+      window.clearTimeout(delayedRefresh);
+      delayedRefresh = window.setTimeout(() => void load(), 250);
+    };
+
     window.addEventListener("strafe:order-saved", refreshAfterSave);
 
     return () => {
+      window.clearTimeout(delayedRefresh);
       window.removeEventListener("strafe:order-saved", refreshAfterSave);
     };
   }, []);

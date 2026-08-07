@@ -143,9 +143,11 @@ export default function AdminOrdersQueue() {
     });
     setSaving(null);
     if (error) { setStatus(error.message); return; }
-    setStatus("Order saved. Revenue and profit refreshed.");
-    window.dispatchEvent(new CustomEvent("strafe:order-saved"));
     await load();
+    setStatus("Order saved. Revenue and profit refreshed.");
+    window.dispatchEvent(new CustomEvent("strafe:order-saved", {
+      detail: { orderId: order.order_id, savedAt: Date.now() },
+    }));
   }
 
   async function createOrder() {
