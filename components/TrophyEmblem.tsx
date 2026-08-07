@@ -38,6 +38,18 @@ export default function TrophyEmblem({
   const slug = trophy.toLowerCase();
 
   switch (slug) {
+
+    case "launch-sand-dollar":
+      return (
+        <Base className={className} title={title ?? "Sand Dollar"}>
+          <circle cx="32" cy="32" r="25" stroke="currentColor" strokeWidth="4" />
+          <path d="M12 46c8-8 32-8 40 0" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+          <path d="M24 44V25m16 19V20" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+          <path d="M24 27c-5-5-9-4-12-1 5 0 8 2 12 6m0-5c4-6 9-7 13-4-5 1-8 4-13 9m16-10c-4-5-8-5-12-2 5 1 8 3 12 7m0-5c5-5 9-4 12-1-5 0-8 2-12 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="m32 35 2 4 5 1-4 3 1 5-4-2-4 2 1-5-4-3 5-1 2-4Z" fill="currentColor" />
+        </Base>
+      );
+
     case "founding-member":
       return (
         <Base className={className} title={title ?? "Founding Member"}>

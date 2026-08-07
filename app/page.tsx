@@ -6,6 +6,7 @@ import TierEmblem from "@/components/TierEmblem";
 import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
 import TierMemberTracker from "@/components/TierMemberTracker";
+import LaunchEventSection from "@/components/LaunchEventSection";
 
 
 
@@ -275,10 +276,11 @@ export default function Home() {
 
   return (
     <main>
+      <a className="event-below-banner" href="#launch-event"><span>LIMITED TIME</span><strong>Launch event below ↓</strong><em>Free P250 | Sand Dune + exclusive trophy</em></a>
       <section className="hero shell">
         <div>
           <p className="eyebrow">PREMIUM MONTHLY CS2 SKIN MEMBERSHIPS</p>
-          <h1>Build your inventory, one cycle at a time.</h1>
+          <h1>Build your CS2 inventory, one cycle at a time.</h1>
           <p className="lead">Create an account, save your Steam trade URL, and track every monthly drop in a private dashboard.</p>
           <div className="actions">
             {signedIn ? (
@@ -342,6 +344,8 @@ export default function Home() {
           <p className="showcase-card-hint">Move or gently drag the card to view the finish.</p>
         </div>
       </section>
+
+      <LaunchEventSection />
 
       <section className="value-section shell"><div><p className="eyebrow">TRANSPARENT VALUE</p><h2>Published minimum values at every level.</h2><p>Each membership has a disclosed Steam Community Market reference-value floor. Higher tiers retain a larger share of the monthly price while supporting sourcing, fulfillment, rotation management, and customer service.</p><Link className="text-link" href="/membership-policy">Read how valuation and selection work →</Link></div><div className="value-grid"><article><strong>$21+</strong><span>Recruit minimum</span></article><article><strong>$90+</strong><span>Elite minimum</span></article><article><strong>$188+</strong><span>Prestige minimum</span></article></div></section>
 

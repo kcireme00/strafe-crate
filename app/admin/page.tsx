@@ -8,9 +8,10 @@ import AdminChatBans from "@/components/AdminChatBans";
 import AdminBusinessMetrics from "@/components/AdminBusinessMetrics";
 import AdminSupportTickets from "@/components/AdminSupportTickets";
 import AdminPrivateReviews from "@/components/AdminPrivateReviews";
+import AdminLaunchEvent from "@/components/AdminLaunchEvent";
 import styles from "./admin.module.css";
 
-type Tab = "orders" | "reports" | "bans" | "tickets" | "reviews";
+type Tab = "orders" | "reports" | "bans" | "tickets" | "reviews" | "events";
 
 function AdminHub() {
   const [tab, setTab] = useState<Tab>("orders");
@@ -21,6 +22,7 @@ function AdminHub() {
     ["bans", "Bans"],
     ["tickets", "Tickets"],
     ["reviews", "Reviews"],
+    ["events", "Events"],
   ];
 
   return (
@@ -80,6 +82,13 @@ function AdminHub() {
         {tab === "reviews" && (
           <section className={styles.contentPanel}>
             <AdminPrivateReviews />
+          </section>
+        )}
+
+
+        {tab === "events" && (
+          <section className={styles.contentPanel}>
+            <AdminLaunchEvent />
           </section>
         )}
 

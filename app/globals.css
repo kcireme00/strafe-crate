@@ -2070,3 +2070,5 @@
     cursor: pointer;
   }
 }
+
+.event-below-banner{width:min(calc(100% - 40px),1180px);min-height:44px;display:flex;align-items:center;justify-content:center;gap:14px;margin:18px auto -18px;padding:8px 16px;border:1px solid rgba(255,106,32,.38);border-radius:10px;background:rgba(255,106,32,.065);color:#fff;text-align:center}.event-below-banner span{padding:4px 7px;border-radius:999px;background:#ff7628;color:#160b04;font-size:.56rem;font-weight:950;letter-spacing:.11em}.event-below-banner strong{font-size:.76rem;text-transform:uppercase;letter-spacing:.06em}.event-below-banner em{color:#9ca9b8;font-size:.67rem;font-style:normal}@media(max-width:650px){.event-below-banner{display:grid;gap:4px}.event-below-banner span{justify-self:center}}
