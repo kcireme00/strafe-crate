@@ -52,13 +52,70 @@ async function cancelStripeMembership(subscriptionId: string | null) {
 
     await stripe.subscriptions.cancel(subscriptionId);
   } catch (error: any) {
-    // A missing/already-deleted Stripe subscription should not block
-    // deletion of the Strafe Crate account.
+    // Missing/already-deleted subscriptions should not prevent account deletion.
     if (error?.code !== "resource_missing") throw error;
   }
 }
 
+async function safeProfileAnonymization(userId: string) {
+  const admin = getSupabaseAdmin();
+
+  // Keep this update limited to columns that are part of the core profile
+  // model. Optional project columns are intentionally not referenced here.
+  const { error } = await admin
+    .from("profiles")
+    .update({
+      full_name: "Deleted Member",
+      display_name: "Deleted Member",
+      steam_profile_url: null,
+      steam_trade_url: null,
+    })
+    .eq("id", userId);
+
+  if (error) {
+    throw new Error(`Profile anonymization failed: ${error.message}`);
+  }
+}
+
+async function safeLocalSubscriptionCancellation(userId: string) {
+  const admin = getSupabaseAdmin();
+
+  const { error } = await admin
+    .from("subscriptions")
+    .update({
+      status: "canceled",
+      cancel_at_period_end: false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId);
+
+  // A missing local subscription row is fine. A schema/table error should be
+  // logged, but Stripe has already been cancelled and auth deletion can proceed.
+  if (error) {
+    console.warn("Unable to update local subscription record.", error);
+  }
+}
+
+async function safeChatAnonymization(userId: string) {
+  const admin = getSupabaseAdmin();
+
+  const { error } = await admin
+    .from("chat_messages")
+    .update({
+      display_name_snapshot: "Deleted Member",
+      tier_name_snapshot: null,
+    })
+    .eq("user_id", userId);
+
+  // Chat history is optional and should never block account deletion.
+  if (error) {
+    console.warn("Unable to anonymize historical chat.", error);
+  }
+}
+
 export async function POST(request: NextRequest) {
+  let stage = "authentication";
+
   try {
     const user = await authenticate(request);
 
@@ -80,77 +137,43 @@ export async function POST(request: NextRequest) {
 
     const admin = getSupabaseAdmin();
 
+    stage = "subscription lookup";
     const { data: subscriptionData, error: subscriptionError } = await admin
       .from("subscriptions")
       .select("stripe_subscription_id")
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (subscriptionError) throw subscriptionError;
+    // The absence of a local subscription must not block deletion.
+    if (subscriptionError) {
+      console.warn("Unable to read local subscription.", subscriptionError);
+    }
 
     const subscription = subscriptionData as {
       stripe_subscription_id: string | null;
     } | null;
 
-    // Stop all future Stripe billing before removing account access.
+    stage = "Stripe cancellation";
     await cancelStripeMembership(
       subscription?.stripe_subscription_id ?? null,
     );
 
-    // Keep fulfillment/payment rows for accounting, dispute, and support
-    // purposes, but remove direct identifying profile data.
-    const deletedEmail = `deleted+${user.id}@deleted.strafecrate.invalid`;
+    stage = "profile anonymization";
+    await safeProfileAnonymization(user.id);
 
-    const { error: profileError } = await admin
-      .from("profiles")
-      .update({
-        full_name: "Deleted Member",
-        display_name: "Deleted Member",
-        email: deletedEmail,
-        steam_profile_url: null,
-        steam_trade_url: null,
-        stripe_customer_id: null,
-        account_approved: false,
-        fulfillment_ready: false,
-      })
-      .eq("id", user.id);
+    stage = "history anonymization";
+    await safeChatAnonymization(user.id);
 
-    if (profileError) throw profileError;
+    stage = "local subscription cancellation";
+    await safeLocalSubscriptionCancellation(user.id);
 
-    // Remove public identity from historical chat while preserving moderation
-    // and audit records.
-    const { error: chatError } = await admin
-      .from("chat_messages")
-      .update({
-        display_name_snapshot: "Deleted Member",
-        tier_name_snapshot: null,
-      })
-      .eq("user_id", user.id);
-
-    if (chatError) {
-      console.warn("Unable to anonymize historical chat.", chatError);
-    }
-
-    const { error: localSubscriptionError } = await admin
-      .from("subscriptions")
-      .update({
-        status: "canceled",
-        cancel_at_period_end: false,
-        stripe_customer_id: null,
-        stripe_subscription_id: null,
-        stripe_price_id: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("user_id", user.id);
-
-    if (localSubscriptionError) throw localSubscriptionError;
-
-    // Soft deletion is irreversible and removes the user's ability to log in,
-    // while retaining a hashed identifier for record integrity.
+    stage = "Supabase Auth deletion";
     const { error: deleteError } =
       await admin.auth.admin.deleteUser(user.id, true);
 
-    if (deleteError) throw deleteError;
+    if (deleteError) {
+      throw new Error(deleteError.message);
+    }
 
     return NextResponse.json({
       ok: true,
@@ -158,14 +181,14 @@ export async function POST(request: NextRequest) {
         "Your account was deleted and any active membership was canceled.",
     });
   } catch (error) {
-    console.error("Account deletion failed", error);
+    console.error(`Account deletion failed during ${stage}`, error);
+
+    const detail =
+      error instanceof Error ? error.message : "Unknown deletion error.";
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to delete the account.",
+        error: `Unable to delete the account during ${stage}. ${detail}`,
       },
       { status: 500 },
     );

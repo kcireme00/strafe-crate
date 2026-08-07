@@ -42,13 +42,27 @@ export default function DeleteAccount() {
         body: JSON.stringify({ confirmation }),
       });
 
-      const result = (await response.json()) as {
-        error?: string;
-        message?: string;
-      };
+      const rawResponse = await response.text();
+      let result: { error?: string; message?: string } = {};
+
+      try {
+        result = rawResponse
+          ? (JSON.parse(rawResponse) as {
+              error?: string;
+              message?: string;
+            })
+          : {};
+      } catch {
+        result = {
+          error: rawResponse || "The deletion service returned an invalid response.",
+        };
+      }
 
       if (!response.ok) {
-        throw new Error(result.error || "Unable to delete the account.");
+        throw new Error(
+          result.error ||
+            `Unable to delete the account (HTTP ${response.status}).`,
+        );
       }
 
       await supabase.auth.signOut();

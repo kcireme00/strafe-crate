@@ -1867,3 +1867,38 @@
 
 /* Admin moderation workspace */
 .moderationReports,.bansWorkspace{display:grid;gap:18px}.moderationHeading,.bansHeading{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}.moderationHeading h1{margin:5px 0 8px;font-size:clamp(2.3rem,5vw,4.8rem);line-height:.95}.bansHeading h2{margin:5px 0 6px;font-size:2rem}.moderationHeading p,.bansHeading p{margin:0;color:#91a0b3}.moderationSummary{display:flex;gap:8px}.moderationSummary span,.banCount{min-width:88px;padding:11px 13px;border:1px solid #263140;border-radius:10px;background:#0a0f16;display:flex;flex-direction:column}.moderationSummary small,.banCount small{color:#738196;font-size:.54rem;letter-spacing:.1em}.moderationSummary strong,.banCount strong{font-size:1.35rem}.moderationToolbar,.bansToolbar{display:flex;justify-content:space-between;align-items:center}.moderationToolbar>div{display:flex;gap:7px}.moderationToolbar button{padding:8px 12px;border:1px solid #293544;border-radius:8px;background:#0b1119;color:#dfe5ed;font:inherit;font-size:.7rem;font-weight:800;cursor:pointer}.moderationToolbar button.active{border-color:rgba(255,122,40,.48);background:rgba(255,122,40,.1);color:#fff}.moderationList,.banList{display:grid;gap:12px}.moderationCard,.banCard{padding:18px;border:1px solid #24303d;border-radius:13px;background:linear-gradient(145deg,#0b1119,#090e15)}.moderationCard.status-dismissed{opacity:.72}.moderationCardTop{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.moderationStatus,.banType{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:.55rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.moderationStatus{background:rgba(255,122,40,.11);color:#ff8b3d}.moderationCard h2,.banCard h3{margin:7px 0 4px}.moderationCardTop p,.banIdentity p{margin:0;color:#8e9caf;font-size:.72rem}.restrictionBadge{padding:7px 10px;border:1px solid #2a3644;border-radius:999px;color:#b7c1ce;font-size:.62rem}.moderationCard blockquote{margin:16px 0;padding:15px 17px;border-left:3px solid #ff7628;border-radius:0 9px 9px 0;background:#080d13;color:#f1f4f8}.reportReason small,.banDetails small{color:#748297;font-size:.55rem;letter-spacing:.09em}.reportReason p{margin:4px 0 0;color:#c4ccd6}.moderationActions{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.moderationActions button,.unbanButton{padding:8px 11px;border:1px solid #2b3745;border-radius:8px;background:#0a1018;color:#dfe6ee;font:inherit;font-size:.65rem;font-weight:850;cursor:pointer}.moderationActions button:hover{border-color:#ff7628}.moderationActions .danger{border-color:rgba(235,64,91,.45);color:#ff7187}.moderationActions .subtle{margin-left:auto;color:#91a0b3}.moderationEmpty{padding:24px;border:1px dashed #2a3542;border-radius:12px;display:flex;align-items:center;gap:14px;color:#94a1b2}.moderationEmpty span{width:36px;height:36px;display:grid;place-items:center;border:1px solid rgba(85,230,165,.4);border-radius:50%;color:#55e6a5}.moderationEmpty p{margin:3px 0 0}.moderationPageStatus{margin:0;color:#ff9a5d;font-size:.72rem}.banCard{display:grid;grid-template-columns:minmax(190px,.75fr) minmax(0,2fr) auto;gap:22px;align-items:center}.banType.permanent{background:rgba(235,64,91,.13);color:#ff7187}.banType.temporary{background:rgba(255,180,44,.12);color:#ffc15d}.banDetails{display:grid;grid-template-columns:1.2fr 1.4fr .8fr;gap:16px}.banDetails div{min-width:0}.banDetails strong{display:block;margin-top:4px;color:#d9e0e8;font-size:.72rem;overflow-wrap:anywhere}.unbanButton{border-color:rgba(85,230,165,.35);color:#62e7ac;white-space:nowrap}@media(max-width:900px){.moderationHeading,.bansHeading,.moderationCardTop{flex-direction:column;align-items:flex-start}.banCard{grid-template-columns:1fr}.banDetails{grid-template-columns:1fr}.moderationActions .subtle{margin-left:0}}
+
+
+/* Icon-only social links */
+.social-icon-links{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:14px;
+}
+.social-icon-links a{
+  width:38px;
+  height:38px;
+  display:grid !important;
+  place-items:center;
+  padding:0 !important;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  background:rgba(255,255,255,.025);
+  color:#aeb9c7;
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    color .18s ease,
+    background .18s ease;
+}
+.social-icon-links a:hover{
+  transform:translateY(-2px);
+  border-color:#ff7628;
+  background:rgba(255,118,40,.09);
+  color:#ff8d4a;
+}
+.social-icon-links svg{
+  width:19px;
+  height:19px;
+}

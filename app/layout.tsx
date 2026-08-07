@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Brand from "@/components/Brand";
 import SiteHeader from "@/components/SiteHeader";
+import SocialLinks from "@/components/SocialLinks";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -96,6 +97,7 @@ export default function Layout({
               <Link href="/terms">Terms of Service</Link>
               <Link href="/privacy">Privacy Policy</Link>
               <a href="mailto:strafecrate@gmail.com">strafecrate@gmail.com</a>
+              <SocialLinks />
             </div>
           </div>
 
